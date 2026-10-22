@@ -11,5 +11,4 @@ print("tasks trả về:", len(tasks))
 for t in tasks:
     print("-", t.get("id"), t.get("name"), "| status:", (t.get("status") or {}).get("name"))
     print("  custom_fields:", json.dumps(t.get("custom_fields"), ensure_ascii=False)[:400])
-print("\nCF đang map:", json.dumps(Z.CF, ensure_ascii=False))
-print("Nếu key trong custom_fields khác, đặt ZOHO_CF_<TÊN>=<api_name> trong ai-team/.env")
+print("\nMetadata agent nằm ở dòng [ai] {...} đầu description; không cần custom field.")
