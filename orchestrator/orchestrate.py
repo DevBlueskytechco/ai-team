@@ -25,7 +25,7 @@ def skills_of(agent):
     m = re.search(r"skills:\n((?:  - .+\n)+)", txt); return [l.strip()[2:] for l in m.group(1).splitlines()] if m else []
 
 def run_agent(t):
-    agent, tid = t["agent"], t["id"]
+    agent, tid = t["agent"], t["id"]; key = t.get("key") or tid
     if t.get("task_type") not in RACI.get(agent, []):
         T.set_label(tid, "ai-draft", note=f"orchestrator: {agent} không có A cho {t.get('task_type')} theo raci.yaml"); return None
     env = dict(os.environ, AI_AGENT=agent, AI_TICKET=tid, AI_AGENT_VERSION=agent_version(agent), AI_TEAM_DIR=ROOT)
@@ -41,12 +41,12 @@ def run_agent(t):
     r = subprocess.run(cmd, cwd=THEME, env=env, capture_output=True, text=True, timeout=3600)
     try: out = json.loads(r.stdout)
     except Exception: out = {"result": r.stdout[-2000:], "stderr": r.stderr[-2000:], "is_error": True}
-    rec = {"agent": agent, "ticket": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
+    rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
            "model": out.get("model") or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),
            "started_at": started, "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
     d = os.path.join(ROOT, "evals/raw", agent); os.makedirs(d, exist_ok=True)
-    json.dump(rec, open(os.path.join(d, f"{tid}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
     cur = T.get(tid)
     if "ai-review" not in cur.get("labels", []):
@@ -67,11 +67,11 @@ def make_eval_records():
     for t in T.all():
         lab = next((l for l in t.get("labels", []) if l in ("ai-dat", "ai-sua", "ai-loai")), None)
         if not lab or not t.get("agent"): continue
-        p = os.path.join(ROOT, "evals/raw", t["agent"], f"{t['id']}.json")
+        p = os.path.join(ROOT, "evals/raw", t["agent"], f"{t.get('key') or t['id']}.json")
         if os.path.exists(p): continue
         runp = p.replace(".json", ".run.json"); run = json.load(open(runp)) if os.path.exists(runp) else {}
         rev = t.get("review") or {}
-        rec = {"agent": t["agent"], "ticket": t["id"], "task_type": t.get("task_type", ""), "input_refs": t.get("input_refs", []),
+        rec = {"agent": t["agent"], "ticket": t.get("key") or t["id"], "ticket_id": t["id"], "task_type": t.get("task_type", ""), "input_refs": t.get("input_refs", []),
                "agent_output_ref": t.get("output_link", ""), "agent_version": run.get("agent_version", ""), "model": run.get("model", ""),
                "tokens": run.get("tokens"), "cost_usd": run.get("cost_usd"), "num_turns": run.get("num_turns"),
                "self_check": rev.get("self_check", {}), "label": {"ai-dat": "dat", "ai-sua": rev.get("severity", "sua_nhe"), "ai-loai": "loai"}[lab],
