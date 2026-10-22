@@ -11,4 +11,5 @@
 - Agent chạy quá maxTurns: run.json is_error → giảm phạm vi ticket (techlead chia nhỏ) → chạy lại; 3 lần thì chuyển người.
 - Hook chặn (exit 2) nhiều: đúng hành vi; đếm trong log, nếu agent lặp lại cùng lỗi → sửa system prompt, không nới hook.
 - Chạm 80% ngân sách: hạ model cho qa/writer bằng `model_override`; chạm 100%: orchestrator dừng, CTO nới.
-- Ticket backend đổi sang Zoho/Linear: viết `mcp/ticket_<backend>.py` cùng 5 hàm get/list/create/set_label/comment, set `TICKET_BACKEND`.
+- Ticket backend = Zoho Projects (quyết định CTO 22/10). Cấu hình trong `ai-team/.env` (mẫu `.env.example`); adapter `mcp/ticket_zoho.py`; dò field bằng `python3 mcp/zoho_probe.py`. Backend file vẫn dùng được khi `TICKET_BACKEND=file` (thử nghiệm offline).
+- Zoho lỗi 401/invalid_token: refresh token hết hạn hoặc sai DC → tạo lại ở api-console.zoho.<dc>; lỗi 400 custom field: api_name sai → chạy probe, sửa `ZOHO_CF_*`.

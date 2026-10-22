@@ -20,6 +20,10 @@ def serve(name, tools, handlers):
 
 # Ticket MCP. Backend "file": tickets.json cạnh repo ai-team. Đổi sang Zoho/Linear: viết adapter cùng 5 hàm.
 import os, datetime
+_envp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+if os.path.exists(_envp):
+    for _l in open(_envp):
+        if "=" in _l and not _l.strip().startswith("#"): k, v = _l.strip().split("=", 1); os.environ.setdefault(k, v)
 BACKEND = os.environ.get("TICKET_BACKEND", "file")
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tickets.json")
 def _load():
@@ -34,11 +38,11 @@ def list(label=None, agent=None, status=None, type=None, sprint=None):
     out = [t for t in _load()["tickets"] if (not label or label in t.get("labels", [])) and (not agent or t.get("agent") == agent)
            and (not status or t.get("status") == status) and (not type or t.get("type") == type) and (not sprint or t.get("sprint") == sprint)]
     return [{k: t.get(k) for k in ("id","title","type","agent","side","status","labels","points","sprint")} for t in out]
-def create(title, type="task", agent=None, side=None, points=None, body="", parent=None, blocked_by=None, labels=None, r_codes=None):
+def create(title, type="task", agent=None, side=None, points=None, body="", parent=None, blocked_by=None, labels=None, r_codes=None, task_type=None):
     d = _load(); n = len(d["tickets"]) + 1; pid = (parent or "TE")
     tid = f"{pid}-{type[:1].upper()}{n}" if parent else f"TE-{n}"
     t = {"id": tid, "title": title, "type": type, "agent": agent, "side": side, "points": points, "body": body, "parent": parent,
-         "blocked_by": blocked_by or [], "labels": labels or [], "r_codes": r_codes or [], "status": "Backlog",
+         "blocked_by": blocked_by or [], "labels": labels or [], "r_codes": r_codes or [], "status": "Backlog", "task_type": task_type,
          "comments": [], "created_at": datetime.date.today().isoformat()}
     d["tickets"].append(t); _save(d); return t
 def set_label(id, label, remove=None, link=None, note=None):
@@ -53,10 +57,26 @@ def set_label(id, label, remove=None, link=None, note=None):
     raise KeyError(id)
 def comment(id, text):
     return set_label(id, next(l for l in get(id).get("labels", ["ai-draft"]) if True), note=text)
+def all(): return _load()["tickets"]
+def set_review(id, review, label):
+    d = _load()
+    for t in d["tickets"]:
+        if t["id"] == id:
+            t["labels"] = [l for l in t.get("labels", []) if not l.startswith("ai-")] + [label]; t["review"] = review
+    _save(d); return get(id)
+def set_task_type(id, task_type):
+    d = _load()
+    for t in d["tickets"]:
+        if t["id"] == id: t["task_type"] = task_type
+    _save(d); return get(id)
+
+# --- chọn backend: TICKET_BACKEND=file (mặc định) | zoho
+if BACKEND == "zoho":
+    from ticket_zoho import get, list, create, set_label, comment, all, set_review, set_task_type  # noqa
 TOOLS = [
  {"name":"get","description":"Đọc một ticket đầy đủ","inputSchema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"]}},
  {"name":"list","description":"Liệt kê ticket theo label/agent/status/type/sprint","inputSchema":{"type":"object","properties":{"label":{"type":"string"},"agent":{"type":"string"},"status":{"type":"string"},"type":{"type":"string"},"sprint":{"type":"integer"}}}},
- {"name":"create","description":"Tạo ticket (task, bug, question, feature, story). Ticket con: parent=<id>","inputSchema":{"type":"object","properties":{"title":{"type":"string"},"type":{"type":"string"},"agent":{"type":"string"},"side":{"type":"string"},"points":{"type":"integer"},"body":{"type":"string"},"parent":{"type":"string"},"blocked_by":{"type":"array","items":{"type":"string"}},"labels":{"type":"array","items":{"type":"string"}},"r_codes":{"type":"array","items":{"type":"string"}}},"required":["title"]}},
+ {"name":"create","description":"Tạo ticket (task, bug, question, feature, story). Ticket con: parent=<id>","inputSchema":{"type":"object","properties":{"title":{"type":"string"},"task_type":{"type":"string"},"type":{"type":"string"},"agent":{"type":"string"},"side":{"type":"string"},"points":{"type":"integer"},"body":{"type":"string"},"parent":{"type":"string"},"blocked_by":{"type":"array","items":{"type":"string"}},"labels":{"type":"array","items":{"type":"string"}},"r_codes":{"type":"array","items":{"type":"string"}}},"required":["title"]}},
  {"name":"set_label","description":"Đổi nhãn ai-* (ai-draft→ai-review…), kèm link đầu ra và ghi chú","inputSchema":{"type":"object","properties":{"id":{"type":"string"},"label":{"type":"string"},"remove":{"type":"string"},"link":{"type":"string"},"note":{"type":"string"}},"required":["id","label"]}},
  {"name":"comment","description":"Thêm comment vào ticket","inputSchema":{"type":"object","properties":{"id":{"type":"string"},"text":{"type":"string"}},"required":["id","text"]}},
 ]

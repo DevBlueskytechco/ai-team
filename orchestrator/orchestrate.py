@@ -64,7 +64,7 @@ def pg_insert(rec):
     except Exception as e: print("pg:", e)
 
 def make_eval_records():
-    for t in T._load()["tickets"]:
+    for t in T.all():
         lab = next((l for l in t.get("labels", []) if l in ("ai-dat", "ai-sua", "ai-loai")), None)
         if not lab or not t.get("agent"): continue
         p = os.path.join(ROOT, "evals/raw", t["agent"], f"{t['id']}.json")
