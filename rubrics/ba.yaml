@@ -1,0 +1,33 @@
+agent: ba
+pass_threshold: 0.8
+criteria:
+  - id: coverage
+    text: "Mọi FR trong SRS có story; mọi story có FR"
+    scale:
+      0: "<90%"
+      1: "90–97%"
+      2: "≥98%"
+  - id: gwt
+    text: "AC Given/When/Then, quan sát được"
+    scale:
+      0: "<80%"
+      1: "80–95%"
+      2: "≥95%"
+  - id: vague
+    text: "Không từ mơ hồ"
+    scale:
+      0: ">5"
+      1: "1–5"
+      2: "0"
+  - id: no_invention
+    text: "Không thêm yêu cầu stakeholder chưa nói"
+    scale:
+      0: "có"
+      1: "1 chỗ có ghi KHÔNG CHẮC"
+      2: "không"
+  - id: r_codes
+    text: "Story gắn mã R / Canvas đúng"
+    scale:
+      0: "không"
+      1: "một phần"
+      2: "đủ"

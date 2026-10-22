@@ -1,0 +1,10 @@
+# Agent nào được nhận ticket loại nào (A trong RACI). Orchestrator từ chối phát ticket sai vai.
+qa: [test_case_from_story, e2e_from_story, bug_report, theme_store_checklist, canvas_check, regression]
+writer: [release_note, merchant_guide, ticket_triage, canvas_guide]
+dev-fe: [fe_task]
+dev-be: [be_task]
+techlead: [pr_review, adr, task_split, estimate]
+devops: [pipeline, preview, zip, runbook, rollback_test]
+designer: [ui_spec, design_token, ui_diff]
+ba: [questionnaire, srs, user_story, traceability]
+po: [charter, prd, backlog_prioritize, change_request]

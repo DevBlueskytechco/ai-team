@@ -1,0 +1,39 @@
+agent: qa
+pass_threshold: 0.8
+criteria:
+  - id: coverage
+    text: "Mọi AC có ít nhất 1 test case"
+    scale:
+      0: "thiếu >2 AC"
+      1: "thiếu 1–2 AC"
+      2: "đủ"
+  - id: edge_cases
+    text: "Có case biên hợp lý (rỗng, tối đa, mạng, 360px, keyboard, editor)"
+    scale:
+      0: "không có"
+      1: "thiếu case quan trọng"
+      2: "đủ"
+  - id: clarity
+    text: "Test case chạy được bởi người không biết story"
+    scale:
+      0: "mơ hồ"
+      1: "cần hỏi 1–2 chỗ"
+      2: "chạy được ngay"
+  - id: format
+    text: "Đúng template, đúng nơi lưu, có nguồn"
+    scale:
+      0: "sai"
+      1: "lệch nhỏ"
+      2: "đúng"
+  - id: no_hallucination
+    text: "Không bịa tính năng/setting/màn hình ngoài SRS/Figma"
+    scale:
+      0: "có bịa"
+      1: "suy đoán có ghi KHÔNG CHẮC"
+      2: "không"
+  - id: r_codes
+    text: "Case gắn mã R / bước Canvas khi story có"
+    scale:
+      0: "không"
+      1: "một phần"
+      2: "đủ"

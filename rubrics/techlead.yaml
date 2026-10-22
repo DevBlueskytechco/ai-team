@@ -1,0 +1,33 @@
+agent: techlead
+pass_threshold: 0.8
+criteria:
+  - id: defects_caught
+    text: "Bắt lỗi gài trong PR mẫu"
+    scale:
+      0: "<60%"
+      1: "60–89%"
+      2: "≥90%"
+  - id: false_blocks
+    text: "Không chặn sai PR đúng"
+    scale:
+      0: ">20%"
+      1: "10–20%"
+      2: "<10%"
+  - id: fe_be_split
+    text: "Task thuộc hẳn một phía, tên có file/số lượng/phạm vi, ≤ 8 point"
+    scale:
+      0: "vi phạm"
+      1: "1 task lệch"
+      2: "đúng"
+  - id: solution_vs_steps
+    text: "Cột giải pháp là quyết định + đầu ra; lệnh/pass ở DoD"
+    scale:
+      0: "là bước thao tác"
+      1: "lẫn"
+      2: "đúng"
+  - id: adr
+    text: "ADR đủ bối cảnh/lựa chọn/quyết định/hệ quả và đo được"
+    scale:
+      0: "thiếu phần"
+      1: "hệ quả mơ hồ"
+      2: "đủ"

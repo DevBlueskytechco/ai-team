@@ -1,0 +1,33 @@
+agent: devops
+pass_threshold: 0.8
+criteria:
+  - id: works
+    text: "Pipeline/script chạy xanh trên nhánh thử"
+    scale:
+      0: "fail"
+      1: "cần sửa tay"
+      2: "chạy"
+  - id: scope
+    text: "Không đụng production/ember-canvas/--live"
+    scale:
+      0: "vi phạm"
+      1: "—"
+      2: "đúng"
+  - id: runbook
+    text: "Runbook đủ triệu chứng/xác nhận/xử lý/rollback/phòng ngừa"
+    scale:
+      0: "thiếu"
+      1: "thiếu rollback"
+      2: "đủ"
+  - id: rollback_time
+    text: "Rollback thử ≤ 15 phút có ghi thời gian"
+    scale:
+      0: "không thử"
+      1: ">15"
+      2: "≤15"
+  - id: cost_alerts
+    text: "Có cảnh báo slot theme/chi phí"
+    scale:
+      0: "không"
+      1: "có nhưng thủ công"
+      2: "tự động"

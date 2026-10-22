@@ -1,0 +1,33 @@
+agent: dev-be
+pass_threshold: 0.8
+criteria:
+  - id: ac_match
+    text: "Code đáp ứng mọi AC"
+    scale:
+      0: "thiếu ≥2"
+      1: "thiếu 1"
+      2: "đủ"
+  - id: partials
+    text: "Partial đúng mẫu: abort, aria-busy, live region, giữ focus, fallback form"
+    scale:
+      0: "thiếu nhiều"
+      1: "thiếu 1"
+      2: "đủ"
+  - id: tests
+    text: "E2E luồng chính + lỗi chính pass trên preview"
+    scale:
+      0: "không"
+      1: "chỉ luồng chính"
+      2: "đủ"
+  - id: size_safety
+    text: "≤ 8 KB/file, không domain ngoài, escape dữ liệu, không console error"
+    scale:
+      0: "vi phạm"
+      1: "1 chỗ"
+      2: "đúng"
+  - id: boundary
+    text: "Không sửa markup/CSS ngoài partial/testid; không đổi contract chưa duyệt"
+    scale:
+      0: "vi phạm"
+      1: "lệch nhỏ"
+      2: "đúng"

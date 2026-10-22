@@ -1,0 +1,39 @@
+agent: dev-fe
+pass_threshold: 0.8
+criteria:
+  - id: ac_match
+    text: "Code đáp ứng mọi AC, không làm thêm"
+    scale:
+      0: "thiếu ≥2 AC"
+      1: "thiếu 1"
+      2: "đủ"
+  - id: skeleton
+    text: "Đúng AGENTS.md (doc, schema, shopify_attributes, t, routes, không sections)"
+    scale:
+      0: "vi phạm"
+      1: "lệch nhỏ"
+      2: "đúng"
+  - id: boundary
+    text: "Không JS; có data-testid + tên partial cho BE"
+    scale:
+      0: "có JS"
+      1: "thiếu testid"
+      2: "đúng"
+  - id: tokens
+    text: "Chỉ dùng biến CSS, không hardcode"
+    scale:
+      0: "hardcode"
+      1: "1–2 chỗ"
+      2: "đúng"
+  - id: quality
+    text: "theme check 0, Lighthouse đạt 96/90/98, 3 breakpoint, a11y"
+    scale:
+      0: "fail"
+      1: "1 chỉ số lệch"
+      2: "đạt"
+  - id: r_codes
+    text: "Tuân mã R của story"
+    scale:
+      0: "không"
+      1: "một phần"
+      2: "đủ"

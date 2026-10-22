@@ -1,0 +1,33 @@
+agent: writer
+pass_threshold: 0.8
+criteria:
+  - id: task_based
+    text: "Theo tác vụ merchant, không theo file code"
+    scale:
+      0: "không"
+      1: "một phần"
+      2: "đúng"
+  - id: accuracy
+    text: "Khớp schema/label/hành vi thật"
+    scale:
+      0: "sai ≥2 chỗ"
+      1: "sai 1 chỗ"
+      2: "đúng"
+  - id: screenshots
+    text: "Ảnh đúng màn hình, đúng trạng thái hiện tại"
+    scale:
+      0: "thiếu/sai"
+      1: "1 ảnh cũ"
+      2: "đúng"
+  - id: concise
+    text: "Ngắn, câu ≤ 20 từ, không giọng AI"
+    scale:
+      0: "dài dòng"
+      1: "vài chỗ"
+      2: "đạt"
+  - id: triage
+    text: "Phân loại ticket đúng loại và đúng người nhận"
+    scale:
+      0: "<70%"
+      1: "70–90%"
+      2: ">90%"

@@ -1,0 +1,4 @@
+evals/raw/*.run.json
+evals/raw/_runs.jsonl
+__pycache__/
+.env

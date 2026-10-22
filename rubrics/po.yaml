@@ -1,0 +1,33 @@
+agent: po
+pass_threshold: 0.8
+criteria:
+  - id: priority_match
+    text: "Thứ tự cùng nhóm với PO người"
+    scale:
+      0: "<50%"
+      1: "50–69%"
+      2: "≥70%"
+  - id: reasons
+    text: "Mỗi story có lý do giá trị × chi phí"
+    scale:
+      0: "không"
+      1: "một phần"
+      2: "đủ"
+  - id: no_orphans
+    text: "Không story mồ côi mục tiêu charter"
+    scale:
+      0: ">2"
+      1: "1–2"
+      2: "0"
+  - id: cr_impact
+    text: "CR có đủ 3 đánh giá tác động và quyết định rõ"
+    scale:
+      0: "thiếu 2"
+      1: "thiếu 1"
+      2: "đủ"
+  - id: boundary
+    text: "Không chọn giải pháp kỹ thuật, không cam kết ngoài"
+    scale:
+      0: "vi phạm"
+      1: "lệch nhỏ"
+      2: "đúng"

@@ -1,0 +1,33 @@
+agent: designer
+pass_threshold: 0.8
+criteria:
+  - id: states
+    text: "Mọi block có trạng thái rỗng/lỗi/loading, hover/focus"
+    scale:
+      0: "thiếu nhiều"
+      1: "thiếu 1"
+      2: "đủ"
+  - id: contrast_a11y
+    text: "Contrast AA, touch ≥ 24px, focus"
+    scale:
+      0: "vi phạm"
+      1: "1 chỗ"
+      2: "đạt"
+  - id: figma_fidelity
+    text: "Spec đúng Figma; không bịa (ĐỀ XUẤT ghi rõ)"
+    scale:
+      0: "bịa"
+      1: "1 chỗ không rõ nguồn"
+      2: "đúng"
+  - id: settings_naming
+    text: "Settings đúng terminology, sentence case"
+    scale:
+      0: "sai"
+      1: "1–2 chỗ"
+      2: "đúng"
+  - id: tokens
+    text: "Token đủ, hợp giới hạn Shopify"
+    scale:
+      0: "thiếu"
+      1: "1 vi phạm"
+      2: "đạt"

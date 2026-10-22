@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvalRecord",
+  "type": "object",
+  "required": [
+    "agent",
+    "ticket",
+    "task_type",
+    "agent_output_ref",
+    "agent_version",
+    "model",
+    "label",
+    "rubric_scores",
+    "reviewer",
+    "reviewed_at"
+  ],
+  "properties": {
+    "agent": {
+      "enum": [
+        "qa",
+        "writer",
+        "dev-fe",
+        "dev-be",
+        "techlead",
+        "devops",
+        "designer",
+        "ba",
+        "po",
+        "gate-reviewer"
+      ]
+    },
+    "ticket": {
+      "type": "string"
+    },
+    "task_type": {
+      "type": "string"
+    },
+    "input_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "agent_output_ref": {
+      "type": "string"
+    },
+    "agent_version": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "tokens": {
+      "type": "integer"
+    },
+    "cost_usd": {
+      "type": "number"
+    },
+    "num_turns": {
+      "type": "integer"
+    },
+    "self_check": {
+      "type": "object",
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "label": {
+      "enum": [
+        "dat",
+        "sua_nhe",
+        "sua_nang",
+        "loai"
+      ]
+    },
+    "rubric_scores": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "fixed_output_ref": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}
