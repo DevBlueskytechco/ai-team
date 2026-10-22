@@ -1,4 +1,4 @@
-theme_dir: ../theme-ember
+theme_dir: ../theme-efitco
 ai_team_dir: .
 claude_bin: claude
 permission_mode: acceptEdits

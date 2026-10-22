@@ -1,4 +1,4 @@
-# ai-team — bộ máy vận hành 9 agent cho theme-ember
+# ai-team — bộ máy vận hành 9 agent cho theme-efitco
 
 ```
 rubrics/      9 rubric YAML (role owner chấm, gate-reviewer chấm)
@@ -11,4 +11,4 @@ orchestrator/ orchestrate.py: phát ticket ai-draft → claude -p --agent → gh
 db/           schema Postgres + query dashboard
 docs/         runbook vận hành agent
 ```
-Chạy: `python3 orchestrator/orchestrate.py --once` (một vòng) hoặc `--loop 900` (mỗi 15 phút). Cần `claude` CLI đã login bằng tài khoản service; làm việc trong `../theme-ember`.
+Chạy: `python3 orchestrator/orchestrate.py --once` (một vòng) hoặc `--loop 900` (mỗi 15 phút). Cần `claude` CLI đã login bằng tài khoản service; làm việc trong `../theme-efitco`.
