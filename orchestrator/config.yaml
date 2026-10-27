@@ -7,3 +7,4 @@ budget_usd_month: 2000      # quyết định CTO 22/10/2026; chỉ CTO (Tony Ph
 budget_warn_pct: 80
 review_overdue_days: 2
 model_override: {}   # ví dụ qa: sonnet để chạy regression rẻ
+claude_version: 2.1.306   # ghim 22/10; chạy bằng gói Max của CTO ở pha 0–1

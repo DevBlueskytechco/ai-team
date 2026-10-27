@@ -28,11 +28,19 @@ def run_agent(t):
     agent, tid = t["agent"], t["id"]; key = t.get("key") or tid
     if t.get("task_type") not in RACI.get(agent, []):
         T.set_label(tid, "ai-draft", note=f"orchestrator: {agent} không có A cho {t.get('task_type')} theo raci.yaml"); return None
-    env = dict(os.environ, AI_AGENT=agent, AI_TICKET=tid, AI_AGENT_VERSION=agent_version(agent), AI_TEAM_DIR=ROOT)
-    if agent in ("dev-fe", "dev-be"):
+    env = dict(os.environ, AI_AGENT=agent, AI_TICKET=tid, AI_TICKET_KEY=key, AI_AGENT_VERSION=agent_version(agent), AI_TEAM_DIR=ROOT)
+    branch = None
+    if agent != "gate-reviewer":
+        # Mọi agent ghi file đều làm trên nhánh riêng; không bao giờ ghi lên develop
+        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=normal"], cwd=THEME, capture_output=True, text=True).stdout.strip()
+        if dirty:
+            print(f"BỎ QUA {key}: theme-efitco có thay đổi chưa commit, dọn trước khi chạy:\n{dirty[:500]}"); return None
+        branch = f"feature/ai-{key}"
         subprocess.run(["git", "fetch", "origin"], cwd=THEME, check=False)
-        subprocess.run(["git", "checkout", "-B", f"feature/ai-{tid}", "origin/develop"], cwd=THEME, check=False)
-    prompt = f"Ticket {tid}: {t['title']}. Đọc ticket bằng mcp__ticket__get, làm theo skill của bạn, nộp đúng nơi quy định rồi set_label ai-review kèm link và tóm tắt tự kiểm tra."
+        subprocess.run(["git", "checkout", "-B", branch, "origin/develop"], cwd=THEME, check=True)
+    prompt = (f"Ticket {key} (id {tid}): {t['title']}. Đọc ticket bằng mcp__ticket__get với id {tid}. Đặt tên file đầu ra theo key {key} "
+              f"(vd drafts/{agent}/{key}/, tests/e2e/{key}.spec.ts). Làm theo skill của bạn, KHÔNG git commit/push (Orchestrator làm), "
+              f"rồi set_label ai-review kèm tóm tắt tự kiểm tra.")
     cmd = [CFG["claude_bin"], "-p", "--agent", agent, "--permission-mode", CFG["permission_mode"], "--output-format", "json",
            "--max-turns", str(t.get("max_turns") or CFG["max_turns_default"])]
     if CFG.get("model_override", {}).get(agent): cmd += ["--model", CFG["model_override"][agent]]
@@ -42,12 +50,24 @@ def run_agent(t):
     try: out = json.loads(r.stdout)
     except Exception: out = {"result": r.stdout[-2000:], "stderr": r.stderr[-2000:], "is_error": True}
     rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
-           "model": out.get("model") or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
+           "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),
            "started_at": started, "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
     d = os.path.join(ROOT, "evals/raw", agent); os.makedirs(d, exist_ok=True)
     json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
+    if branch:
+        rec["branch"] = branch
+        subprocess.run(["git", "add", "-A"], cwd=THEME, check=False)
+        staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=THEME).returncode != 0
+        if staged:
+            subprocess.run(["git", "commit", "-q", "-m", f"ai({agent}): {key} {t['title']}\n\nAgent-Version: {rec['agent_version']}\nSession: {rec['session_id']}"], cwd=THEME, check=False)
+            p = subprocess.run(["git", "push", "-q", "-u", "origin", branch], cwd=THEME, capture_output=True, text=True)
+            rec["pushed"] = p.returncode == 0
+            if p.returncode != 0: print(f"push {branch} lỗi: {p.stderr[-300:]}")
+            T.set_label(tid, "ai-review", link=f"branch {branch}", note=f"orchestrator: đầu ra trên nhánh {branch}")
+        subprocess.run(["git", "checkout", "-q", "develop"], cwd=THEME, check=False)
+        json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     cur = T.get(tid)
     if "ai-review" not in cur.get("labels", []):
         T.set_label(tid, "ai-review", note=f"orchestrator: agent kết thúc (turns={rec['num_turns']}, cost={rec['cost_usd']}); chưa tự set_label — kiểm tra đầu ra")
