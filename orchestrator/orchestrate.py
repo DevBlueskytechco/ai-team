@@ -24,6 +24,19 @@ def skills_of(agent):
     txt = open(os.path.join(THEME, f".claude/agents/{agent}.md"), encoding="utf-8").read()
     m = re.search(r"skills:\n((?:  - .+\n)+)", txt); return [l.strip()[2:] for l in m.group(1).splitlines()] if m else []
 
+# Danh tính agent trên GitHub: commit, push, mở PR bằng nextsky-ai-agent (AGENT_GH_TOKEN trong .env),
+# để CTO duyệt PR như người thứ hai. Không có token thì dùng tài khoản đang đăng nhập (cảnh báo).
+_AGT = os.environ.get("AGENT_GH_TOKEN", "")
+if _AGT:
+    import base64
+    _hdr = base64.b64encode(f"x-access-token:{_AGT}".encode()).decode()
+    AGENT_GIT = ["-c", "user.name=nextsky-ai-agent", "-c", "user.email=nextsky-ai-agent@users.noreply.github.com",
+                 "-c", "credential.helper=", "-c", f"http.https://github.com/.extraheader=AUTHORIZATION: basic {_hdr}"]
+    AGENT_GH_ENV = dict(os.environ, GH_TOKEN=_AGT)
+else:
+    print("CẢNH BÁO: thiếu AGENT_GH_TOKEN — PR sẽ đứng tên tài khoản đang đăng nhập, CTO không tự duyệt được")
+    AGENT_GIT, AGENT_GH_ENV = [], dict(os.environ)
+
 def run_agent(t):
     agent, tid = t["agent"], t["id"]; key = t.get("key") or tid
     if t.get("task_type") not in RACI.get(agent, []):
@@ -61,15 +74,15 @@ def run_agent(t):
         subprocess.run(["git", "add", "-A"], cwd=THEME, check=False)
         staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=THEME).returncode != 0
         if staged:
-            subprocess.run(["git", "commit", "-q", "-m", f"ai({agent}): {key} {t['title']}\n\nAgent-Version: {rec['agent_version']}\nSession: {rec['session_id']}"], cwd=THEME, check=False)
-            p = subprocess.run(["git", "push", "-q", "-u", "origin", branch], cwd=THEME, capture_output=True, text=True)
+            subprocess.run(["git", *AGENT_GIT, "commit", "-q", "-m", f"ai({agent}): {key} {t['title']}\n\nAgent-Version: {rec['agent_version']}\nSession: {rec['session_id']}"], cwd=THEME, check=False)
+            p = subprocess.run(["git", *AGENT_GIT, "push", "-q", "-u", "origin", branch], cwd=THEME, capture_output=True, text=True)
             rec["pushed"] = p.returncode == 0
             if p.returncode != 0: print(f"push {branch} lỗi: {p.stderr[-300:]}")
             link = f"branch {branch}"
             if rec.get("pushed") and agent in ("dev-fe", "dev-be", "devops"):
                 pr = subprocess.run(["gh", "pr", "create", "-B", "develop", "-H", branch, "-t", f"{key}: {t['title'][:200]}",
                                      "-b", f"Ticket {key} (Zoho {tid}). Agent {rec['agent_version']}, {rec['num_turns']} turns, ~{rec['cost_usd']} USD.\n\n{rec['result'][:3000]}"],
-                                    cwd=THEME, capture_output=True, text=True)
+                                    cwd=THEME, capture_output=True, text=True, env=AGENT_GH_ENV)
                 if pr.returncode == 0: link = pr.stdout.strip().splitlines()[-1]; rec["pr"] = link
                 else: print(f"tạo PR lỗi: {pr.stderr[-300:]}")
             T.set_label(tid, "ai-review", link=link, note=f"orchestrator: đầu ra {link}")
