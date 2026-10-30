@@ -65,7 +65,14 @@ def run_agent(t):
             p = subprocess.run(["git", "push", "-q", "-u", "origin", branch], cwd=THEME, capture_output=True, text=True)
             rec["pushed"] = p.returncode == 0
             if p.returncode != 0: print(f"push {branch} lỗi: {p.stderr[-300:]}")
-            T.set_label(tid, "ai-review", link=f"branch {branch}", note=f"orchestrator: đầu ra trên nhánh {branch}")
+            link = f"branch {branch}"
+            if rec.get("pushed") and agent in ("dev-fe", "dev-be", "devops"):
+                pr = subprocess.run(["gh", "pr", "create", "-B", "develop", "-H", branch, "-t", f"{key}: {t['title'][:200]}",
+                                     "-b", f"Ticket {key} (Zoho {tid}). Agent {rec['agent_version']}, {rec['num_turns']} turns, ~{rec['cost_usd']} USD.\n\n{rec['result'][:3000]}"],
+                                    cwd=THEME, capture_output=True, text=True)
+                if pr.returncode == 0: link = pr.stdout.strip().splitlines()[-1]; rec["pr"] = link
+                else: print(f"tạo PR lỗi: {pr.stderr[-300:]}")
+            T.set_label(tid, "ai-review", link=link, note=f"orchestrator: đầu ra {link}")
         subprocess.run(["git", "checkout", "-q", "develop"], cwd=THEME, check=False)
         json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     cur = T.get(tid)
@@ -117,20 +124,44 @@ def remind_and_budget():
     if pct >= CFG["budget_warn_pct"]: print("CẢNH BÁO: ≥ 80% ngân sách")
     return True
 
-def once():
-    if not remind_and_budget(): return
-    make_eval_records()
+SIDE_TYPE = {"fe": "fe_task", "be": "be_task"}
+
+def blockers_open(full):
+    """Trả danh sách key ticket chặn chưa xong (closed hoặc ai-dat mới tính là xong)."""
+    out = []
+    for b in full.get("blocked_by") or []:
+        try:
+            if not (T.is_done(b) if hasattr(T, "is_done") else "ai-dat" in T.get(b).get("labels", [])): out.append(T.get(b).get("key") or b)
+        except Exception: out.append(b)
+    return out
+
+def pick(only=None):
+    """Ticket ai-draft đủ điều kiện chạy, theo thứ tự key. Bỏ câu hỏi [Q] (cho người trả lời)."""
+    ready = []
     for t in T.list(label="ai-draft"):
         full = T.get(t["id"])
-        if not full.get("agent"): continue
-        print("→", full["id"], full["agent"]); run_agent(full)
+        if only and full.get("key") != only: continue
+        if (full.get("status") or "").lower() in ("closed", "đã đóng", "cancelled"): continue
+        if not full.get("agent") or (full.get("title") or "").startswith("[Q]"): continue
+        if not full.get("task_type") and full.get("side") in SIDE_TYPE: full["task_type"] = SIDE_TYPE[full["side"]]
+        bl = blockers_open(full)
+        if bl: print(f"chờ {full.get('key')}: bị chặn bởi {', '.join(bl)}"); continue
+        ready.append(full)
+    return sorted(ready, key=lambda x: int(re.sub(r"\D", "", x.get("key") or "0") or 0))
+
+def once(max_n=1, only=None):
+    if not remind_and_budget(): return
+    make_eval_records()
+    for full in pick(only)[:max_n]:
+        print("→", full.get("key"), full["agent"]); run_agent(full)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--once", action="store_true"); ap.add_argument("--loop", type=int, default=0); ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--max", type=int, default=1, help="số ticket tối đa mỗi lượt (mặc định 1)"); ap.add_argument("--ticket", help="chỉ chạy ticket key này, vd ES1-T12")
     a = ap.parse_args()
     if a.dry:
         remind_and_budget(); make_eval_records()
-        for t in T.list(label="ai-draft"): print("would run", t["id"], t["agent"], "ok" if T.get(t["id"]).get("task_type") in RACI.get(t["agent"], []) else "RACI DENY")
+        for full in pick(a.ticket): print("would run", full.get("key"), full["agent"], full.get("task_type"), "ok" if full.get("task_type") in RACI.get(full["agent"], []) else "RACI DENY")
     elif a.loop:
-        while True: once(); time.sleep(a.loop)
-    else: once()
+        while True: once(a.max, a.ticket); time.sleep(a.loop)
+    else: once(a.max, a.ticket)

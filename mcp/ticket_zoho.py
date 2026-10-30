@@ -113,3 +113,25 @@ def set_review(id, review, label):
 
 def set_task_type(id, task_type):
     _patch_meta(id, task_type=task_type); return get(id)
+
+STATUS_OPEN = os.environ.get("ZOHO_STATUS_OPEN", "2727475000000016068")
+STATUS_CLOSED = os.environ.get("ZOHO_STATUS_CLOSED", "2727475000000016071")
+
+def set_status(id, closed=True, note=None):
+    """Đóng/mở task trên Zoho (status Closed/Open). Ghi comment lý do nếu có."""
+    _req("PATCH", f"/tasks/{id}", {"status": {"id": STATUS_CLOSED if closed else STATUS_OPEN}})
+    if note: comment(id, note)
+    return get(id)
+
+def is_done(id):
+    """Task xong khi status thuộc loại closed hoặc có nhãn ai-dat."""
+    z = _task_of(_req("GET", f"/tasks/{id}")); meta, _ = _split(z.get("description"))
+    return bool((z.get("status") or {}).get("is_closed_type")) or "ai-dat" in meta.get("labels", [])
+
+def update(id, title=None, body=None, **meta_changes):
+    """Sửa tên, body, metadata. Body không được chứa ký tự nhọn (Zoho strip)."""
+    z = _task_of(_req("GET", f"/tasks/{id}")); meta, old_body = _split(z.get("description"))
+    meta.update({k: v for k, v in meta_changes.items() if v is not None})
+    payload = {"description": _join(meta, old_body if body is None else body)}
+    if title: payload["name"] = title
+    _req("PATCH", f"/tasks/{id}", payload); return get(id)
