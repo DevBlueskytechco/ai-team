@@ -72,7 +72,7 @@ def set_task_type(id, task_type):
 
 # --- chọn backend: TICKET_BACKEND=file (mặc định) | zoho
 if BACKEND == "zoho":
-    from ticket_zoho import get, list, create, set_label, comment, all, set_review, set_task_type  # noqa
+    from ticket_zoho import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
 TOOLS = [
  {"name":"get","description":"Đọc một ticket đầy đủ","inputSchema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"]}},
  {"name":"list","description":"Liệt kê ticket theo label/agent/status/type/sprint","inputSchema":{"type":"object","properties":{"label":{"type":"string"},"agent":{"type":"string"},"status":{"type":"string"},"type":{"type":"string"},"sprint":{"type":"integer"}}}},
