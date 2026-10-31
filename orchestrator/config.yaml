@@ -2,7 +2,7 @@ theme_dir: ../theme-efitco
 ai_team_dir: .
 claude_bin: claude
 permission_mode: acceptEdits
-max_turns_default: 60
+max_turns_default: 90   # dev-fe ES1-T14/T15 chạm 60 lượt (30/10)
 budget_usd_month: 2000      # quyết định CTO 22/10/2026; chỉ CTO (Tony Pham) được nới, sửa số này + ghi lý do trong commit
 budget_warn_pct: 80
 review_overdue_days: 2
