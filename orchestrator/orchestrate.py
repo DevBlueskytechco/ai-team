@@ -156,7 +156,10 @@ def pick(only=None):
         if only and full.get("key") != only: continue
         if (full.get("status") or "").lower() in ("closed", "đã đóng", "cancelled"): continue
         if not full.get("agent") or (full.get("title") or "").startswith("[Q]"): continue
-        if not full.get("task_type") and full.get("side") in SIDE_TYPE: full["task_type"] = SIDE_TYPE[full["side"]]
+        if not full.get("task_type"):
+            # Chỉ dev-fe/dev-be mới suy task_type từ side; agent khác thiếu task_type thì bỏ qua để CTO đặt (ES1-T34, ES1-T41)
+            if full.get("agent") in ("dev-fe", "dev-be") and full.get("side") in SIDE_TYPE: full["task_type"] = SIDE_TYPE[full["side"]]
+            else: print(f"bỏ qua {full.get('key')}: {full.get('agent')} thiếu task_type (đặt một trong {RACI.get(full.get('agent'), [])})"); continue
         bl = blockers_open(full)
         if bl: print(f"chờ {full.get('key')}: bị chặn bởi {', '.join(bl)}"); continue
         ready.append(full)
