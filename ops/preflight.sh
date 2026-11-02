@@ -7,7 +7,9 @@ for v in TICKET_BACKEND ZOHO_REFRESH_TOKEN AGENT_GH_TOKEN SHOPIFY_CLI_THEME_TOKE
   [ -n "${!v:-}" ] && ok "$v có" || bad "$v thiếu trong ai-team/.env"
 done
 command -v claude >/dev/null && ok "claude $(claude --version 2>/dev/null | head -1)" || bad "chưa cài claude"
-sv=$(shopify version 2>/dev/null | grep -oE '^[0-9]+' | head -1); [ "${sv:-0}" -ge 4 ] && ok "shopify CLI $(shopify version 2>/dev/null)" || bad "shopify CLI phải >= 4"
+sver=$(shopify version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1); sv=${sver%%.*}
+if [ "${sv:-0}" = 4 ]; then ok "shopify CLI $sver"; [ "$sver" = "4.9.5" ] || warn "nên ghim đúng 4.9.5 như CI: npm i -g @shopify/cli@4.9.5"
+else bad "shopify CLI $sver — phải 4.x (CLI 5.0 đổi output JSON, chưa hỗ trợ): npm i -g @shopify/cli@4.9.5"; fi
 me=$(gh api user --jq .login 2>/dev/null); [ -n "$me" ] && ok "gh đăng nhập: $me" || bad "gh chưa đăng nhập"
 [ "$me" = "nextsky-ai-agent" ] && bad "gh đang là nextsky-ai-agent — phải là tài khoản CTO (unset GH_TOKEN)"
 git -C "$AI_TEAM" pull -q --ff-only 2>/dev/null && ok "ai-team đã pull" || warn "ai-team không pull được (có thay đổi local?)"
