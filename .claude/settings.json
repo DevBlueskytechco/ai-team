@@ -1,0 +1,48 @@
+{
+  "permissions": {
+    "additionalDirectories": ["../theme-efitco"],
+    "allow": [
+      "Bash(ops/preflight.sh*)",
+      "Bash(ops/status.py*)",
+      "Bash(python3 ops/status.py*)",
+      "Bash(python3 ops/ticket.py show*)",
+      "Bash(python3 ops/ticket.py children*)",
+      "Bash(ops/run_next.sh*)",
+      "Bash(ops/pr_report.sh*)",
+      "Bash(ops/ci_watch.sh*)",
+      "Bash(source ops/env.sh*)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh pr diff*)",
+      "Bash(gh run view*)",
+      "Bash(gh run list*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(shopify theme check*)"
+    ],
+    "ask": [
+      "Bash(ops/merge_pr.sh*)",
+      "Bash(ops/apply_patch.sh*)",
+      "Bash(python3 ops/ticket.py close*)",
+      "Bash(python3 ops/ticket.py comment*)",
+      "Bash(python3 orchestrator/review.py*)",
+      "Bash(git push*)",
+      "Bash(gh pr merge*)",
+      "Bash(gh pr review*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin develop*)",
+      "Bash(git push origin main*)",
+      "Bash(shopify theme publish*)",
+      "Bash(shopify theme delete*)",
+      "Bash(shopify theme push --live*)",
+      "Bash(gh secret*)",
+      "Bash(rm -rf*)",
+      "Read(./.env)"
+    ]
+  }
+}
