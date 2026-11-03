@@ -122,6 +122,46 @@ main[hidden]{display:none}
 .dg .ln.hl{stroke:var(--accent);stroke-width:2}
 .dg .sep{stroke:var(--line);stroke-width:1}
 .dg .band{fill:var(--surface-2);opacity:.55}
+.btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 11px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{text-decoration:none;border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:2px 8px;font-size:12px}
+.btn[disabled]{opacity:.5;cursor:default}
+a.plain{color:var(--text)}
+.kanban{grid-template-columns:repeat(6,minmax(190px,1fr))}
+a.card.tcard{display:block;color:var(--text)} a.card.tcard:hover{text-decoration:none;border-color:var(--accent)}
+.tform .fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+#tnew .fgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){#tnew .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--text-2)}
+.tform label.full{grid-column:1/-1} .tform input[type=checkbox]{width:auto;margin:0} .tform label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--text)}
+.tform input,.tform select,.tform textarea,#tBodyForm textarea,.tcomform textarea{font:inherit;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.tform textarea,#tBodyForm textarea,.tcomform textarea{resize:vertical;line-height:1.45}
+.tform input:disabled,.tform select:disabled{background:var(--surface-2);color:var(--text-2)}
+.req{color:var(--critical)}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tback{font-size:13px;margin-bottom:8px}
+.thead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.key.big{font-family:var(--mono);font-size:15px;font-weight:700}
+h2.ttitle{font-size:19px;margin:8px 0 10px;text-transform:none;letter-spacing:0;color:var(--text);line-height:1.35}
+.tbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.tbar label.inline{display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--text-2)}
+.tbar select{font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.tgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:1100px){.tgrid{grid-template-columns:minmax(0,1fr)}}
+.tsec{border-top:1px solid var(--line);padding:12px 0;margin:0}
+.tsec h3,.tside h3{font-size:12px;margin:0 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em}
+.tsec .sec-head{margin-bottom:6px}
+.tbody{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px;line-height:1.55}
+.tcom{padding:8px 0;border-bottom:1px solid var(--line)} .tcom:last-child{border-bottom:0}
+.tcomform{margin-top:10px}
+.tside{background:var(--surface-2);border-radius:8px;padding:12px}
+.tside .tform input,.tside .tform select{background:var(--surface)}
+.tmeta{display:grid;grid-template-columns:96px 1fr;gap:6px 10px;font-size:12.5px;margin:14px 0 0;border-top:1px solid var(--line);padding-top:12px}
+.tmeta dt{color:var(--muted)} .tmeta dd{margin:0;overflow-wrap:anywhere}
+details.tsec summary{cursor:pointer}
+#toast{position:fixed;right:16px;bottom:16px;z-index:20;background:var(--text);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:13px;display:none;max-width:min(420px,calc(100vw - 32px));box-shadow:0 4px 16px rgba(0,0,0,.2)}
+#toast.bad{background:var(--critical);color:#fff}
 h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
@@ -267,30 +307,34 @@ let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard"]]],
+  ["Ticket", [["t-list", "Danh sách"], ["t-board", "Kanban"], ["t-new", "Tạo ticket"]]],
   ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"]]],
   ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["process", "Quy trình"], ["commands", "Lệnh"]]],
-  ["Tiến độ", [["story", "Story"], ["tickets", "Ticket Zoho"]]],
+  ["Tiến độ", [["story", "Story"]]],
   ["Quy ước", [["decisions", "Quyết định"]]],
 ];
 const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
 
 function renderMenu() {
-  const cnt = { tickets: DATA ? DATA.tickets.length : "", story: PROJECT ? PROJECT.story.length : "" };
+  const cnt = { "t-list": DATA ? DATA.tickets.filter((t) => t.status !== "Closed").length : "", story: PROJECT ? PROJECT.story.length : "" };
   (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   const html = MENU.map(([grp, items]) => `<div class="grp">${esc(grp)}</div>` + items.map(([id, name]) =>
-    `<a href="#/${id}" ${id === PAGE ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
+    `<a href="#/${id}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
   if ($("menu").innerHTML !== html) $("menu").innerHTML = html;
 }
 
 function route() {
-  const id = (location.hash.replace(/^#\/?/, "") || "dashboard");
-  PAGE = PAGE_IDS.includes(id) ? id : "dashboard";
+  let id = (location.hash.replace(/^#\/?/, "") || "dashboard");
+  if (id === "tickets") id = "t-list";                     // link cũ "Ticket Zoho"
+  const tm = id.match(/^t\/([A-Za-z0-9-]+)$/);
+  PAGE = tm ? "t-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
+  if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
   $("page-dashboard").hidden = PAGE !== "dashboard";
   $("page-info").hidden = PAGE === "dashboard";
-  const showAgent = PAGE === "dashboard" || PAGE === "tickets";
+  const showAgent = ["dashboard", "t-list", "t-board"].includes(PAGE);
   $("agentFilter").hidden = !showAgent; document.querySelector('label[for="agentFilter"]').hidden = !showAgent;
-  document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
+  document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : PAGE === "t-detail" ? `${TDETAIL.key} · Efitco Agent Ops` : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
   window.scrollTo(0, 0);
   if (DATA && PAGE === "dashboard") render(DATA); else { renderMenu(); renderInfo(); }
 }
@@ -325,7 +369,10 @@ function renderInfo() {
 function renderInfoInner(box) {
   if (!PROJECT) { box.innerHTML = '<div class="empty">Đang tải…</div>'; return; }
   if (PAGE === "story") box.innerHTML = pageStory();
-  else if (PAGE === "tickets") box.innerHTML = pageTickets();
+  else if (PAGE === "t-list") box.innerHTML = pageTList();
+  else if (PAGE === "t-board") box.innerHTML = pageTBoard();
+  else if (PAGE === "t-new") { box.innerHTML = pageTNew(); bindTNew(); return; }
+  else if (PAGE === "t-detail") { box.innerHTML = pageTDetail(); if (TDETAIL.t) bindTDetail(); else loadTDetail(TDETAIL.key); return; }
   else if (PAGE === "process") box.innerHTML = pageProcess();
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
@@ -339,7 +386,8 @@ function renderInfoInner(box) {
         `<tr><td colspan="${pg.columns.length}" class="empty">Không có dòng khớp.</td></tr>`}</tbody></table></div>
       ${pg.note ? `<p class="note">${esc(pg.note)}</p>` : ""}`;
   }
-  box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${PAGE === "tickets" || PAGE === "story" ? "Zoho trực tiếp (" + ago(DATA && DATA.zoho_at) + ") + " : ""}ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.</p>`);
+  const live = ["t-list", "t-board", "story"].includes(PAGE);
+  box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
 }
 
@@ -396,7 +444,7 @@ function diagramAgents() {
 
 /* Sơ đồ 2 (trang Quy trình): đường đi của 1 ticket qua 6 bên, theo thời gian */
 function diagramFlow() {
-  const id = "dgf", lanes = ["CTO", "Claude Code", "Orchestrator", "Agent", "GitHub + CI", "Zoho"], LY = 34, LH = 64;
+  const id = "dgf", lanes = ["CTO", "Claude Code", "Orchestrator", "Agent", "GitHub + CI", "Ticket"], LY = 34, LH = 64;
   const cy = (l) => LY + l * LH + LH / 2, bx = (c) => 140 + c * 147, BW = 127, BH = 44;
   let g = DG.defs(id);
   lanes.forEach((n, i) => {
@@ -429,7 +477,7 @@ function diagramFlow() {
   L([[m(5), top(1)], [m(5), bot(0) + 2]], ["đề xuất", m(5) + 6, (top(1) + bot(0)) / 2 + 4, "start"]);
   L([[r(5), cy(0)], [m(6), cy(0)], [m(6), top(4) - 2]], ["approve + merge", m(6) - 6, cy(2) + 4, "end"], "hl");
   L([[m(6), bot(4)], [m(6), top(5) - 2]], ["review.py", m(6) + 6, (bot(4) + top(5)) / 2 + 4, "start"]);
-  return DG.fig(1160, LY + 6 * LH + 6, "Đường đi của một ticket qua CTO, Claude Code, Orchestrator, Agent, GitHub CI và Zoho: tạo ai-draft, /run-next, agent làm trên nhánh, nộp ai-review và PR, CI, /review-pr, CTO /merge-pr, merge và đóng ticket", g,
+  return DG.fig(1160, LY + 6 * LH + 6, "Đường đi của một ticket qua CTO, Claude Code, Orchestrator, Agent, GitHub CI và ticket nội bộ: tạo ai-draft, /run-next, agent làm trên nhánh, nộp ai-review và PR, CI, /review-pr, CTO /merge-pr, merge và đóng ticket", g,
     "Đọc theo cột từ trái sang phải. Chỉ một bước do CTO quyết (viền màu nhấn): /merge-pr. Các nhánh rẽ khác (bị chặn, câu hỏi, sửa, loại) ở sơ đồ trạng thái bên dưới. Ticket không có PR (PO, BA, Tech Lead, Designer, QA, Writer) bỏ bước 5: CTO đọc đầu ra ở nhánh/drafts rồi chấm.");
 }
 
@@ -492,42 +540,291 @@ function pageStory() {
       <td class="n">${r.pts}</td></tr>`).join("")}</tbody>
     <tfoot><tr><td colspan="3">Tổng</td><td class="n">${sum("points")}</td><td class="nw">Story xong: ${xong} point</td><td class="n">${tk}</td><td class="n">${td}</td>
       <td>${tk ? Math.round((td / tk) * 100) : 0}%</td><td class="n">${sum("pts")}</td></tr></tfoot></table></div>
-    <p class="note">Trạng thái story do CTO cập nhật trong project.json; số ticket con, đã đóng và point task đạt tính trực tiếp từ Zoho.</p>`;
+    <p class="note">Trạng thái story do CTO cập nhật trong project.json; số ticket con, đã đóng và point task đạt tính trực tiếp từ ticket nội bộ.</p>`;
 }
 
-function pageTickets() {
-  const T = (DATA ? DATA.tickets : []).slice().sort((a, b) => num(b.key) - num(a.key));
-  const f = $("agentFilter").value, st = Q.t_status || "", sy = Q.t_story || "";
-  const stories = [...new Set(T.map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
-  const rows = T.filter((t) => (!f || t.agent === f) && (!st || (t.status || "") === st) && (!sy || t.parent === sy) &&
-    match(Q.tickets, [t.key, t.title, t.agent, t.task_type, (t.labels || []).join(" ")]));
-  const open = T.filter((t) => (t.status || "").toLowerCase() !== "closed").length;
-  const opt = (id, cur, list, all) => `<select data-sel="${id}" aria-label="${all}"><option value="">${all}</option>${list.map((v) => `<option ${v === cur ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>`;
-  return `<div class="page-head"><h2>Ticket Zoho</h2>${searchBox("tickets", "Tìm key, tên, nhãn")}
-      ${opt("t_status", st, ["Open", "Closed"], "Mọi trạng thái")}${opt("t_story", sy, stories, "Mọi story")}
-      <span class="fresh">${rows.length} hiển thị · ${T.length} ticket · ${open} mở · ${T.length - open} đóng</span></div>
-    <div class="tablewrap"><table class="info"><thead><tr><th>Key</th><th>Trạng thái</th><th>Agent</th><th>Loại</th><th>Phía</th><th class="n">Point</th>
-      <th>Nhãn</th><th>Story</th><th>Tên ticket</th><th>Ngày tạo</th><th>Đầu ra</th></tr></thead>
-    <tbody>${rows.map((t) => { const closed = (t.status || "").toLowerCase() === "closed", out = String(t.output_link || "");
-      const lnk = (out.match(/https?:\/\/\S+/) || [])[0];
-      return `<tr><td class="k">${esc(t.key)}</td><td class="nw">${status(closed ? "good" : "warning", t.status || "—")}</td><td class="nw">${esc(t.agent || "")}</td>
-      <td class="nw">${esc(t.task_type || "")}</td><td class="nw">${esc(String(t.side || "").toUpperCase())}</td><td class="n">${t.points ?? ""}</td><td class="nw">${(t.labels || []).map((l) => `<span class="chip">${esc(l)}</span>`).join(" ")}</td>
-      <td class="nw">${esc(t.parent || "")}</td><td style="min-width:280px">${esc(t.title)}</td><td class="fresh nw">${esc(t.created_at || "")}</td>
-      <td class="nw">${lnk ? `<a href="${esc(lnk)}" target="_blank" rel="noopener">${esc(lnk.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out.replace(/^branch /, ""))}</td></tr>`; }).join("") ||
+/* ================= Ticket nội bộ (thay Zoho): danh sách, kanban, tạo, chi tiết ================= */
+const AGENTS = ["po", "ba", "techlead", "designer", "dev-fe", "dev-be", "qa", "devops", "writer"];
+const FLOW_LABELS = ["ai-draft", "ai-review", "ai-sua", "ai-dat", "ai-loai"];
+const PRIO = { none: "—", low: "Thấp", medium: "Vừa", high: "Cao" };
+const TYPES = ["task", "bug", "question", "story"];
+const STAGE = { running: ["warning", "Đang chạy"], ready: ["none", "Sẵn sàng"], blocked: ["serious", "Bị chặn"], review: ["warning", "Chờ CTO chấm"],
+  fix: ["serious", "Cần sửa"], question: ["none", "Câu hỏi"], done: ["good", "Đã xong"], other: ["none", "Chưa gắn nhãn"] };
+let RACI = null, TDETAIL = { key: null, t: null, sig: null, dirty: false };
+const canWrite = () => DATA && DATA.backend === "local";
+const tByKey = () => Object.fromEntries((DATA ? DATA.tickets : []).map((t) => [t.key, t]));
+const stageOf = (t) => { const g = classify(t); const [k, l] = STAGE[g] || STAGE.other; return status(k, l); };
+const lab = (l) => `<span class="chip">${esc(l)}</span>`;
+const fmt = (iso) => (iso ? String(iso).slice(0, 16).replace("T", " ") : "—");
+
+async function loadRaci() { try { RACI = await (await fetch("/api/raci", { cache: "no-store" })).json(); } catch (e) { RACI = {}; } }
+
+function toast(msg, bad) {
+  let el = $("toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+  el.className = bad ? "bad" : ""; el.textContent = msg; el.style.display = "block";
+  clearTimeout(el._t); el._t = setTimeout(() => (el.style.display = "none"), bad ? 6000 : 2500);
+}
+
+async function tapi(action, body) {
+  const r = await fetch(`/api/ticket/${action}`, { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: JSON.stringify(body) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+
+const keysOf = (s) => String(s || "").split(/[\s,;]+/).map((x) => x.trim().toUpperCase()).filter(Boolean);
+const listOf = (s) => String(s || "").split(/[,;]+/).map((x) => x.trim()).filter(Boolean);
+const opt = (v, cur, label) => `<option value="${esc(v)}" ${String(v) === String(cur ?? "") ? "selected" : ""}>${esc(label ?? v)}</option>`;
+const taskTypes = (agent) => (RACI && RACI[agent]) || [];
+const storyOpts = (cur) => { const st = PROJECT ? PROJECT.story : [];
+  return opt("", cur, "—") + (cur && !st.some((s) => s.key === cur) ? opt(cur, cur, `${cur} (ticket cha)`) : "") + st.map((s) => opt(s.key, cur, `${s.key} · ${s.title}`)).join(""); };
+const readonlyNote = () => canWrite() ? "" : `<p class="note">${status("warning", "Chỉ xem")} Backend ticket đang là <b>${esc(DATA ? DATA.backend : "?")}</b>; sửa trên dashboard chỉ bật khi orchestrator/config.yaml có ticket_backend: local.</p>`;
+
+/* ---- Danh sách ---- */
+function pageTList() {
+  const all = (DATA ? DATA.tickets : []).slice();
+  const f = $("agentFilter").value, st = Q.ts ?? "Open", sy = Q.tstory || "", ty = Q.ttype || "", lb = Q.tlabel || "", pr = Q.tprio || "", so = Q.tsort || "key";
+  const stories = [...new Set(all.map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
+  const labels = [...new Set(all.flatMap((t) => t.labels || []))].sort();
+  let rows = all.filter((t) => (!f || t.agent === f) && (!st || t.status === st) && (!sy || t.parent === sy) && (!ty || (t.type || "task") === ty) &&
+    (!lb || (t.labels || []).includes(lb)) && (!pr || (t.priority || "none") === pr) && match(Q.tlist, [t.key, t.title, t.agent, t.task_type, (t.labels || []).join(" ")]));
+  rows.sort(so === "upd" ? (a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")) : (a, b) => num(b.key) - num(a.key));
+  const open = all.filter((t) => t.status !== "Closed").length;
+  const sel = (id, cur, list, all) => `<select data-sel="${id}" aria-label="${esc(all)}">${list.map(([v, l]) => opt(v, cur, l)).join("")}</select>`;
+  return `<div class="page-head"><h2>Ticket</h2>${searchBox("tlist", "Tìm key, tên, nhãn")}
+      ${sel("ts", st, [["", "Mọi trạng thái"], ["Open", "Đang mở"], ["Closed", "Đã đóng"]], "Trạng thái")}
+      ${sel("tstory", sy, [["", "Mọi story"], ...stories.map((s) => [s, s])], "Story")}
+      ${sel("ttype", ty, [["", "Mọi loại"], ...TYPES.map((s) => [s, s])], "Loại")}
+      ${sel("tlabel", lb, [["", "Mọi nhãn"], ...labels.map((s) => [s, s])], "Nhãn")}
+      ${sel("tprio", pr, [["", "Mọi ưu tiên"], ...Object.entries(PRIO).filter(([k]) => k !== "none").map(([k, v]) => [k, v])], "Ưu tiên")}
+      ${sel("tsort", so, [["key", "Mới tạo trước"], ["upd", "Mới cập nhật trước"]], "Sắp xếp")}
+      ${canWrite() ? `<a class="btn primary" href="#/t-new">+ Tạo ticket</a>` : ""}
+      <span class="fresh">${rows.length} hiển thị · ${all.length} ticket · ${open} mở · ${all.length - open} đóng</span></div>
+    ${readonlyNote()}
+    <div class="tablewrap"><table class="info tlist"><thead><tr><th>Key</th><th>Tên ticket</th><th>Giai đoạn</th><th>Nhãn</th><th>Agent</th><th>Loại việc</th><th class="n">Point</th><th>Story</th><th>Ưu tiên</th><th>Cập nhật</th><th class="n" title="Comment">Cmt</th></tr></thead>
+    <tbody>${rows.map((t) => `<tr><td class="k"><a href="#/t/${esc(t.key)}">${esc(t.key)}</a></td>
+      <td style="min-width:240px"><a class="plain" href="#/t/${esc(t.key)}">${esc(t.title)}</a></td><td class="nw">${stageOf(t)}</td>
+      <td class="nw">${(t.labels || []).map(lab).join(" ")}</td><td class="nw">${esc(t.agent || "")}</td><td class="nw">${esc(t.task_type || (t.side ? String(t.side).toUpperCase() : ""))}</td><td class="n">${t.points ?? ""}</td><td class="nw">${esc(t.parent || "")}</td>
+      <td class="nw">${esc(PRIO[t.priority || "none"])}</td><td class="fresh nw">${fmt(t.updated_at || t.created_at)}</td><td class="n">${t.comments_n ?? ""}</td></tr>`).join("") ||
       '<tr><td colspan="11" class="empty">Không có ticket khớp.</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---- Kanban ---- */
+function pageTBoard() {
+  const f = $("agentFilter").value, sy = Q.bstory || "";
+  const T = (DATA ? DATA.tickets : []).filter((t) => (!f || t.agent === f) && (!sy || t.parent === sy) && match(Q.tboard, [t.key, t.title, t.agent]));
+  const stories = [...new Set((DATA ? DATA.tickets : []).map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
+  const cols = [["ready", "Đang chạy · Sẵn sàng"], ["blocked", "Bị chặn"], ["question", "Câu hỏi"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["other", "Chưa gắn nhãn"], ["done", "Đã xong"]];
+  const G = Object.fromEntries(cols.map(([g]) => [g, []])); G.running = [];
+  T.forEach((t) => { const g = classify(t); (G[g] || G.other).push(t); });
+  const card = (t) => `<a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? lab(t.agent) : ""}
+      ${t.side ? lab(String(t.side).toUpperCase()) : ""}${t.points ? lab(t.points + " pt") : ""}${t.parent ? lab(t.parent) : ""}
+      ${t.priority && t.priority !== "none" ? lab("ưu tiên " + PRIO[t.priority].toLowerCase()) : ""}${G.running.includes(t) ? status("warning", "đang chạy") : ""}</div>
+      <div class="ttl">${esc(t.title)}</div>${t.comments_n ? `<div class="fresh" style="margin-top:4px">${t.comments_n} comment · ${fmt(t.updated_at)}</div>` : ""}</a>`;
+  return `<div class="page-head"><h2>Kanban</h2>${searchBox("tboard", "Tìm key, tên")}
+      <select data-sel="bstory" aria-label="Story">${[["", "Mọi story"], ...stories.map((s) => [s, s])].map(([v, l]) => opt(v, sy, l)).join("")}</select>
+      ${canWrite() ? `<a class="btn primary" href="#/t-new">+ Tạo ticket</a>` : ""}<span class="fresh">${T.length} ticket · cột theo quy trình agent (trang Quy trình)</span></div>
+    <div class="board kanban">${cols.map(([g, name]) => {
+      let list = G[g].sort((a, b) => num(a.key) - num(b.key));
+      if (g === "ready") list = G.running.concat(list);
+      if (g === "other" && !list.length) return "";
+      const total = g === "ready" ? list.length : G[g].length;
+      if (g === "done") list = list.slice(-15).reverse();
+      return `<div class="col"><h3><span>${name}</span><span>${total}</span></h3>${list.map(card).join("") || '<div class="empty">—</div>'}
+        ${g === "done" && G.done.length > 15 ? `<a class="fresh" href="#/t-list" onclick="Q.ts='Closed'">Xem tất cả ${G.done.length} →</a>` : ""}</div>`;
+    }).join("")}</div>`;
+}
+
+/* ---- Form chung: tạo + sửa trường ---- */
+function fieldsForm(t, mode) {
+  const agent = t.agent || "", tts = taskTypes(agent);
+  const dis = canWrite() ? "" : "disabled";
+  const otherLabels = (t.labels || []).filter((l) => !FLOW_LABELS.includes(l)).join(", ");
+  return `<div class="fgrid">
+    ${mode === "new" ? `<label class="full"><span>Tên ticket <span class="req">*</span></span><input name="title" required maxlength="300" value="${esc(t.title || "")}" placeholder="Việc cụ thể: file, số lượng, phạm vi" ${dis}></label>` : ""}
+    <label>Loại<select name="type" ${dis}>${TYPES.map((x) => opt(x, t.type || "task")).join("")}</select></label>
+    <label>Agent<select name="agent" ${dis}>${opt("", agent, "— (người làm)")}${AGENTS.map((a) => opt(a, agent)).join("")}</select></label>
+    <label>Loại việc (RACI)<select name="task_type" ${dis}>${opt("", t.task_type, "—")}${(tts.includes(t.task_type) || !t.task_type ? tts : [t.task_type, ...tts]).map((x) => opt(x, t.task_type)).join("")}</select></label>
+    <label>Phía<select name="side" ${dis}>${opt("", t.side, "—")}${opt("fe", t.side, "FE")}${opt("be", t.side, "BE")}</select></label>
+    <label>Point<input name="points" type="number" min="0" max="100" value="${t.points ?? ""}" ${dis}></label>
+    <label>Story<select name="parent" ${dis}>${storyOpts(t.parent)}</select></label>
+    <label>Ưu tiên<select name="priority" ${dis}>${Object.entries(PRIO).map(([k, v]) => opt(k, t.priority || "none", k === "none" ? "Không" : v)).join("")}</select></label>
+    <label>Sprint<input name="sprint" value="${esc(t.sprint || "")}" placeholder="vd Sprint 1" ${dis}></label>
+    <label>Hạn<input name="due_date" type="date" value="${esc(t.due_date || "")}" ${dis}></label>
+    <label>Bị chặn bởi<input name="blocked_by" value="${esc((t.blocked_by || []).join(", "))}" placeholder="ES1-T56, ES1-T57" ${dis}></label>
+    <label class="full">Nhãn khác<input name="labels_other" value="${esc(otherLabels)}" placeholder="vd P2, rtl" ${dis}></label>
+    ${mode === "new" ? `<label class="full chk"><input type="checkbox" name="ai_draft" ${t.agent ? "checked" : ""} ${dis}> Gắn ai-draft để Orchestrator chạy (cần chọn agent)</label>
+      <label class="full">Mô tả<textarea name="body" rows="9" placeholder="Nguồn: …&#10;Giải pháp: quyết định kỹ thuật + đầu ra cụ thể&#10;DoD: lệnh chạy và điều kiện pass" ${dis}>${esc(t.body || "")}</textarea></label>` : ""}
+  </div>`;
+}
+
+function readFields(form, cur) {
+  const v = (n) => (form.elements[n] ? form.elements[n].value.trim() : undefined);
+  const out = { type: v("type"), agent: v("agent") || null, task_type: v("task_type") || null, side: v("side") || null,
+    points: v("points") === "" ? null : Number(v("points")), parent: v("parent") || null, priority: v("priority"), sprint: v("sprint") || null,
+    due_date: v("due_date") || null, blocked_by: keysOf(v("blocked_by")) };
+  const flow = (cur && cur.labels || []).filter((l) => FLOW_LABELS.includes(l));
+  if (form.elements.ai_draft && form.elements.ai_draft.checked) flow.push("ai-draft");
+  out.labels = [...new Set([...flow, ...listOf(v("labels_other"))])];
+  if (form.elements.title) out.title = v("title");
+  if (form.elements.body) out.body = form.elements.body.value;
+  const known = tByKey(), bad = out.blocked_by.filter((k) => !known[k]);
+  if (bad.length) throw new Error(`Không có ticket ${bad.join(", ")}`);
+  if (out.task_type && out.agent && RACI && RACI[out.agent] && !RACI[out.agent].includes(out.task_type)) throw new Error(`${out.agent} không nhận loại việc ${out.task_type} theo raci.yaml`);
+  return out;
+}
+
+function bindAgentTaskType(form) {
+  const a = form.elements.agent, tt = form.elements.task_type;
+  if (!a || !tt) return;
+  a.onchange = () => { const cur = tt.value; tt.innerHTML = opt("", cur, "—") + taskTypes(a.value).map((x) => opt(x, cur)).join("");
+    if (form.elements.ai_draft) form.elements.ai_draft.checked = !!a.value; };
+}
+
+/* ---- Tạo ticket ---- */
+function pageTNew() {
+  if (!canWrite()) return `<div class="page-head"><h2>Tạo ticket</h2></div>${readonlyNote()}`;
+  return `<div class="page-head"><h2>Tạo ticket</h2><span class="fresh">Số ticket cấp tự động (ES1-T…). Ticket có agent + nhãn ai-draft sẽ được /run-next nhận.</span></div>
+    <form id="tnew" class="tform" autocomplete="off">${fieldsForm({ type: "task", priority: "none" }, "new")}
+      <div class="actions"><button type="submit" class="btn primary">Tạo ticket</button><a class="btn" href="#/t-list">Huỷ</a></div></form>`;
+}
+function bindTNew() {
+  const form = $("tnew"); if (!form) return;
+  bindAgentTaskType(form);
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const body = readFields(form, { labels: [] });
+      if (!body.title) throw new Error("Nhập tên ticket");
+      if (body.labels.includes("ai-draft") && !body.agent) throw new Error("ai-draft cần chọn agent");
+      form.querySelector("button[type=submit]").disabled = true;
+      const t = await tapi("create", body); toast(`Đã tạo ${t.key}`); location.hash = `#/t/${t.key}`;
+    } catch (err) { toast(err.message, true); form.querySelector("button[type=submit]").disabled = false; }
+  };
+}
+
+/* ---- Chi tiết ticket ---- */
+async function loadTDetail(key, force) {
+  if (!force && TDETAIL.key === key && TDETAIL.t) return;
+  TDETAIL = { key, t: null, sig: null, dirty: false };
+  try {
+    const r = await fetch(`/api/ticket?id=${encodeURIComponent(key)}`, { cache: "no-store" });
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+    TDETAIL.t = j; TDETAIL.sig = `${j.updated_at}|${(j.comments || []).length}`;
+  } catch (e) { TDETAIL.t = { error: e.message }; }
+  if (PAGE === "t-detail") { $("info").innerHTML = pageTDetail(); bindTDetail(); }
+}
+
+function pageTDetail() {
+  const t = TDETAIL.t;
+  if (!t) return '<div class="empty">Đang tải…</div>';
+  if (t.error) return `<div class="page-head"><h2>${esc(TDETAIL.key)}</h2></div><p class="note">${status("critical", t.error)}</p><a class="btn" href="#/t-list">← Danh sách</a>`;
+  const K = tByKey(), closed = t.status === "Closed", dis = canWrite() ? "" : "disabled";
+  const blocking = (DATA ? DATA.tickets : []).filter((x) => (x.blocked_by || []).includes(t.key));
+  const runs = (DATA ? DATA.runs : []).filter((r) => r.ticket === t.key).slice(-5).reverse();
+  const rv = t.review || {};
+  const linkT = (k) => `<a href="#/t/${esc(k)}">${esc(k)}</a> ${K[k] ? (K[k].status === "Closed" ? status("good", "đóng") : status("warning", "mở")) : ""}`;
+  const out = String(t.output_link || ""), outUrl = (out.match(/https?:\/\/\S+/) || [])[0];
+  const flow = (t.labels || []).find((l) => FLOW_LABELS.includes(l)) || "";
+  return `<div class="tback"><a href="#/t-list">← Danh sách</a> · <a href="#/t-board">Kanban</a></div>
+  <div class="thead"><span class="key big">${esc(t.key)}</span>${status(closed ? "good" : "warning", closed ? "Đã đóng" : "Đang mở")} ${closed ? "" : stageOf(t)}
+    ${(t.labels || []).map(lab).join(" ")}</div>
+  <h2 class="ttitle" id="tTitle">${esc(t.title)}</h2>
+  ${readonlyNote()}
+  ${canWrite() ? `<div class="tbar">
+    <button class="btn" data-act="edit-title">Sửa tên</button>
+    <button class="btn ${closed ? "" : "primary"}" data-act="${closed ? "reopen" : "close"}">${closed ? "Mở lại" : "Đóng ticket"}</button>
+    <label class="inline">Nhãn quy trình <select id="tFlow">${opt("", flow, "—")}${FLOW_LABELS.map((l) => opt(l, flow)).join("")}</select></label>
+    <button class="btn" data-act="flow">Đổi nhãn</button></div>` : ""}
+  <div class="tgrid">
+    <div class="tmain">
+      <div class="tsec"><div class="sec-head"><h3>Mô tả</h3>${canWrite() ? `<button class="btn sm" data-act="edit-body">Sửa</button>` : ""}</div>
+        <div id="tBody" class="tbody">${t.body ? esc(t.body) : '<span class="fresh">(trống)</span>'}</div></div>
+      <div class="tsec"><h3>Comment (${(t.comments || []).length})</h3>
+        <div class="tcoms">${(t.comments || []).map((c) => `<div class="tcom"><div class="fresh"><b>${esc(c.by || "")}</b> · ${fmt(c.at)}</div><div class="tbody">${esc(c.text)}</div></div>`).join("") || '<div class="empty">Chưa có comment.</div>'}</div>
+        ${canWrite() ? `<form id="tCom" class="tcomform"><textarea name="text" rows="3" placeholder="Viết comment (agent đọc được qua mcp ticket get)"></textarea>
+          <div class="actions"><button class="btn primary" type="submit">Gửi comment</button></div></form>` : ""}</div>
+      <details class="tsec"><summary><h3 style="display:inline">Lịch sử (${(t.activity || []).length})</h3></summary>
+        <table class="info"><tbody>${(t.activity || []).slice().reverse().map((a) => `<tr><td class="fresh nw">${fmt(a.at)}</td><td class="nw">${esc(a.by || "")}</td>
+          <td class="nw"><b>${esc(a.field)}</b></td><td>${esc(a.old ?? "")}${a.old != null || a.new != null ? " → " : ""}${esc(a.new ?? "")}</td></tr>`).join("")}</tbody></table></details>
+    </div>
+    <aside class="tside">
+      <form id="tFields" class="tform" autocomplete="off"><h3>Thông tin</h3>${fieldsForm(t, "edit")}
+        ${canWrite() ? `<div class="actions"><button class="btn primary" type="submit">Lưu thông tin</button></div>` : ""}</form>
+      <dl class="tmeta">
+        <dt>Đầu ra</dt><dd>${outUrl ? `<a href="${esc(outUrl)}" target="_blank" rel="noopener">${esc(outUrl.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out || "—")}</dd>
+        <dt>Bị chặn bởi</dt><dd>${(t.blocked_by || []).map(linkT).join("<br>") || "—"}</dd>
+        <dt>Đang chặn</dt><dd>${blocking.map((x) => linkT(x.key)).join("<br>") || "—"}</dd>
+        <dt>Chấm điểm</dt><dd>${rv.severity ? `${esc(rv.severity)} · ${esc(rv.by || "")} · ${esc(rv.at || "")}<br><span class="fresh">${esc(Object.entries(rv.scores || {}).map(([k, v]) => `${k}=${v}`).join(", "))}</span>${rv.reason ? `<br>${esc(rv.reason)}` : ""}` : "—"}</dd>
+        <dt>Lượt agent</dt><dd>${runs.map((r) => `${fmt(r.started_at)} · ${esc(r.agent)} · ${r.num_turns ?? "—"} turn${r.duration_s != null ? " · " + dur(r.duration_s) : ""} ${r.is_error ? status("critical", "lỗi") : ""}`).join("<br>") || "—"}</dd>
+        <dt>Tạo</dt><dd>${fmt(t.created_at)} · ${esc(t.created_by || "")}</dd>
+        <dt>Cập nhật</dt><dd>${fmt(t.updated_at)}</dd>
+        ${t.closed_at ? `<dt>Đóng</dt><dd>${fmt(t.closed_at)}</dd>` : ""}
+        ${t.legacy_id ? `<dt>Zoho cũ</dt><dd class="fresh">${esc(t.legacy_id)}</dd>` : ""}
+      </dl>
+    </aside>
+  </div>`;
+}
+
+function bindTDetail() {
+  const t = TDETAIL.t; if (!t || t.error || !canWrite()) return;
+  const done = async (p, msg) => { try { TDETAIL.dirty = false; const j = await p; TDETAIL.t = j; TDETAIL.sig = `${j.updated_at}|${(j.comments || []).length}`;
+    toast(msg); await loadTDetail(t.key, true); } catch (e) { toast(e.message, true); } };
+  const fields = $("tFields");
+  if (fields) {
+    bindAgentTaskType(fields);
+    fields.oninput = () => (TDETAIL.dirty = true);
+    fields.onsubmit = (e) => { e.preventDefault(); let body; try { body = readFields(fields, t); } catch (err) { return toast(err.message, true); }
+      done(tapi("update", { id: t.key, ...body }), "Đã lưu thông tin"); };
+  }
+  const com = $("tCom");
+  if (com) { com.oninput = () => (TDETAIL.dirty = true);
+    com.onsubmit = (e) => { e.preventDefault(); const text = com.elements.text.value.trim(); if (!text) return; done(tapi("comment", { id: t.key, text }), "Đã gửi comment"); }; }
+  document.querySelectorAll("#info [data-act]").forEach((b) => (b.onclick = () => {
+    const a = b.dataset.act;
+    if (a === "close" || a === "reopen") {
+      const note = prompt(a === "close" ? "Ghi chú khi đóng (có thể bỏ trống):" : "Lý do mở lại:", "");
+      if (note === null) return;
+      done(tapi("status", { id: t.key, closed: a === "close", note }), a === "close" ? "Đã đóng ticket" : "Đã mở lại");
+    } else if (a === "flow") {
+      const l = $("tFlow").value; if (!l) return toast("Chọn nhãn", true);
+      done(tapi("label", { id: t.key, label: l, note: `[cto] đổi nhãn → ${l}` }), `Đã gắn ${l}`);
+    } else if (a === "edit-title") {
+      const v = prompt("Tên ticket:", t.title); if (v === null || !v.trim() || v.trim() === t.title) return;
+      done(tapi("update", { id: t.key, title: v.trim() }), "Đã đổi tên");
+    } else if (a === "edit-body") {
+      const box = $("tBody"); TDETAIL.dirty = true;
+      box.outerHTML = `<form id="tBodyForm"><textarea name="body" rows="14">${esc(t.body || "")}</textarea>
+        <div class="actions"><button class="btn primary" type="submit">Lưu mô tả</button><button class="btn" type="button" id="tBodyCancel">Huỷ</button></div></form>`;
+      $("tBodyCancel").onclick = () => { TDETAIL.dirty = false; $("info").innerHTML = pageTDetail(); bindTDetail(); };
+      $("tBodyForm").onsubmit = (e) => { e.preventDefault(); done(tapi("update", { id: t.key, body: e.target.elements.body.value }), "Đã lưu mô tả"); };
+    }
+  }));
+}
+
+/* Gọi khi dữ liệu SSE về: chỉ tải lại chi tiết khi ticket đổi và người dùng không đang sửa */
+function refreshTDetail() {
+  if (PAGE !== "t-detail" || !TDETAIL.t || TDETAIL.t.error) return;
+  const cur = tByKey()[TDETAIL.key]; if (!cur) return;
+  const sig = `${cur.updated_at}|${cur.comments_n}`;
+  if (sig !== TDETAIL.sig) {
+    if (TDETAIL.dirty) { if (!$("tStale")) $("info").insertAdjacentHTML("afterbegin", `<p class="note" id="tStale">${status("warning", "Ticket vừa đổi ở nơi khác")} Lưu xong rồi tải lại trang để thấy bản mới.</p>`); }
+    else loadTDetail(TDETAIL.key, true);
+  }
 }
 
 function render(d) {
   DATA = d;
   renderMenu();
-  if (PAGE !== "dashboard") { if (PAGE === "tickets" || PAGE === "story") renderInfo(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const f = $("agentFilter").value;
   const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
   const sel = $("agentFilter");
   if (sel.options.length - 1 !== agents.length) {
     sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
   }
-  $("fresh").textContent = `Zoho: ${ago(d.zoho_at)} · GitHub: ${ago(d.gh_at)}`;
+  $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
@@ -574,12 +871,12 @@ function render(d) {
     if (g === "ready") list = groups.running.concat(list);
     if (g === "done") list = list.slice(-8).reverse();
     return `<div class="col"><h3><span>${name}</span><span>${g === "done" ? groups.done.length : list.length}</span></h3>${list.map((t) => `
-      <div class="card"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? `<span class="chip">${esc(t.agent)}</span>` : ""}
+      <a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? `<span class="chip">${esc(t.agent)}</span>` : ""}
       ${t.side ? `<span class="chip">${esc(String(t.side).toUpperCase())}</span>` : ""}${t.points ? `<span class="chip">${t.points} pt</span>` : ""}
       ${t.parent && String(t.parent).startsWith("TE-") ? `<span class="chip">${esc(t.parent)}</span>` : ""}
       ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}
       ${groups.running.includes(t) ? status("warning", "đang chạy") : ""}</div>
-      <div class="ttl" title="${esc(t.title)}">${esc(t.title)}</div></div>`).join("") || '<div class="empty">—</div>'}</div>`;
+      <div class="ttl" title="${esc(t.title)}">${esc(t.title)}</div></a>`).join("") || '<div class="empty">—</div>'}</div>`;
   }).join("");
 
   // Stories
@@ -717,7 +1014,7 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); route();
+loadProject(); loadRaci(); route();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (innerWidth > 900) $("menu").style.top = h + "px", $("menu").style.height = `calc(100vh - ${h}px)`; else $("menu").style.top = "0", $("menu").style.height = "auto"; };
 syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);

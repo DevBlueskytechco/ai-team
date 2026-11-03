@@ -4,7 +4,8 @@
 Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - evals/raw/_live.json, evals/raw/live/<key>.jsonl   agent đang chạy (Orchestrator ghi, cập nhật mỗi lượt)   — đọc mỗi 2s
   - evals/raw/_runs.jsonl                               lịch sử lượt chạy, chi phí                               — mỗi 2s
-  - Zoho (mcp/ticket_server)                            ticket, nhãn, chấm điểm                                  — mỗi 60s
+  - Ticket (mcp/ticket_server, backend theo config.yaml) ticket nội bộ: đọc khi đổi (kiểm mỗi 2s); Zoho: mỗi 60s
+  - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ backend local, chỉ từ localhost, cần header X-Efitco
   - gh CLI (tài khoản CTO)                              PR mở + CI, CI develop                                   — mỗi 60s
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
 import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re
@@ -25,7 +26,8 @@ try:
 except Exception:
     CFG = {"budget_usd_month": 2000, "budget_warn_pct": 80}
 
-STATE = {"tickets": [], "prs": [], "merged": [], "ci_develop": [], "zoho_at": None, "gh_at": None, "errors": {}}
+STATE = {"tickets": [], "prs": [], "merged": [], "ci_develop": [], "tickets_at": None, "gh_at": None, "errors": {}, "backend": None}
+UI_USER = os.environ.get("TICKET_UI_USER", "cto")   # người ghi khi thao tác trên dashboard
 LOCK = threading.Lock()
 VERSION = {"n": 0, "hash": ""}
 
@@ -36,18 +38,43 @@ def sh(*a, timeout=60):
     return r.stdout
 
 # ---------- nguồn chậm ----------
-def poll_zoho():
+import ticket_server as T
+TICKET_FIELDS = ("key", "id", "status", "type", "agent", "task_type", "side", "points", "labels", "parent", "blocked_by", "created_at",
+                 "output_link", "priority", "sprint", "due_date", "updated_at", "closed_at", "created_by", "comments_n", "r_codes")
+
+def load_tickets():
+    rows = []
+    for t in T.all():
+        rows.append({k: t.get(k) for k in TICKET_FIELDS} |
+                    {"title": html.unescape(t.get("title") or ""), "review": {k: (t.get("review") or {}).get(k) for k in ("severity", "scores", "by", "at", "reason")}})
+    with LOCK: STATE["tickets"] = rows; STATE["tickets_at"] = now(); STATE["backend"] = T.BACKEND; STATE["errors"].pop("ticket", None)
+
+def poll_tickets():
+    """local: đọc lại ngay khi dữ liệu đổi (kiểm dấu mỗi 2s, không tốn API); zoho: mỗi 60s."""
+    last, last_full = None, 0
     while True:
         try:
-            import ticket_server as T
-            rows = []
-            for t in T.all():
-                rows.append({k: t.get(k) for k in ("key", "status", "agent", "task_type", "side", "points", "labels", "parent", "blocked_by", "id", "created_at", "output_link")} |
-                            {"title": html.unescape(t.get("title") or ""), "review": {k: (t.get("review") or {}).get(k) for k in ("severity", "scores", "by", "at")}})
-            with LOCK: STATE["tickets"] = rows; STATE["zoho_at"] = now(); STATE["errors"].pop("zoho", None)
+            if T.BACKEND == "local":
+                import ticket_local as L
+                v = L.version()
+                if v != last or time.time() - last_full > 60: load_tickets(); last, last_full = v, time.time()
+                time.sleep(2); continue
+            load_tickets()
         except Exception as e:
-            with LOCK: STATE["errors"]["zoho"] = str(e)[:200]
-        time.sleep(60)
+            with LOCK: STATE["errors"]["ticket"] = str(e)[:300]; STATE["backend"] = T.BACKEND
+        time.sleep(2 if T.BACKEND == "local" else 60)
+
+def backup_daily():
+    """Ticket nội bộ: sao lưu 1 bản/ngày vào data/backup/ (giữ 30 bản)."""
+    while True:
+        try:
+            if T.BACKEND == "local":
+                import ticket_local as L
+                d = os.path.join(os.path.dirname(L.DB), "backup", f"tickets-{datetime.date.today().isoformat()}.db")
+                if os.path.exists(L.DB) and not os.path.exists(d): L.backup()
+        except Exception as e:
+            with LOCK: STATE["errors"]["backup"] = str(e)[:200]
+        time.sleep(3600)
 
 def poll_gh():
     while True:
@@ -182,7 +209,7 @@ def now(): return datetime.datetime.now().isoformat(timespec="seconds")
 def snapshot():
     runs = read_runs()
     with LOCK:
-        s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "zoho_at", "gh_at")} | {"errors": dict(STATE["errors"])}
+        s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     s.update({"live": read_live(), "runs": runs[-500:], "server_time": now()})
     return s
 
@@ -193,8 +220,48 @@ def ticker():
         if h != VERSION["hash"]: VERSION["hash"] = h; VERSION["n"] += 1
         time.sleep(2)
 
+TICKET_EDITABLE = ("title", "body", "type", "agent", "task_type", "side", "points", "parent", "priority", "sprint", "due_date",
+                   "blocked_by", "labels", "r_codes", "output_link")
+
+def ticket_write(action, d):
+    """Thao tác ticket từ giao diện. Trả ticket sau khi ghi."""
+    import ticket_local as L
+    tid = str(d.get("id") or "")
+    if action == "create":
+        f = {k: d.get(k) for k in TICKET_EDITABLE if k in d and k != "output_link"}
+        return L.create(by=UI_USER, **f)
+    if action == "update":
+        return L.update(tid, by=UI_USER, **{k: d[k] for k in TICKET_EDITABLE if k in d})
+    if action == "status":
+        return L.set_status(tid, bool(d.get("closed")), (d.get("note") or "").strip() or None, by=UI_USER)
+    if action == "comment":
+        L.comment(tid, d.get("text") or "", by=UI_USER); return L.get(tid)
+    if action == "label":
+        return L.set_label(tid, str(d.get("label") or ""), note=(d.get("note") or "").strip() or None, by=UI_USER)
+    raise ValueError("thao tác không hỗ trợ")
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
+    def _local_ok(self):
+        """Chống web khác gọi vào localhost: Host phải là localhost/127.0.0.1, có header X-Efitco (form/ảnh từ site lạ không đặt được)."""
+        host = (self.headers.get("Host") or "").split(":")[0]
+        return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
+    def do_POST(self):
+        u = urlparse(self.path)
+        if not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
+        if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
+        if T.BACKEND != "local": return self._send(409, json.dumps({"error": f"backend ticket đang là {T.BACKEND}: chỉ ghi được khi ticket_backend: local"}, ensure_ascii=False))
+        n = int(self.headers.get("Content-Length") or 0)
+        if n > 200_000: return self._send(413, '{"error":"quá lớn"}')
+        try:
+            d = json.loads(self.rfile.read(n) or b"{}")
+            t = ticket_write(u.path.rsplit("/", 1)[-1], d)
+            load_tickets(); VERSION["n"] += 1
+            return self._send(200, json.dumps(t, ensure_ascii=False, default=str))
+        except (ValueError, KeyError, TypeError) as e:
+            return self._send(400, json.dumps({"error": str(e).strip("'")}, ensure_ascii=False))
+        except Exception as e:
+            return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
     def _send(self, code, body, ctype="application/json; charset=utf-8"):
         b = body if isinstance(body, bytes) else body.encode()
         self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Cache-Control", "no-store")
@@ -206,6 +273,15 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/api/project":   # trang thông tin (chuyển từ Efitco-thong-tin-du-an.xlsx), đọc lại mỗi lần để sửa file là thấy
             try: return self._send(200, open(os.path.join(HERE, "project.json"), "rb").read())
             except Exception as e: return self._send(500, json.dumps({"error": str(e)}))
+        if u.path == "/api/raci":   # agent → loại việc được nhận (orchestrator/raci.yaml)
+            out = {}
+            for l in open(os.path.join(ROOT, "orchestrator", "raci.yaml"), encoding="utf-8"):
+                m = re.match(r"^([a-z-]+):\s*\[(.*)\]", l)
+                if m: out[m.group(1)] = [x.strip() for x in m.group(2).split(",") if x.strip()]
+            return self._send(200, json.dumps(out))
+        if u.path == "/api/ticket":
+            try: return self._send(200, json.dumps(T.get((parse_qs(u.query).get("id") or [""])[0]), ensure_ascii=False, default=str))
+            except Exception as e: return self._send(404, json.dumps({"error": str(e).strip("'")}, ensure_ascii=False))
         if u.path == "/api/snapshot":
             return self._send(200, json.dumps(snapshot(), ensure_ascii=False, default=str))
         if u.path == "/api/live":
@@ -228,6 +304,6 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, '{"error":"not found"}')
 
 if __name__ == "__main__":
-    for f in (poll_zoho, poll_gh, ticker): threading.Thread(target=f, daemon=True).start()
+    for f in (poll_tickets, poll_gh, ticker, backup_daily): threading.Thread(target=f, daemon=True).start()
     print(f"Dashboard Efitco: http://localhost:{PORT}  (Ctrl+C để dừng)")
     ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()

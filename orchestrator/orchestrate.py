@@ -129,7 +129,7 @@ def run_agent(t):
             link = f"branch {branch}"
             if rec.get("pushed") and agent in ("dev-fe", "dev-be", "devops"):
                 pr = subprocess.run(["gh", "pr", "create", "-B", "develop", "-H", branch, "-t", f"{key}: {t['title'][:200]}",
-                                     "-b", f"Ticket {key} (Zoho {tid}). Agent {rec['agent_version']}, {rec['num_turns']} turns, ~{rec['cost_usd']} USD.\n\n{rec['result'][:3000]}"],
+                                     "-b", f"Ticket {key}. Agent {rec['agent_version']}, {rec['num_turns']} turns, ~{rec['cost_usd']} USD.\n\n{rec['result'][:3000]}"],
                                     cwd=THEME, capture_output=True, text=True, env=AGENT_GH_ENV)
                 if pr.returncode == 0: link = pr.stdout.strip().splitlines()[-1]; rec["pr"] = link
                 else: print(f"tạo PR lỗi: {pr.stderr[-300:]}")

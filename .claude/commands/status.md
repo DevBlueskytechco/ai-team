@@ -1,5 +1,5 @@
 ---
-description: Bảng trạng thái sprint Efitco — ticket Zoho, PR mở, CI develop
+description: Bảng trạng thái sprint Efitco — ticket nội bộ, PR mở, CI develop
 allowed-tools: Bash(source ops/env.sh*), Bash(python3 ops/status.py*), Bash(ops/preflight.sh*)
 ---
 Chạy `source ops/env.sh && python3 ops/status.py` rồi `ops/preflight.sh`.

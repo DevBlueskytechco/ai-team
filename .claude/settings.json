@@ -23,7 +23,10 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(shopify theme check*)",
-      "Bash(ops/dashboard.sh*)"
+      "Bash(ops/dashboard.sh*)",
+      "Bash(python3 ops/ticket_migrate_zoho.py*)",
+      "Bash(python3 ops/ticket.py backup*)",
+      "Bash(python3 ops/ticket.py export*)"
     ],
     "ask": [
       "Bash(ops/merge_pr.sh*)",
@@ -33,7 +36,10 @@
       "Bash(python3 orchestrator/review.py*)",
       "Bash(git push*)",
       "Bash(gh pr merge*)",
-      "Bash(gh pr review*)"
+      "Bash(gh pr review*)",
+      "Bash(python3 ops/ticket.py reopen*)",
+      "Bash(python3 ops/ticket.py label*)",
+      "Bash(python3 ops/ticket.py init*)"
     ],
     "deny": [
       "Bash(git push --force*)",

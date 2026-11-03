@@ -228,10 +228,16 @@
      "Sofia Sans Condensed có trong thư viện (CTO kiểm 27/10)"
     ],
     [
+     "Ticket",
+     "Ticket nội bộ (dashboard)",
+     "http://localhost:8787/#/t-list",
+     "Thay Zoho từ 03/11/2026. Dữ liệu ai-team/data/tickets.db, sao lưu data/backup/ mỗi ngày"
+    ],
+    [
      "Zoho",
-     "Zoho Projects — project Efitco Shopify Theme",
+     "Zoho Projects — bản lưu trữ (trước 03/11/2026)",
      "https://projects.zoho.com",
-     "Portal ID 943715743, Project ID 2727475000000112892, DC com. Điền link trực tiếp vào cột Ghi chú khi mở project trên trình duyệt"
+     "Chỉ đọc, không ghi nữa: ticket đã chuyển sang ticket nội bộ (dashboard menu Ticket, ai-team/data/tickets.db). Portal 943715743, Project 2727475000000112892"
     ],
     [
      "Figma",
@@ -291,7 +297,7 @@
    "rows": [
     [
      "ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET / ZOHO_REFRESH_TOKEN",
-     "Orchestrator đọc/ghi ticket Zoho",
+     "Chỉ dùng khi chuyển dữ liệu từ Zoho (ops/ticket_migrate_zoho.py) hoặc quay lại Zoho",
      "ai-team/.env",
      "CTO",
      "Scope ZohoProjects.tasks.ALL, projects.READ, portals.READ"
@@ -332,11 +338,11 @@
      "Token hạn 90 ngày từ 22/10 → gia hạn trước 20/01/2027. Token đã lộ trong chat: nên thu hồi, tạo lại"
     ],
     [
-     "TICKET_BACKEND",
-     "Chọn backend ticket",
-     "ai-team/.env",
+     "ticket_backend (orchestrator/config.yaml)",
+     "Chọn backend ticket cho Orchestrator, agent, ops/, dashboard",
+     "orchestrator/config.yaml (có commit)",
      "CTO",
-     "zoho"
+     "local (từ 03/11/2026). TICKET_BACKEND trong .env không còn tác dụng"
     ],
     [
      "Tài khoản Claude (gói Max)",
@@ -641,6 +647,11 @@
      "03/11/2026",
      "Dashboard vận hành local bỏ chi phí, chỉ theo dõi vận hành và kết quả",
      "ai-team/ops/dashboard"
+    ],
+    [
+     "03/11/2026",
+     "Bỏ phụ thuộc API Zoho: ticket chạy nội bộ (SQLite ai-team/data/tickets.db), quản lý trên dashboard menu Ticket; Zoho giữ làm bản lưu trữ chỉ đọc",
+     "orchestrator/config.yaml ticket_backend, mcp/ticket_local.py"
     ]
    ],
    "note": ""
@@ -661,7 +672,7 @@
     ],
     [
      "/status",
-     "Ticket Zoho, PR mở, CI develop, preflight",
+     "Ticket đang mở, PR mở, CI develop, preflight",
      "Bắt đầu mỗi phiên"
     ],
     [
@@ -693,6 +704,11 @@
      "/dashboard",
      "Mở dashboard vận hành http://localhost:8787",
      "Hoặc chạy ops/dashboard.sh ở terminal riêng"
+    ],
+    [
+     "python3 ops/ticket.py show|close|reopen|label|comment|backup|export",
+     "Thao tác ticket nội bộ từ terminal",
+     "Giao diện: dashboard menu Ticket"
     ],
     [
      "Ngưỡng Lighthouse",
@@ -729,8 +745,8 @@
      "1",
      "Giao việc",
      "CTO, Tech Lead agent (task_split)",
-     "orchestrator/new_ticket.py, ticket chia task",
-     "Ticket ai-draft trên Zoho: agent, task_type, side, point, blocked_by",
+     "Dashboard menu Ticket › Tạo ticket, orchestrator/new_ticket.py, Tech Lead task_split",
+     "Ticket ai-draft trong ticket nội bộ: agent, task_type, side, point, blocked_by",
      "task_type đúng raci.yaml; task FE đi trước BE"
     ],
     [
@@ -794,7 +810,7 @@
      "Duyệt và đóng",
      "CTO",
      "/merge-pr <số> <nhãn> <scores> \"<lý do>\"",
-     "Approve, squash merge, chấm điểm (review.py), đóng ticket Zoho, kéo develop",
+     "Approve, squash merge, chấm điểm (review.py), đóng ticket, kéo develop",
      "CTO gõ lệnh = đồng ý"
     ],
     [
@@ -890,6 +906,10 @@
     [
      "Store dev đầy theme",
      "Workflow Preview cleanup xoá preview ai-* không còn nhánh; preview tự xoá bản cũ khi ≥ 16 theme"
+    ],
+    [
+     "Mất hoặc hỏng data/tickets.db",
+     "Chép bản gần nhất trong data/backup/tickets-YYYY-MM-DD.db về data/tickets.db (dashboard tự sao lưu mỗi ngày)"
     ]
    ]
   },

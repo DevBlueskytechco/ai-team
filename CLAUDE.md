@@ -11,6 +11,12 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - `/apply-patch <file> <theme|aiteam|pr:n> "<tiêu đề>"` — áp patch từ Claude chat.
 - `/sprint [n]` — chạy liên tiếp tối đa n ticket, dừng ở mỗi PR chờ duyệt.
 - `/dashboard` — mở dashboard web local http://localhost:8787 (hoặc chạy `ops/dashboard.sh` ở terminal riêng).
+- `/ticket-migrate` — chuyển ticket từ Zoho sang ticket nội bộ (1 lần).
+
+## Ticket
+- Ticket nội bộ: `ai-team/data/tickets.db` (SQLite, không commit), chọn bằng `ticket_backend: local` trong orchestrator/config.yaml. Zoho chỉ còn là bản lưu trữ.
+- Thao tác: `python3 ops/ticket.py show|close|reopen|label|comment|children|backup|export`; CTO dùng dashboard menu Ticket.
+- Không sửa trực tiếp file .db bằng sqlite3; luôn qua ops/ticket.py hoặc mcp/ticket_local.py để có lịch sử.
 
 ## Quy tắc cứng
 - Mọi thao tác qua script trong `ops/`. Không tự viết lệnh gh/git thay script khi script đã có.
