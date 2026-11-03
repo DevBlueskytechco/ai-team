@@ -3,3 +3,5 @@ evals/raw/_runs.jsonl
 __pycache__/
 .env
 ops/__pycache__/
+evals/raw/live/
+evals/raw/_live.json

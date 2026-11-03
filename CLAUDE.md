@@ -10,6 +10,7 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - `/merge-pr <n> <nhãn> <scores> "<lý do>"` — CTO đồng ý merge.
 - `/apply-patch <file> <theme|aiteam|pr:n> "<tiêu đề>"` — áp patch từ Claude chat.
 - `/sprint [n]` — chạy liên tiếp tối đa n ticket, dừng ở mỗi PR chờ duyệt.
+- `/dashboard` — mở dashboard web local http://localhost:8787 (hoặc chạy `ops/dashboard.sh` ở terminal riêng).
 
 ## Quy tắc cứng
 - Mọi thao tác qua script trong `ops/`. Không tự viết lệnh gh/git thay script khi script đã có.

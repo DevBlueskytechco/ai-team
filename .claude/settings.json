@@ -1,6 +1,8 @@
 {
   "permissions": {
-    "additionalDirectories": ["../theme-efitco"],
+    "additionalDirectories": [
+      "../theme-efitco"
+    ],
     "allow": [
       "Bash(ops/preflight.sh*)",
       "Bash(ops/status.py*)",
@@ -20,7 +22,8 @@
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
-      "Bash(shopify theme check*)"
+      "Bash(shopify theme check*)",
+      "Bash(ops/dashboard.sh*)"
     ],
     "ask": [
       "Bash(ops/merge_pr.sh*)",
