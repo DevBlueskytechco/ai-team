@@ -259,6 +259,32 @@ def export():
     finally: c.close()
 
 
+DAYS = ("Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật")
+
+def get_roles():
+    """Role owner và ngày duyệt cố định CTO đã sửa trên dashboard: {vai trò: {owner, day, by, at}}."""
+    c = connect()
+    try:
+        r = c.execute("SELECT v FROM meta WHERE k='roles'").fetchone()
+        return json.loads(r[0]) if r else {}
+    finally: c.close()
+
+def set_roles(changes, by=None):
+    """changes: [{role, owner, day}]. Ghi đè từng vai, giữ 200 thay đổi gần nhất ở meta roles_log."""
+    with _tx() as c:
+        cur = json.loads((c.execute("SELECT v FROM meta WHERE k='roles'").fetchone() or ["{}"])[0])
+        log = json.loads((c.execute("SELECT v FROM meta WHERE k='roles_log'").fetchone() or ["[]"])[0])
+        for ch in changes or []:
+            role, owner, day = str(ch.get("role") or "").strip(), str(ch.get("owner") or "").strip(), str(ch.get("day") or "").strip()
+            if not role or len(role) > 60: raise ValueError("vai trò không hợp lệ")
+            if len(owner) > 60: raise ValueError("role owner tối đa 60 ký tự")
+            if day and day not in DAYS: raise ValueError(f"ngày duyệt phải là một trong {', '.join(DAYS)}")
+            new = {"owner": owner, "day": day, "by": by or actor(), "at": now()}
+            log.append({"role": role, "old": cur.get(role), "new": new}); cur[role] = new
+        c.execute("INSERT OR REPLACE INTO meta(k,v) VALUES('roles',?)", (json.dumps(cur, ensure_ascii=False),))
+        c.execute("INSERT OR REPLACE INTO meta(k,v) VALUES('roles_log',?)", (json.dumps(log[-200:], ensure_ascii=False),))
+    return get_roles()
+
 def version():
     """Dấu thay đổi rẻ để dashboard biết khi nào cần đọc lại."""
     c = connect()
