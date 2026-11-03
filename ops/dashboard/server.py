@@ -200,13 +200,33 @@ def live_events(key, limit=60):
             ev.append({"kind": "done", "text": f"xong · {e.get('num_turns')} turn · {round((e.get('duration_ms') or 0) / 60000, 1)} phút · lỗi={e.get('is_error')}"})
     return ev[-limit:]
 
-def now(): return datetime.datetime.now().isoformat(timespec="seconds")
+def now(): return datetime.datetime.now().astimezone().isoformat(timespec="seconds")   # kèm múi giờ để trình duyệt tính "x phút trước" đúng
+
+def evals_count():
+    """Số bản ghi eval (evals/raw/<agent>/<ticket>.json, không tính .run.json) — mục tiêu charter ≥ 300."""
+    n = 0
+    for a in os.listdir(RAW) if os.path.isdir(RAW) else []:
+        d = os.path.join(RAW, a)
+        if os.path.isdir(d) and a != "live": n += sum(1 for f in os.listdir(d) if f.endswith(".json") and not f.endswith(".run.json"))
+    return n
+
+def read_rubrics():
+    """rubrics/<agent>.yaml → {agent: {pass_threshold, criteria: [{id, text}]}} (đọc bằng regex, không cần pyyaml)."""
+    out = {}
+    d = os.path.join(ROOT, "rubrics")
+    for f in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        if not f.endswith(".yaml"): continue
+        txt = open(os.path.join(d, f), encoding="utf-8").read()
+        m = re.search(r"^pass_threshold:\s*([0-9.]+)", txt, re.M)
+        crit = [{"id": i, "text": t} for i, t in re.findall(r'^\s*-\s*id:\s*(\S+)\s*\n\s*text:\s*"?(.*?)"?\s*$', txt, re.M)]
+        out[f[:-5]] = {"pass_threshold": float(m.group(1)) if m else 0.8, "criteria": crit}
+    return out
 
 def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
-    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now()})
+    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count()})
     return s
 
 def ticker():
@@ -265,9 +285,18 @@ class H(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send(200, open(os.path.join(HERE, "index.html"), "rb").read(), "text/html; charset=utf-8")
+        if u.path.startswith("/static/"):   # logo, favicon NextSky
+            name = u.path[len("/static/"):]
+            fp = os.path.join(HERE, "static", name)
+            if re.fullmatch(r"[a-z0-9][a-z0-9._-]*\.(png|svg|ico)", name) and os.path.isfile(fp):
+                ctype = {"png": "image/png", "svg": "image/svg+xml", "ico": "image/x-icon"}[name.rsplit(".", 1)[1]]
+                return self._send(200, open(fp, "rb").read(), ctype)
+            return self._send(404, '{"error":"not found"}')
         if u.path == "/api/project":   # trang thông tin (chuyển từ Efitco-thong-tin-du-an.xlsx), đọc lại mỗi lần để sửa file là thấy
             try: return self._send(200, open(os.path.join(HERE, "project.json"), "rb").read())
             except Exception as e: return self._send(500, json.dumps({"error": str(e)}))
+        if u.path == "/api/rubrics":
+            return self._send(200, json.dumps(read_rubrics(), ensure_ascii=False))
         if u.path == "/api/raci":   # agent → loại việc được nhận (orchestrator/raci.yaml)
             out = {}
             for l in open(os.path.join(ROOT, "orchestrator", "raci.yaml"), encoding="utf-8"):
