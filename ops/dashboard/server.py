@@ -7,8 +7,9 @@ Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - Ticket nội bộ (mcp/ticket_local, data/tickets.db)  đọc lại khi dữ liệu đổi (kiểm dấu mỗi 2s)
   - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ từ localhost, cần header X-Efitco
   - gh CLI (tài khoản CTO)                              PR mở + CI, CI develop                                   — mỗi 60s
+  - Kiểm môi trường (biến .env có/không, claude, shopify CLI, gh, theme sạch)  trang Việc chờ tôi           — mỗi 10 phút
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
-import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re
+import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re, shutil
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -269,11 +270,60 @@ def roles_merged():
                     "note": note, "default_owner": owner, "default_day": day, "edited_by": o.get("by"), "edited_at": o.get("at")})
     return {"rows": out, "days": list(L.DAYS)}
 
+# ---------- kiểm môi trường cho trang "Việc chờ tôi" (chỉ đọc; không in giá trị bí mật, chỉ có/không) ----------
+SETUP = {"items": [], "at": None}
+SETUP_LOCK = threading.Lock()
+def setup_checks():
+    out = []
+    def add(ok, text, fix="", level="warn"): out.append({"ok": bool(ok), "text": text, "fix": fix, "level": level})
+    for v in ("AGENT_GH_TOKEN", "SHOPIFY_CLI_THEME_TOKEN", "STORE_PASSWORD", "FIGMA_TOKEN"):
+        add(bool(os.environ.get(v)), f"{v} {'có' if os.environ.get(v) else 'chưa có'} trong môi trường",
+            "Thêm vào ai-team/.env rồi mở lại dashboard bằng ops/dashboard.sh (nạp ops/env.sh)", "bad")
+    add(bool(shutil.which("claude")), "Claude Code CLI " + ("có" if shutil.which("claude") else "chưa cài"), "Cài Claude Code để Orchestrator chạy agent", "bad")
+    try:
+        ver = (re.search(r"\d+\.\d+\.\d+", sh("shopify", "version", timeout=30)) or [None])[0]
+        major = (ver or "0").split(".")[0]
+        if major != "4": add(False, f"Shopify CLI {ver or '?'} — cần 4.x như CI", "npm i -g @shopify/cli@4.9.5", "bad")
+        else: add(ver == "4.9.5", f"Shopify CLI {ver}" + ("" if ver == "4.9.5" else " — CI ghim 4.9.5"), "npm i -g @shopify/cli@4.9.5")
+    except Exception as e:
+        add(False, "Không chạy được shopify version", "Cài Shopify CLI 4.9.5: npm i -g @shopify/cli@4.9.5", "bad")
+    try:
+        me = sh("gh", "api", "user", "--jq", ".login", timeout=20).strip()
+        add(me != "nextsky-ai-agent", f"gh đăng nhập: {me}" + (" — phải là tài khoản CTO" if me == "nextsky-ai-agent" else ""), "unset GH_TOKEN; gh auth login bằng tài khoản CTO", "bad")
+    except Exception:
+        add(False, "gh chưa đăng nhập", "gh auth login (tài khoản CTO)", "bad")
+    if read_live() is None:   # agent đang chạy thì theme đang ở nhánh feature và có thay đổi — bình thường
+        try:
+            dirty = [l for l in sh("git", "-C", THEME, "status", "--porcelain", "--untracked-files=normal", timeout=15).splitlines() if l.strip()]
+            add(not dirty, "theme-efitco sạch" if not dirty else f"theme-efitco có {len(dirty)} file thay đổi chưa commit — Orchestrator sẽ bỏ qua ticket",
+                "git -C ../theme-efitco status rồi commit/stash; hoặc chạy ops/preflight.sh", "bad")
+        except Exception:
+            add(False, "Không đọc được git theme-efitco", "Kiểm tra thư mục ../theme-efitco", "bad")
+    try:
+        import ticket_local as L
+        b = os.path.join(os.path.dirname(L.DB), "backup")
+        last = max((f for f in os.listdir(b) if f.startswith("tickets-")), default="") if os.path.isdir(b) else ""
+        add(bool(last), f"Sao lưu ticket gần nhất: {last[8:18] or 'chưa có'}", "python3 ops/ticket.py backup")
+    except Exception:
+        pass
+    with SETUP_LOCK: SETUP["items"] = out; SETUP["at"] = now()
+    VERSION["n"] += 1
+    return out
+
+def poll_setup():
+    while True:
+        try: setup_checks()
+        except Exception as e:
+            with LOCK: STATE["errors"]["setup"] = str(e)[:200]
+        time.sleep(600)
+
 def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
-    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks()})
+    with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
+    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+              "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2)})
     return s
 
 def ticker():
@@ -315,8 +365,10 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/roles/update",) and not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
+        if u.path == "/api/setup/recheck":
+            return self._send(200, json.dumps({"items": setup_checks(), "at": SETUP["at"]}, ensure_ascii=False))
         if u.path == "/api/roles/update":
             try:
                 import ticket_local as L
@@ -394,6 +446,6 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, '{"error":"not found"}')
 
 if __name__ == "__main__":
-    for f in (poll_tickets, poll_gh, ticker, backup_daily): threading.Thread(target=f, daemon=True).start()
+    for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup): threading.Thread(target=f, daemon=True).start()
     print(f"Dashboard Efitco: http://localhost:{PORT}  (Ctrl+C để dừng)")
     ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()
