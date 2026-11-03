@@ -18,13 +18,23 @@ def serve(name, tools, handlers):
         elif i is not None:
             send({"jsonrpc":"2.0","id":i,"error":{"code":-32601,"message":"not found"}})
 
-# Ticket MCP. Backend "file": tickets.json cạnh repo ai-team. Đổi sang Zoho/Linear: viết adapter cùng 5 hàm.
+# Ticket MCP. Backend: local (data/tickets.db, mặc định từ 03/11/2026) | zoho | file (tickets.json, thử nghiệm). Adapter cùng giao diện.
 import os, datetime
 _envp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
 if os.path.exists(_envp):
     for _l in open(_envp):
         if "=" in _l and not _l.strip().startswith("#"): k, v = _l.strip().split("=", 1); os.environ.setdefault(k, v)
-BACKEND = os.environ.get("TICKET_BACKEND", "file")
+def _backend():
+    """Chọn backend: orchestrator/config.yaml `ticket_backend` (quyết định chung, có commit) > biến TICKET_BACKEND > file.
+    TICKET_BACKEND_OVERRIDE dùng khi thử nghiệm (vd file)."""
+    if os.environ.get("TICKET_BACKEND_OVERRIDE"): return os.environ["TICKET_BACKEND_OVERRIDE"]
+    try:
+        import re as _re
+        m = _re.search(r"^ticket_backend:\s*([a-z]+)", open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "orchestrator", "config.yaml"), encoding="utf-8").read(), _re.M)
+        if m: return m.group(1)
+    except OSError: pass
+    return os.environ.get("TICKET_BACKEND", "file")
+BACKEND = _backend()
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tickets.json")
 def _load():
     if not os.path.exists(DB): return {"tickets": []}
@@ -70,8 +80,10 @@ def set_task_type(id, task_type):
         if t["id"] == id: t["task_type"] = task_type
     _save(d); return get(id)
 
-# --- chọn backend: TICKET_BACKEND=file (mặc định) | zoho
-if BACKEND == "zoho":
+# --- chọn backend: local (ticket nội bộ SQLite, từ 03/11/2026) | zoho (lưu trữ) | file (thử nghiệm)
+if BACKEND == "local":
+    from ticket_local import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
+elif BACKEND == "zoho":
     from ticket_zoho import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
 TOOLS = [
  {"name":"get","description":"Đọc một ticket đầy đủ","inputSchema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"]}},

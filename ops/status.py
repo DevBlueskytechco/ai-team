@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bảng trạng thái sprint: ticket Zoho đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất.
+"""Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất.
 Chạy: source ops/env.sh && python3 ops/status.py"""
 import os, sys, json, subprocess
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,7 +13,7 @@ def sh(*a):
 rows = [t for t in T.all() if (t.get("status") or "").lower() != "closed"]
 key = lambda t: int("".join(c for c in (t.get("key") or "0").split("-T")[-1] if c.isdigit()) or 0)
 ids = {t["id"]: t for t in T.all()}
-print("== Ticket đang mở (Zoho)")
+print(f"== Ticket đang mở ({T.BACKEND})")
 for t in sorted(rows, key=key):
     labels = ",".join(t.get("labels") or []) or "-"
     bl = [ids.get(b, {}).get("key", b) for b in (t.get("blocked_by") or [])

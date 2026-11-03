@@ -5,3 +5,4 @@ __pycache__/
 ops/__pycache__/
 evals/raw/live/
 evals/raw/_live.json
+data/

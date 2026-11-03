@@ -6,5 +6,6 @@ max_turns_default: 90   # dev-fe ES1-T14/T15 chạm 60 lượt (30/10)
 budget_usd_month: 2000      # quyết định CTO 22/10/2026; chỉ CTO (Tony Pham) được nới, sửa số này + ghi lý do trong commit
 budget_warn_pct: 80
 review_overdue_days: 2
+ticket_backend: local   # ticket nội bộ ai-team/data/tickets.db (CTO 03/11/2026: bỏ phụ thuộc API Zoho). Quay lại Zoho: đổi thành zoho
 model_override: {}   # ví dụ qa: sonnet để chạy regression rẻ
 claude_version: 2.1.306   # ghim 22/10; chạy bằng gói Max của CTO ở pha 0–1

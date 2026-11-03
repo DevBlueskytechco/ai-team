@@ -6,7 +6,8 @@ evals/raw/    bản ghi eval sinh sau mỗi lần chấm (schema: evals/schema/r
 evals/golden/ mẫu chuẩn role owner nộp tuần 2
 evals/sets/   bộ eval chốt tuần 13
 checks/       script tự kiểm tra (ac_coverage, vague_words, traceability)
-mcp/          MCP server: ticket (file backend, đổi sang Zoho/Linear bằng adapter), store-dev, figma
+mcp/          MCP server: ticket (ticket_local SQLite mặc định; adapter Zoho, file), store-dev, figma
+data/         tickets.db + backup/ (ticket nội bộ, không commit)
 orchestrator/ orchestrate.py: phát ticket ai-draft → claude -p --agent → ghi run → ai-review; raci.yaml
 db/           schema Postgres + query dashboard
 docs/         runbook vận hành agent
