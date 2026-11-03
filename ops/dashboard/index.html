@@ -9,7 +9,7 @@
   color-scheme: light;
   --bg:#f4f5f4; --surface:#fcfcfb; --surface-2:#f0f1ef; --line:#dcdedb;
   --text:#0b0b0b; --text-2:#52514e; --muted:#77766f;
-  --accent:#2a78d6; --series-1:#2a78d6;
+  --accent:#2a78d6; --series-1:#2a78d6; --series-2:#eb6834;
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
   --chip:#e9ecf3;
   --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -19,13 +19,13 @@
   :root:where(:not([data-theme="light"])){
     color-scheme: dark;
     --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
-    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --chip:#25303f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --series-2:#d95926; --chip:#25303f;
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
   --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
-  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --chip:#25303f;
+  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --series-2:#d95926; --chip:#25303f;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--font)}
@@ -42,7 +42,7 @@ section{background:var(--surface);border:1px solid var(--line);border-radius:10p
 section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
 @media (max-width:1100px){.span-8,.span-6,.span-4{grid-column:span 12}}
-.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px 16px 32px}header{padding:10px 16px}}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
@@ -84,6 +84,16 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
 .errbox{grid-column:span 12;border:1px solid var(--critical);color:var(--text);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;display:none}
 .tablewrap{overflow-x:auto}
+.sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.sec-head h2{margin:0}
+.rep{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:1100px){.rep{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:600px){.rep{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rep .t{background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.rep .l{font-size:12px;color:var(--text-2)} .rep .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.rep .s{font-size:12px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text-2);margin:0 0 6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 </style>
 </head>
 <body>
@@ -113,9 +123,25 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
     <div id="stories"></div>
   </section>
 
-  <section class="span-12" aria-labelledby="h-board">
-    <h2 id="h-board">Bảng ticket</h2>
-    <div class="board" id="board"></div>
+  <section class="span-12" aria-labelledby="h-report">
+    <div class="sec-head">
+      <h2 id="h-report">Kết quả vận hành</h2>
+      <label class="fresh">Kỳ <select id="period"><option value="7">7 ngày</option><option value="14">14 ngày</option><option value="30">30 ngày</option></select></label>
+    </div>
+    <div class="rep" id="report"></div>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>Lượt agent chạy</span><span><i style="background:var(--series-2)"></i>PR đã merge</span></div>
+    <div class="chart" id="tpChart"><svg role="img" aria-label="Lượt agent chạy và PR đã merge theo ngày"></svg><div class="tip" id="tip"></div></div>
+    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table><thead><tr><th>Ngày</th><th class="n">Lượt chạy</th><th class="n">Lượt lỗi</th><th class="n">PR merge</th><th class="n">Ticket chấm</th></tr></thead><tbody id="tpTable"></tbody></table></div></details>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-agents">
+    <h2 id="h-agents">Hiệu quả theo agent</h2>
+    <div class="tablewrap"><table><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Lỗi</th><th class="n">TB thời gian</th><th class="n">TB turn</th><th class="n">Đạt</th><th class="n">Sửa</th><th class="n">Loại</th><th class="n">Tỉ lệ đạt</th></tr></thead><tbody id="agents"></tbody></table></div>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-runs">
+    <h2 id="h-runs">Lượt chạy gần đây</h2>
+    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Turn</th><th class="n">Thời gian</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
   </section>
 
   <section class="span-6" aria-labelledby="h-pr">
@@ -125,20 +151,14 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
     <div class="tablewrap"><table><tbody id="ci"></tbody></table></div>
   </section>
 
-  <section class="span-6" aria-labelledby="h-cost">
-    <h2 id="h-cost">Chi phí ước tính theo ngày (USD, 14 ngày)</h2>
-    <div class="chart" id="costChart"><svg role="img" aria-label="Biểu đồ chi phí theo ngày"></svg><div class="tip" id="tip"></div></div>
-    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table><tbody id="costTable"></tbody></table></div></details>
+  <section class="span-6" aria-labelledby="h-merged">
+    <h2 id="h-merged">PR đã merge gần đây</h2>
+    <div class="tablewrap"><table><thead><tr><th>PR</th><th>Ticket</th><th>Merge lúc</th><th class="n">Mở → merge</th></tr></thead><tbody id="merged"></tbody></table></div>
   </section>
 
-  <section class="span-6" aria-labelledby="h-agents">
-    <h2 id="h-agents">Hiệu quả theo agent</h2>
-    <div class="tablewrap"><table><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">TB lượt</th><th class="n">TB USD</th><th class="n">Lỗi</th><th class="n">Đạt</th><th class="n">Sửa</th><th class="n">Loại</th></tr></thead><tbody id="agents"></tbody></table></div>
-  </section>
-
-  <section class="span-6" aria-labelledby="h-runs">
-    <h2 id="h-runs">Lượt chạy gần đây</h2>
-    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Lượt</th><th class="n">USD</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
+  <section class="span-12" aria-labelledby="h-board">
+    <h2 id="h-board">Bảng ticket</h2>
+    <div class="board" id="board"></div>
   </section>
 </main>
 
@@ -161,6 +181,8 @@ let DATA = null, liveKey = null;
     if (DATA) render(DATA);
   };
   $("agentFilter").onchange = () => DATA && render(DATA);
+  try { const p = localStorage.getItem("efitco-period"); if (p) $("period").value = p; } catch (e) {}
+  $("period").onchange = () => { try { localStorage.setItem("efitco-period", $("period").value); } catch (e) {} if (DATA) render(DATA); };
 })();
 
 function ago(iso) {
@@ -213,22 +235,19 @@ function render(d) {
   T.forEach((t) => { const g = classify(t); if (groups[g]) groups[g].push(t); });
 
   // KPIs
-  const live = d.live, b = d.budget, pct = b.limit ? (b.spent / b.limit) * 100 : 0;
+  const live = d.live;
   const ci = (d.ci_develop || [])[0];
   const ciKind = !ci ? "none" : ci.status !== "completed" ? "warning" : ci.conclusion === "success" ? "good" : "critical";
   const ciLbl = !ci ? "chưa có" : ci.status !== "completed" ? "đang chạy" : ci.conclusion === "success" ? "đạt" : "lỗi";
-  const budgetKind = pct >= 100 ? "critical" : pct >= b.warn_pct ? "warning" : "good";
   const k = [
     ["Đang chạy", live && live.alive ? live.ticket : "—", live && live.alive ? `${live.agent} · ${dur(live.elapsed_s)}` : "không có agent nào"],
     ["Sẵn sàng chạy", groups.ready.length, `${groups.blocked.length} đang bị chặn`],
     ["Chờ CTO", groups.review.length + groups.question.length, `${groups.review.length} chấm · ${groups.question.length} câu hỏi`],
     ["PR mở", d.prs.length, d.prs.filter((p) => Object.values(p.checks).some((v) => ["failure", "error"].includes(v))).length + " PR có CI lỗi"],
     ["CI develop", "", ""],
-    ["Chi phí tháng", `$${b.spent.toFixed(0)}`, ""],
   ];
   $("kpis").innerHTML = k.map(([l, v, s], i) => {
     if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle : "")}">${ci ? `${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
-    if (i === 5) return `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${status(budgetKind, `${pct.toFixed(1)}% của $${b.limit}`)}</div><div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`;
   }).join("");
 
@@ -279,49 +298,101 @@ function render(d) {
     return `<tr><td>${status(kind, lbl)}</td><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.workflowName)}</a> · ${esc(r.displayTitle)}</td><td class="n fresh">${ago(r.createdAt)}</td></tr>`;
   }).join("") || '<tr><td class="empty">Chưa lấy được CI.</td></tr>';
 
-  // Runs
+  // Lượt chạy gần đây
   const R = d.runs.filter((r) => !f || r.agent === f);
   $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
     <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${esc(r.agent)}</td>
-    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.cost_usd != null ? Number(r.cost_usd).toFixed(2) : "—"}</td>
+    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td>
     <td>${r.is_error ? status("critical", "lỗi") : status("good", "xong")}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Chưa có lượt chạy.</td></tr>';
 
-  // Agent stats
+  // Hiệu quả theo agent
   const A = {};
-  d.runs.forEach((r) => { const a = (A[r.agent] ||= { n: 0, turns: 0, cost: 0, err: 0, dat: 0, sua: 0, loai: 0 }); a.n++; a.turns += r.num_turns || 0; a.cost += Number(r.cost_usd || 0); if (r.is_error) a.err++; });
+  d.runs.forEach((r) => { const a = (A[r.agent] ||= { n: 0, turns: 0, err: 0, dsum: 0, dn: 0, dat: 0, sua: 0, loai: 0 });
+    a.n++; a.turns += r.num_turns || 0; if (r.is_error) a.err++; if (r.duration_s != null) { a.dsum += r.duration_s; a.dn++; } });
   d.tickets.forEach((t) => { if (!t.agent || !A[t.agent]) return; const L = t.labels || [];
     if (L.includes("ai-dat")) A[t.agent].dat++; else if (L.includes("ai-sua")) A[t.agent].sua++; else if (L.includes("ai-loai")) A[t.agent].loai++; });
-  $("agents").innerHTML = Object.entries(A).sort().map(([a, s]) => `<tr><td>${esc(a)}</td><td class="n">${s.n}</td><td class="n">${(s.turns / s.n).toFixed(0)}</td>
-    <td class="n">${(s.cost / s.n).toFixed(2)}</td><td class="n">${s.err}</td><td class="n">${s.dat}</td><td class="n">${s.sua}</td><td class="n">${s.loai}</td></tr>`).join("") ||
-    '<tr><td colspan="8" class="empty">Chưa có dữ liệu.</td></tr>';
+  $("agents").innerHTML = Object.entries(A).sort().map(([a, s]) => { const sc = s.dat + s.sua + s.loai;
+    return `<tr><td>${esc(a)}</td><td class="n">${s.n}</td><td class="n">${s.err}</td><td class="n">${s.dn ? dur(Math.round(s.dsum / s.dn)) : "—"}</td>
+    <td class="n">${(s.turns / s.n).toFixed(0)}</td><td class="n">${s.dat}</td><td class="n">${s.sua}</td><td class="n">${s.loai}</td>
+    <td class="n">${sc ? Math.round((s.dat / sc) * 100) + "%" : "—"}</td></tr>`; }).join("") ||
+    '<tr><td colspan="9" class="empty">Chưa có dữ liệu.</td></tr>';
 
-  drawCost(d.runs);
+  // PR đã merge gần đây
+  const keyOf = (br) => String(br || "").replace("feature/ai-", "");
+  const agentOfKey = Object.fromEntries(d.tickets.map((t) => [t.key, t.agent]));
+  const M = (d.merged || []).filter((p) => !f || agentOfKey[keyOf(p.branch)] === f);
+  $("merged").innerHTML = M.slice(0, 10).map((p) => `<tr><td><a href="${esc(p.url)}" target="_blank" rel="noopener">#${p.number}</a></td>
+    <td title="${esc(p.title)}">${esc(keyOf(p.branch))}</td><td class="fresh">${esc((p.mergedAt || "").slice(5, 16).replace("T", " "))}</td>
+    <td class="n">${hrs(p)}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có PR merge.</td></tr>';
+
+  report(d, f, R, M);
 }
 
-function drawCost(runs) {
-  const days = [], byDay = {};
-  for (let i = 13; i >= 0; i--) { const dt = new Date(Date.now() - i * 864e5); const k = dt.toISOString().slice(0, 10); days.push(k); byDay[k] = 0; }
-  runs.forEach((r) => { const k = (r.started_at || "").slice(0, 10); if (k in byDay) byDay[k] += Number(r.cost_usd || 0); });
-  const svg = $("costChart").querySelector("svg"), W = svg.clientWidth || 600, H = 180, pl = 34, pb = 22, pt = 8;
-  const max = Math.max(1, ...Object.values(byDay)), nice = Math.ceil(max / 5) * 5 || 5;
-  const bw = (W - pl - 8) / days.length, gap = 2;
+const hrs = (p) => { const h = (new Date(p.mergedAt) - new Date(p.createdAt)) / 36e5; return isFinite(h) ? (h < 24 ? `${h.toFixed(1)} giờ` : `${(h / 24).toFixed(1)} ngày`) : "—"; };
+const dayKey = (iso) => { if (!iso) return ""; const dt = new Date(iso); return isNaN(dt) ? String(iso).slice(0, 10) : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`; };
+
+/* Báo cáo kết quả vận hành theo kỳ: lượt chạy, PR merge, ticket chấm, tỉ lệ đạt, story point, thời gian lượt */
+function report(d, f, R, M) {
+  const n = parseInt($("period").value, 10) || 7;
+  const days = [];
+  for (let i = n - 1; i >= 0; i--) days.push(dayKey(new Date(Date.now() - i * 864e5).toISOString()));
+  const inP = (iso) => days.includes(dayKey(iso));
+  const runs = R.filter((r) => inP(r.started_at));
+  const ok = runs.filter((r) => !r.is_error).length;
+  const merged = M.filter((p) => inP(p.mergedAt));
+  const lead = merged.map((p) => (new Date(p.mergedAt) - new Date(p.createdAt)) / 36e5).filter(isFinite);
+  const T = d.tickets.filter((t) => (!f || t.agent === f) && t.review && t.review.at && days.includes(String(t.review.at).slice(0, 10)));
+  const sev = (s) => T.filter((t) => t.review.severity === s).length;
+  const dat = sev("dat"), sua = sev("sua_nhe") + sev("sua_nang"), loai = sev("loai");
+  const pts = T.filter((t) => t.review.severity === "dat").reduce((a, t) => a + (Number(t.points) || 0), 0);
+  const dd = runs.filter((r) => r.duration_s != null).map((r) => r.duration_s);
+  const tiles = [
+    ["Lượt agent chạy", runs.length, runs.length ? `${Math.round((ok / runs.length) * 100)}% thành công · ${runs.length - ok} lỗi` : "chưa có lượt"],
+    ["PR đã merge", merged.length, lead.length ? `TB mở → merge ${(lead.reduce((a, b) => a + b, 0) / lead.length).toFixed(1)} giờ` : "—"],
+    ["Ticket đã chấm", T.length, `đạt ${dat} · sửa ${sua} · loại ${loai}`],
+    ["Tỉ lệ đạt", T.length ? Math.round((dat / T.length) * 100) + "%" : "—", T.length ? `trên ${T.length} ticket đã chấm` : "chưa chấm ticket nào"],
+    ["Story point xong", pts, `${dat} ticket đạt`],
+    ["TB thời gian / lượt", dd.length ? dur(Math.round(dd.reduce((a, b) => a + b, 0) / dd.length)) : "—",
+      runs.length ? `TB ${Math.round(runs.reduce((a, r) => a + (r.num_turns || 0), 0) / runs.length)} turn` : ""],
+  ];
+  $("report").innerHTML = tiles.map(([l, v, s]) => `<div class="t"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("");
+
+  const by = Object.fromEntries(days.map((k) => [k, { runs: 0, err: 0, pr: 0, rev: 0 }]));
+  R.forEach((r) => { const k = dayKey(r.started_at); if (by[k]) { by[k].runs++; if (r.is_error) by[k].err++; } });
+  M.forEach((p) => { const k = dayKey(p.mergedAt); if (by[k]) by[k].pr++; });
+  d.tickets.forEach((t) => { if (f && t.agent !== f) return; const k = t.review && t.review.at && String(t.review.at).slice(0, 10); if (k && by[k]) by[k].rev++; });
+  drawTp(days, by);
+  $("tpTable").innerHTML = days.slice().reverse().map((k) => `<tr><td>${k}</td><td class="n">${by[k].runs}</td><td class="n">${by[k].err}</td><td class="n">${by[k].pr}</td><td class="n">${by[k].rev}</td></tr>`).join("");
+}
+
+/* Cột nhóm: lượt agent chạy (series-1) và PR đã merge (series-2) theo ngày, một trục số lượng */
+let TP = null;
+function drawTp(days, by) {
+  TP = { days, by };
+  const svg = $("tpChart").querySelector("svg"), W = svg.clientWidth || 900, H = 180, pl = 30, pb = 22, pt = 8;
+  const max = Math.max(1, ...days.map((k) => Math.max(by[k].runs, by[k].pr)));
+  const step = max <= 5 ? 1 : Math.ceil(max / 4), top = Math.ceil(max / step) * step;
+  const gw = (W - pl - 8) / days.length, bw = Math.max(2, Math.min(18, (gw - 8) / 2));
   let g = "";
-  for (let i = 0; i <= 2; i++) { const v = (nice / 2) * i, y = H - pb - ((H - pb - pt) * v) / nice;
+  for (let v = 0; v <= top; v += step) { const y = H - pb - ((H - pb - pt) * v) / top;
     g += `<line class="grid" x1="${pl}" x2="${W - 4}" y1="${y}" y2="${y}"/><text class="axis" x="${pl - 6}" y="${y + 3}" text-anchor="end">${v}</text>`; }
+  const bar = (x, v, color) => { if (!v) return ""; const h = ((H - pb - pt) * v) / top, y = H - pb - h, r = Math.min(4, h, bw / 2);
+    return `<path d="M${x},${H - pb} V${y + r} q0,-${r} ${r},-${r} H${x + bw - r} q${r},0 ${r},${r} V${H - pb} Z" fill="var(${color})"/>`; };
+  const every = days.length > 14 ? 5 : days.length > 7 ? 2 : 1;
   days.forEach((k, i) => {
-    const v = byDay[k], h = ((H - pb - pt) * v) / nice, x = pl + i * bw + gap / 2, y = H - pb - h, w = Math.max(2, bw - gap);
-    if (v > 0) g += `<path d="M${x},${H - pb} V${y + Math.min(4, h)} q0,-4 4,-4 H${x + w - 4} q4,0 4,4 V${H - pb} Z" fill="var(--series-1)"/>`;
-    g += `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pb - pt}" fill="transparent" data-k="${k}" data-v="${v.toFixed(2)}"/>`;
-    if (i % 2 === 0) g += `<text class="axis" x="${x + w / 2}" y="${H - 6}" text-anchor="middle">${k.slice(8)}/${k.slice(5, 7)}</text>`;
+    const cx = pl + i * gw + gw / 2;
+    g += bar(cx - bw - 1, by[k].runs, "--series-1") + bar(cx + 1, by[k].pr, "--series-2");
+    g += `<rect x="${pl + i * gw}" y="${pt}" width="${gw}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`;
+    if (i % every === 0 || i === days.length - 1) g += `<text class="axis" x="${cx}" y="${H - 6}" text-anchor="middle">${k.slice(8)}/${k.slice(5, 7)}</text>`;
   });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
   const tip = $("tip");
-  svg.querySelectorAll("rect[data-k]").forEach((r) => {
-    r.onmousemove = (e) => { tip.style.display = "block"; tip.textContent = `${r.dataset.k}: $${r.dataset.v}`;
-      const bx = $("costChart").getBoundingClientRect(); tip.style.left = e.clientX - bx.left + 10 + "px"; tip.style.top = e.clientY - bx.top - 28 + "px"; };
+  svg.querySelectorAll("rect[data-i]").forEach((r) => {
+    r.onmousemove = (e) => { const k = days[+r.dataset.i], v = by[k]; tip.style.display = "block";
+      tip.innerHTML = `<b>${k}</b><br>Lượt agent chạy: ${v.runs}${v.err ? ` (${v.err} lỗi)` : ""}<br>PR đã merge: ${v.pr}<br>Ticket chấm: ${v.rev}`;
+      const bx = $("tpChart").getBoundingClientRect(); tip.style.left = Math.min(e.clientX - bx.left + 10, bx.width - 170) + "px"; tip.style.top = e.clientY - bx.top - 70 + "px"; };
     r.onmouseleave = () => (tip.style.display = "none");
   });
-  $("costTable").innerHTML = days.map((k) => `<tr><td>${k}</td><td class="n">$${byDay[k].toFixed(2)}</td></tr>`).join("");
 }
 
 async function pollFeed() {
@@ -344,7 +415,7 @@ function connect() {
 connect();
 setInterval(pollFeed, 3000);
 setInterval(() => DATA && render(DATA), 1000 * 15);
-window.addEventListener("resize", () => DATA && drawCost(DATA.runs));
+window.addEventListener("resize", () => TP && drawTp(TP.days, TP.by));
 </script>
 </body>
 </html>

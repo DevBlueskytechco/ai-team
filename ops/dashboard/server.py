@@ -25,7 +25,7 @@ try:
 except Exception:
     CFG = {"budget_usd_month": 2000, "budget_warn_pct": 80}
 
-STATE = {"tickets": [], "prs": [], "ci_develop": [], "zoho_at": None, "gh_at": None, "errors": {}}
+STATE = {"tickets": [], "prs": [], "merged": [], "ci_develop": [], "zoho_at": None, "gh_at": None, "errors": {}}
 LOCK = threading.Lock()
 VERSION = {"n": 0, "hash": ""}
 
@@ -63,7 +63,11 @@ def poll_gh():
                             "created": p["createdAt"], "url": p["url"], "checks": checks})
             runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-w", "CI", "-e", "push", "-L", "5", "--json",
                                  "databaseId,status,conclusion,displayTitle,createdAt,url,workflowName,headSha,event") or "[]")
-            with LOCK: STATE["prs"] = out; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
+            merged = json.loads(sh("gh", "pr", "list", "-R", REPO, "--state", "merged", "-L", "100", "--json",
+                                   "number,title,headRefName,createdAt,mergedAt,url") or "[]")
+            merged = [{"number": p["number"], "title": p["title"], "branch": p["headRefName"], "createdAt": p["createdAt"],
+                       "mergedAt": p["mergedAt"], "url": p["url"]} for p in sorted(merged, key=lambda p: p.get("mergedAt") or "", reverse=True)]
+            with LOCK: STATE["prs"] = out; STATE["merged"] = merged; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
         except Exception as e:
             with LOCK: STATE["errors"]["gh"] = str(e)[:200]
         time.sleep(60)
@@ -75,8 +79,8 @@ def read_runs():
         for l in open(p, encoding="utf-8"):
             try: r = json.loads(l)
             except Exception: continue
-            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "cost_usd", "num_turns", "is_error", "pr", "branch", "model")})
-    return out
+            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model")})
+    return sorted(out, key=lambda r: r.get("started_at") or "")
 
 def _etime(v):
     """ps etime [[dd-]hh:]mm:ss → giây."""
@@ -170,19 +174,16 @@ def live_events(key, limit=60):
                     txt = c.get("content"); txt = txt if isinstance(txt, str) else json.dumps(txt)[:200]
                     ev.append({"kind": "error", "text": str(txt)[:200]})
         elif t == "result":
-            ev.append({"kind": "done", "text": f"xong · {e.get('num_turns')} lượt · {e.get('total_cost_usd')} USD · lỗi={e.get('is_error')}"})
+            ev.append({"kind": "done", "text": f"xong · {e.get('num_turns')} turn · {round((e.get('duration_ms') or 0) / 60000, 1)} phút · lỗi={e.get('is_error')}"})
     return ev[-limit:]
 
 def now(): return datetime.datetime.now().isoformat(timespec="seconds")
 
 def snapshot():
     runs = read_runs()
-    month = datetime.date.today().strftime("%Y-%m")
-    spent = sum(float(r["cost_usd"] or 0) for r in runs if (r.get("started_at") or "")[:7] == month)
     with LOCK:
-        s = {k: STATE[k] for k in ("tickets", "prs", "ci_develop", "zoho_at", "gh_at")} | {"errors": dict(STATE["errors"])}
-    s.update({"live": read_live(), "runs": runs[-200:], "budget": {"month": month, "spent": round(spent, 2),
-              "limit": CFG.get("budget_usd_month", 2000), "warn_pct": CFG.get("budget_warn_pct", 80)}, "server_time": now()})
+        s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "zoho_at", "gh_at")} | {"errors": dict(STATE["errors"])}
+    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now()})
     return s
 
 def ticker():
