@@ -74,6 +74,7 @@ section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:upp
 .live-head .t{font-size:18px;font-weight:700}
 .feed{margin-top:10px;max-height:330px;overflow:auto;border-top:1px solid var(--line);font-size:13px}
 .ev{display:grid;grid-template-columns:70px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.inflight table{font-size:12.5px} .inflight td{padding:5px 6px;vertical-align:top}
 .ev .k{font-family:var(--mono);font-size:11px;color:var(--text-2);padding-top:2px}
 .ev.error .k{color:var(--critical)} .ev.done .k{color:var(--good)}
 .ev .x{overflow-wrap:anywhere;font-family:var(--mono);font-size:12px}
@@ -430,15 +431,33 @@ function classify(t) {
   return "other";
 }
 
+const FAILS = ["failure", "error", "cancelled", "timed_out", "action_required", "startup_failure"];
+const reqChecks = () => (DATA && DATA.required_checks) || ["theme-check", "preview", "e2e"];
+/* Cổng CI = các check bắt buộc (orchestrator/config.yaml required_checks, cùng danh sách merge_pr.sh dùng) */
+function gateOf(checks) {
+  checks = checks || {};
+  if (!Object.keys(checks).length) return "none";
+  const v = reqChecks().map((n) => checks[n]);
+  if (v.some((x) => FAILS.includes(x))) return "fail";
+  if (v.every((x) => x === "success" || x === "skipped")) return "pass";
+  return "pending";
+}
+const GATE = { pass: ["good", "CI bắt buộc đạt"], fail: ["critical", "CI bắt buộc lỗi"], pending: ["warning", "CI đang chạy"], none: ["none", "chưa có CI"] };
+const gateChip = (checks) => { const [k, l] = GATE[gateOf(checks)]; return status(k, l); };
 function ciOf(checks) {
-  const want = ["theme-check", "preview", "e2e", "lighthouse"];
-  return want.filter((n) => n in checks).map((n) => {
-    const v = checks[n];
-    const kind = v === "success" ? "good" : ["failure", "error", "cancelled", "timed_out"].includes(v) ? "critical" : v === "skipped" ? "none" : "warning";
-    const lbl = v === "success" ? "đạt" : kind === "critical" ? "lỗi" : v === "skipped" ? "bỏ qua" : "đang chạy";
-    return status(kind, `${n} ${lbl}`);
+  checks = checks || {};
+  const req = reqChecks(), names = [...req, ...Object.keys(checks).filter((n) => !req.includes(n))].filter((n) => n in checks);
+  return names.map((n) => {
+    const v = checks[n], must = req.includes(n);
+    const kind = v === "success" ? "good" : FAILS.includes(v) ? (must ? "critical" : "serious") : v === "skipped" ? "none" : "warning";
+    const lbl = v === "success" ? "đạt" : FAILS.includes(v) ? "lỗi" : v === "skipped" ? "bỏ qua" : "đang chạy";
+    return status(kind, `${n} ${lbl}${must ? "" : " · không chặn"}`);
   }).join(" ") || '<span class="fresh">chưa có CI</span>';
 }
+/* thẻ ticket ở cột Chờ CTO chấm: nhãn phụ khi PR còn chạy CI hoặc CI bắt buộc lỗi */
+const ciStageChip = (t) => { if (classify(t) !== "review") return ""; const pr = prOf(t.key); if (!pr) return ""; const g = gateOf(pr.checks);
+  return g === "pending" ? status("warning", "chờ CI") : g === "fail" ? status("critical", "CI lỗi") : ""; };
+const prOf = (key) => ((DATA && DATA.prs) || []).find((p) => p.branch === `feature/ai-${key}`);
 
 /* ---------- Menu: Dashboard (mặc định) + các trang chuyển từ Efitco-thong-tin-du-an.xlsx ---------- */
 let PAGE = "dashboard", PROJECT = null;
@@ -732,7 +751,13 @@ const STAGE = { running: ["warning", "Đang chạy"], ready: ["none", "Sẵn sà
 let RACI = null, TDETAIL = { key: null, t: null, sig: null, dirty: false };
 const canWrite = () => DATA && DATA.backend === "local";
 const tByKey = () => Object.fromEntries((DATA ? DATA.tickets : []).map((t) => [t.key, t]));
-const stageOf = (t) => { const g = classify(t); const [k, l] = STAGE[g] || STAGE.other; return status(k, l); };
+const stageOf = (t) => {
+  const g = classify(t);
+  if (g === "review") { const pr = prOf(t.key); if (pr) { const st = gateOf(pr.checks);
+    if (st === "pending") return status("warning", "Chờ CI");
+    if (st === "fail") return status("critical", "CI lỗi"); } }
+  const [k, l] = STAGE[g] || STAGE.other; return status(k, l);
+};
 const lab = (l) => `<span class="chip">${esc(l)}</span>`;
 const fmt = (iso) => (iso ? String(iso).slice(0, 16).replace("T", " ") : "—");
 
@@ -799,7 +824,7 @@ function pageTBoard() {
   T.forEach((t) => { const g = classify(t); (G[g] || G.other).push(t); });
   const card = (t) => `<a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? lab(t.agent) : ""}
       ${t.side ? lab(String(t.side).toUpperCase()) : ""}${t.points ? lab(t.points + " pt") : ""}${t.parent ? lab(t.parent) : ""}
-      ${t.priority && t.priority !== "none" ? lab("ưu tiên " + PRIO[t.priority].toLowerCase()) : ""}${G.running.includes(t) ? status("warning", "đang chạy") : ""}</div>
+      ${t.priority && t.priority !== "none" ? lab("ưu tiên " + PRIO[t.priority].toLowerCase()) : ""}${G.running.includes(t) ? status("warning", "đang chạy") : ""}${ciStageChip(t)}</div>
       <div class="ttl">${esc(t.title)}</div>${t.comments_n ? `<div class="fresh" style="margin-top:4px">${t.comments_n} comment · ${fmt(t.updated_at)}</div>` : ""}</a>`;
   return `<div class="page-head"><h2>Kanban</h2>${searchBox("tboard", "Tìm key, tên")}
       <select data-sel="bstory" aria-label="Story">${[["", "Mọi story"], ...stories.map((s) => [s, s])].map(([v, l]) => opt(v, sy, l)).join("")}</select>
@@ -1495,17 +1520,24 @@ function render(d) {
   // KPIs
   const live = d.live;
   const ci = (d.ci_develop || [])[0];
-  const ciKind = !ci ? "none" : ci.status !== "completed" ? "warning" : ci.conclusion === "success" ? "good" : "critical";
-  const ciLbl = !ci ? "chưa có" : ci.status !== "completed" ? "đang chạy" : ci.conclusion === "success" ? "đạt" : "lỗi";
+  const ciGate = !ci ? "none" : ci.jobs && Object.keys(ci.jobs).length ? (ci.status !== "completed" && gateOf(ci.jobs) !== "fail" ? "pending" : gateOf(ci.jobs))
+    : ci.status !== "completed" ? "pending" : ci.conclusion === "success" ? "pass" : "fail";
+  const ciKind = GATE[ciGate][0], ciLbl = { pass: "đạt", fail: "lỗi", pending: "đang chạy", none: "chưa có" }[ciGate];
+  const ciInfo = ci && ci.jobs ? Object.entries(ci.jobs).filter(([n, v]) => !reqChecks().includes(n) && FAILS.includes(v)).map(([n]) => `${n} lỗi (không chặn)`).join(", ") : "";
+  const prG = d.prs.map((p) => gateOf(p.checks)), ciRun = prG.filter((g) => g === "pending").length, ciBad = prG.filter((g) => g === "fail").length;
+  const rv = groups.review.map((t) => { const pr = prOf(t.key); return pr ? gateOf(pr.checks) : "pass"; });
+  const rvReady = rv.filter((g) => g === "pass" || g === "none").length, rvCi = rv.filter((g) => g === "pending").length, rvBad = rv.filter((g) => g === "fail").length;
+  const pushing = live && live.alive && live.phase === "push";
   const k = [
-    ["Đang chạy", live && live.alive ? live.ticket : "—", live && live.alive ? `${live.agent} · ${dur(live.elapsed_s)}` : "không có agent nào"],
+    ["Đang chạy", live && live.alive ? live.ticket : "—", live && live.alive ? (pushing ? "Orchestrator đẩy code, mở PR" : `${live.agent} · ${dur(live.elapsed_s)}`)
+      : `không có agent${ciRun ? ` · ${ciRun} PR đang chạy CI` : ""}`],
     ["Sẵn sàng chạy", groups.ready.length, `${groups.blocked.length} đang bị chặn`],
-    ["Chờ CTO", groups.review.length + groups.question.length, `${groups.review.length} chấm · ${groups.question.length} câu hỏi`],
-    ["PR mở", d.prs.length, d.prs.filter((p) => Object.values(p.checks).some((v) => ["failure", "error"].includes(v))).length + " PR có CI lỗi"],
+    ["Chờ CTO", rvReady + groups.question.length, `${rvReady} chấm · ${groups.question.length} câu hỏi${rvCi ? ` · ${rvCi} chờ CI` : ""}${rvBad ? ` · ${rvBad} CI lỗi` : ""}`],
+    ["PR mở", d.prs.length, `${ciRun} đang chạy CI · ${ciBad} CI bắt buộc lỗi`],
     ["CI develop", "", ""],
   ];
   $("kpis").innerHTML = k.map(([l, v, s], i) => {
-    if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle : "")}">${ci ? `${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
+    if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle + (ciInfo ? " · " + ciInfo : "") : "")}">${ci ? `${ciInfo ? esc(ciInfo) + " · " : ""}${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`;
   }).join("");
 
@@ -1513,14 +1545,23 @@ function render(d) {
   if (live && live.alive) {
     liveKey = live.ticket;
     $("live").innerHTML = `<div class="live-head"><span class="t">${esc(live.ticket)}</span><span class="chip">${esc(live.agent)}</span>
-      ${status("warning", "đang chạy " + dur(live.elapsed_s))}<span class="fresh">${live.turns} lượt · ${live.tools} lần gọi tool</span></div>
+      ${pushing ? status("warning", "agent xong · Orchestrator đang commit, push, mở PR") : status("warning", "đang chạy " + dur(live.elapsed_s))}<span class="fresh">${live.turns} lượt · ${live.tools} lần gọi tool</span></div>
       ${live.source === "ps" ? `<div class="fresh" style="margin-top:4px">Phát hiện qua tiến trình + transcript Claude Code (lượt này chạy bằng Orchestrator bản cũ).</div>` : ""}
       <div style="margin-top:4px">${esc(live.title)}</div>
       <div class="fresh" style="margin-top:6px">Gần nhất: <span style="font-family:var(--mono)">${esc(live.last)}</span></div>`;
   } else {
     const last = d.runs[d.runs.length - 1];
     liveKey = last ? last.ticket : null;
-    $("live").innerHTML = `<div class="empty">Không có agent nào đang chạy. ${last ? `Lượt gần nhất: <b>${esc(last.ticket)}</b> (${esc(last.agent)}) lúc ${esc((last.started_at || "").replace("T", " "))}` : ""}</div>`;
+    const next = { pending: "chờ CI xong", fail: "xem log CI, sửa trên nhánh", pass: "CTO /review-pr → /merge-pr", none: "chờ CI khởi chạy" };
+    const fl = d.prs.filter((p) => p.branch.startsWith("feature/ai-"));
+    $("live").innerHTML = `<div class="empty" style="padding-top:0">${status("none", "Không có agent nào đang chạy")}${last ? ` · Lượt gần nhất <b>${esc(last.ticket)}</b> (${esc(last.agent)})
+        bắt đầu ${esc((last.started_at || "").slice(5, 16).replace("T", " "))}${last.duration_s != null ? ` · ${dur(last.duration_s)}` : ""} · ${last.is_error ? status("critical", "lỗi") : status("good", "agent xong")}
+        ${last.pr ? ` · <a href="${esc(last.pr)}" target="_blank" rel="noopener">PR #${esc(String(last.pr).split("/").pop())}</a>` : ""}` : ""}</div>
+      ${fl.length ? `<div class="inflight"><div class="fresh" style="margin:6px 0 4px">Đang xử lý sau agent (${fl.length} PR mở)</div><table class="info"><tbody>${fl.map((p) => {
+        const key = p.branch.replace("feature/ai-", ""), g = gateOf(p.checks);
+        return `<tr><td class="k"><a href="#/t/${esc(key)}">${esc(key)}</a></td><td class="nw"><a href="${esc(p.url)}" target="_blank" rel="noopener">PR #${p.number}</a></td>
+          <td>${gateChip(p.checks)}<div style="margin-top:3px">${ciOf(p.checks)}</div></td><td class="fresh">${esc(next[g])}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+      ${last ? `<div class="fresh" style="margin-top:8px">Nhật ký lượt ${esc(last.ticket)}:</div>` : ""}`;
   }
 
   // Board
@@ -1534,7 +1575,7 @@ function render(d) {
       ${t.side ? `<span class="chip">${esc(String(t.side).toUpperCase())}</span>` : ""}${t.points ? `<span class="chip">${t.points} pt</span>` : ""}
       ${t.parent && String(t.parent).startsWith("TE-") ? `<span class="chip">${esc(t.parent)}</span>` : ""}
       ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}
-      ${groups.running.includes(t) ? status("warning", "đang chạy") : ""}</div>
+      ${groups.running.includes(t) ? status("warning", "đang chạy") : ""}${ciStageChip(t)}</div>
       <div class="ttl" title="${esc(t.title)}">${esc(t.title)}</div></a>`).join("") || '<div class="empty">—</div>'}</div>`;
   }).join("");
 
@@ -1551,9 +1592,10 @@ function render(d) {
     <td>${esc(p.branch.replace("feature/ai-", ""))}</td><td>${esc(p.author)}</td><td>${ciOf(p.checks)}</td></tr>`).join("") ||
     '<tr><td colspan="4" class="empty">Không có PR mở.</td></tr>';
   $("ci").innerHTML = (d.ci_develop || []).map((r) => {
-    const kind = r.status !== "completed" ? "warning" : r.conclusion === "success" ? "good" : r.conclusion === "skipped" ? "none" : "critical";
-    const lbl = r.status !== "completed" ? "đang chạy" : r.conclusion === "success" ? "đạt" : r.conclusion || "lỗi";
-    return `<tr><td>${status(kind, lbl)}</td><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.workflowName)}</a> · ${esc(r.displayTitle)}</td><td class="n fresh">${ago(r.createdAt)}</td></tr>`;
+    const hasJobs = r.jobs && Object.keys(r.jobs).length;
+    const g = hasJobs ? (r.status !== "completed" && gateOf(r.jobs) !== "fail" ? "pending" : gateOf(r.jobs)) : r.status !== "completed" ? "pending" : r.conclusion === "success" ? "pass" : "fail";
+    return `<tr><td class="nw">${status(GATE[g][0], { pass: "đạt", fail: "lỗi", pending: "đang chạy", none: "—" }[g])}</td><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.workflowName)}</a> · ${esc(r.displayTitle)}
+      ${hasJobs ? `<div style="margin-top:3px">${ciOf(r.jobs)}</div>` : ""}</td><td class="n fresh">${ago(r.createdAt)}</td></tr>`;
   }).join("") || '<tr><td class="empty">Chưa lấy được CI.</td></tr>';
 
   // Lượt chạy gần đây

@@ -80,12 +80,18 @@ def stream_agent(cmd, env, key, agent, t, started):
                 p.kill(); break
         p.wait()
         err_tail = (p.stderr.read() or "")[-2000:]
-    _live_write(None)
+    # agent xong: Orchestrator còn commit/push/mở PR — dashboard hiện bước này thay vì "không có agent"
+    state.update(phase="push", pid=os.getpid(), last="Orchestrator: commit, push, mở PR")
+    _live_write(state)
     if out is None:
         out = {"result": "không có sự kiện result (agent lỗi hoặc quá 60 phút)", "stderr": err_tail, "is_error": True}
     return out
 
 def run_agent(t):
+    try: return _run_agent(t)
+    finally: _live_write(None)
+
+def _run_agent(t):
     agent, tid = t["agent"], t["id"]; key = t.get("key") or tid
     if t.get("task_type") not in RACI.get(agent, []):
         T.set_label(tid, "ai-draft", note=f"orchestrator: {agent} không có A cho {t.get('task_type')} theo raci.yaml"); return None
