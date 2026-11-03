@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Efitco Agent Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
   color-scheme: light;
@@ -12,8 +15,8 @@
   --accent:#2a78d6; --series-1:#2a78d6; --series-2:#eb6834;
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
   --chip:#e9ecf3;
-  --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font: "Roboto", ui-sans-serif, -apple-system, "Segoe UI", Arial, sans-serif;
+  --mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:where(:not([data-theme="light"])){
@@ -84,16 +87,46 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
 .errbox{grid-column:span 12;border:1px solid var(--critical);color:var(--text);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;display:none}
 .tablewrap{overflow-x:auto}
-.app{display:grid;grid-template-columns:208px minmax(0,1fr);align-items:start}
-nav.menu{position:sticky;top:53px;height:calc(100vh - 53px);overflow:auto;padding:14px 10px;border-right:1px solid var(--line);background:var(--surface)}
-nav.menu a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;color:var(--text-2);font-size:13.5px}
-nav.menu a:hover{background:var(--surface-2);text-decoration:none}
-nav.menu a[aria-current="page"]{background:var(--chip);color:var(--text);font-weight:600}
-nav.menu .grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 10px 4px}
-nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}
-  nav.menu{position:sticky;top:0;z-index:4;height:auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px;border-right:0;border-bottom:1px solid var(--line)}
-  nav.menu a{white-space:nowrap;flex:none} nav.menu .grp{display:none} nav.menu .cnt{display:none}}
+.ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn .ic,button .ic{width:15px;height:15px}
+.iconbtn{display:inline-flex;align-items:center;gap:6px}
+#navToggle{padding:5px 7px;line-height:0}
+#navToggle .ic{width:18px;height:18px}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);align-items:start;transition:grid-template-columns .18s ease}
+nav.menu{position:sticky;top:53px;height:calc(100vh - 53px);overflow:auto;padding:10px;border-right:1px solid var(--line);background:var(--surface)}
+nav.menu .grpbox{border:1px solid var(--line);border-radius:10px;padding:6px;margin-bottom:10px;background:var(--surface)}
+nav.menu .grp{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:2px 8px 4px;font-weight:600}
+nav.menu a{position:relative;display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;color:var(--text-2);font-size:13.5px;border:1px solid transparent}
+nav.menu a .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.menu a:hover{background:var(--surface-2);color:var(--text);text-decoration:none}
+nav.menu a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav.menu a[aria-current="page"]{background:var(--chip);color:var(--text);font-weight:600;border-color:var(--line)}
+nav.menu a[aria-current="page"]::before{content:"";position:absolute;left:-7px;top:7px;bottom:7px;width:3px;border-radius:2px;background:var(--accent)}
+nav.menu a[aria-current="page"] .ic{color:var(--accent)}
+nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;background:var(--surface-2);border-radius:999px;padding:0 6px;min-width:20px;text-align:center}
+nav.menu .cnt:empty{display:none}
+/* thu gọn trên màn rộng: chỉ còn icon, tên hiện khi rê chuột (title) */
+.app.collapsed{grid-template-columns:62px minmax(0,1fr)}
+.app.collapsed nav.menu{padding:10px 7px}
+.app.collapsed nav.menu .grp,.app.collapsed nav.menu .lbl,.app.collapsed nav.menu .cnt{display:none}
+.app.collapsed nav.menu .grpbox{padding:4px;border-radius:8px}
+.app.collapsed nav.menu a{justify-content:center;padding:8px 0}
+.app.collapsed nav.menu a[aria-current="page"]::before{left:-5px}
+.navback{display:none}
+.navhead{display:none}
+@media (max-width:600px){#fresh,label[for="agentFilter"],#themeBtn span,#connText{display:none} header{gap:8px 12px} header h1{font-size:15px}}
+/* màn hẹp: menu là ngăn kéo trượt từ trái, có nền mờ */
+@media (max-width:900px){
+  .app,.app.collapsed{grid-template-columns:minmax(0,1fr)}
+  nav.menu{position:fixed;left:0;top:0;bottom:0;z-index:30;width:min(280px,86vw);height:auto;transform:translateX(-105%);transition:transform .2s ease;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .app.nav-open nav.menu{transform:none}
+  .navhead{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px;font-weight:700}
+  .navhead button{padding:5px 7px;line-height:0}
+  .app.nav-open .navback{display:block;position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.35)}
+  .app.collapsed nav.menu .grp,.app.collapsed nav.menu .lbl,.app.collapsed nav.menu .cnt{display:revert}
+  .app.collapsed nav.menu a{justify-content:flex-start;padding:7px 9px}
+}
+@media (prefers-reduced-motion:reduce){.app,nav.menu{transition:none}}
 .page-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
 .page-head h2{margin:0;font-size:16px;text-transform:none;letter-spacing:0;color:var(--text)}
 .page-head input,.page-head select{font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
@@ -140,7 +173,7 @@ a.card.tcard{display:block;color:var(--text)} a.card.tcard:hover{text-decoration
 .tform input:disabled,.tform select:disabled{background:var(--surface-2);color:var(--text-2)}
 .req{color:var(--critical)}
 .actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.tback{font-size:13px;margin-bottom:8px}
+.tback{display:flex;gap:6px;margin-bottom:10px}
 .thead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .key.big{font-family:var(--mono);font-size:15px;font-weight:700}
 h2.ttitle{font-size:19px;margin:8px 0 10px;text-transform:none;letter-spacing:0;color:var(--text);line-height:1.35}
@@ -197,18 +230,48 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
+  <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-kanban" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7v7M12 7v4M16 7v9"/></symbol>
+  <symbol id="i-plus-square" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8V4H8M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></symbol>
+  <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect x="13" y="13" width="8" height="8" rx="2"/></symbol>
+  <symbol id="i-cycle" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6M12 19h8"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-reopen" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1.5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+</defs></svg>
 <header>
+  <button id="navToggle" type="button" aria-controls="menu" aria-expanded="true" aria-label="Ẩn/hiện menu" title="Ẩn/hiện menu"><svg class="ic" aria-hidden="true"><use href="#i-panel"/></svg></button>
   <h1>Efitco · Agent Ops</h1>
   <span class="conn"><span class="dot" id="dot"></span><span id="connText">đang kết nối…</span></span>
   <span class="fresh" id="fresh"></span>
   <span class="spacer"></span>
   <label class="fresh" for="agentFilter">Agent</label>
   <select id="agentFilter"><option value="">Tất cả</option></select>
-  <button id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">Sáng/Tối</button>
+  <button id="themeBtn" class="iconbtn" type="button" aria-label="Đổi giao diện sáng/tối"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span>Sáng/Tối</span></button>
 </header>
 
 <div class="app">
 <nav class="menu" id="menu" aria-label="Menu dashboard"></nav>
+<div class="navback" id="navBack" aria-hidden="true"></div>
 <div>
 <main id="page-dashboard">
   <div class="errbox" id="errbox" role="alert"></div>
@@ -276,6 +339,10 @@ const status = (kind, label) => `<span class="status s-${kind}"><b aria-hidden="
 const num = (k) => parseInt(String(k || "").split("-T").pop(), 10) || 0;
 let DATA = null, liveKey = null;
 
+function syncThemeIcon() {
+  const dark = (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark";
+  $("themeBtn").querySelector("use").setAttribute("href", dark ? "#i-sun" : "#i-moon");
+}
 /* Theme toggle: per-viewer convenience only */
 (function () {
   try { const t = localStorage.getItem("efitco-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -284,6 +351,7 @@ let DATA = null, liveKey = null;
     const next = cur === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem("efitco-theme", next); } catch (e) {}
+    syncThemeIcon();
     if (DATA) render(DATA);
   };
   $("agentFilter").onchange = () => DATA && render(DATA);
@@ -301,12 +369,12 @@ const dur = (s) => (s >= 3600 ? `${Math.floor(s / 3600)}h ` : "") + `${Math.floo
 function classify(t) {
   const L = t.labels || [], title = t.title || "", closed = (t.status || "").toLowerCase() === "closed";
   if (closed) return "done";
-  if (DATA.live && DATA.live.alive && DATA.live.ticket === t.key) return "running";
+  if (DATA && DATA.live && DATA.live.alive && DATA.live.ticket === t.key) return "running";
   if (title.startsWith("[Q]") || /^hỏi /i.test(title)) return "question";
   if (L.includes("ai-review")) return "review";
   if (L.includes("ai-sua")) return "fix";
   if (L.includes("ai-draft") && t.agent) {
-    const ids = Object.fromEntries((DATA.tickets || []).map((x) => [x.id, x]));
+    const ids = Object.fromEntries(((DATA && DATA.tickets) || []).map((x) => [x.id, x]));
     const open = (t.blocked_by || []).filter((b) => (ids[b]?.status || "").toLowerCase() !== "closed");
     return open.length ? "blocked" : "ready";
   }
@@ -327,13 +395,37 @@ function ciOf(checks) {
 let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
-  ["Tổng quan", [["dashboard", "Dashboard"]]],
-  ["Ticket", [["t-list", "Danh sách"], ["t-board", "Kanban"], ["t-new", "Tạo ticket"]]],
-  ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"]]],
-  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["raci", "RACI"], ["process", "Quy trình"], ["scrum", "Agile/Scrum"], ["commands", "Lệnh"]]],
-  ["Tiến độ", [["story", "Story"]]],
-  ["Quy ước", [["decisions", "Quyết định"]]],
+  ["Tổng quan", [["dashboard", "Dashboard", "dashboard"]]],
+  ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
+  ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
+  ["Vận hành", [["roles", "Vai trò", "users"], ["agents", "Agent", "bot"], ["raci", "RACI", "grid"], ["process", "Quy trình", "workflow"], ["scrum", "Agile/Scrum", "cycle"], ["commands", "Lệnh", "terminal"]]],
+  ["Tiến độ", [["story", "Story", "chart"]]],
+  ["Quy ước", [["decisions", "Quyết định", "bookmark"]]],
 ];
+const IC = (n) => `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
+/* Menu trái: màn rộng thu gọn còn icon (nhớ theo trình duyệt), màn hẹp là ngăn kéo */
+const NAV = { collapsed: false, open: false };
+try { NAV.collapsed = localStorage.getItem("efitco-nav") === "collapsed"; } catch (e) {}
+const isNarrow = () => innerWidth <= 900;
+function applyNav() {
+  const app = document.querySelector(".app"), narrow = isNarrow();
+  app.classList.toggle("collapsed", !narrow && NAV.collapsed);
+  app.classList.toggle("nav-open", narrow && NAV.open);
+  const shown = narrow ? NAV.open : !NAV.collapsed;
+  $("navToggle").setAttribute("aria-expanded", String(shown));
+  $("navToggle").title = narrow ? (shown ? "Đóng menu" : "Mở menu") : (shown ? "Thu gọn menu" : "Mở rộng menu");
+  $("menu").toggleAttribute("inert", narrow && !NAV.open);
+}
+$("navToggle").onclick = () => {
+  if (isNarrow()) NAV.open = !NAV.open;
+  else { NAV.collapsed = !NAV.collapsed; try { localStorage.setItem("efitco-nav", NAV.collapsed ? "collapsed" : "open"); } catch (e) {} }
+  applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE === "scrum") setTimeout(drawBurndown, 220);
+};
+$("navBack").onclick = () => { NAV.open = false; applyNav(); };
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && NAV.open) { NAV.open = false; applyNav(); $("navToggle").focus(); } });
+window.addEventListener("hashchange", () => { if (NAV.open) { NAV.open = false; applyNav(); } });
+window.addEventListener("resize", applyNav);
 const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
 
 function renderMenu() {
@@ -341,9 +433,9 @@ function renderMenu() {
   (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
-  const html = MENU.map(([grp, items]) => `<div class="grp">${esc(grp)}</div>` + items.map(([id, name]) =>
-    `<a href="#/${id}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
-  if ($("menu").innerHTML !== html) $("menu").innerHTML = html;
+  const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
+    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
+  if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
 }
 
 function route() {
@@ -630,7 +722,7 @@ function pageTList() {
       ${sel("tlabel", lb, [["", "Mọi nhãn"], ...labels.map((s) => [s, s])], "Nhãn")}
       ${sel("tprio", pr, [["", "Mọi ưu tiên"], ...Object.entries(PRIO).filter(([k]) => k !== "none").map(([k, v]) => [k, v])], "Ưu tiên")}
       ${sel("tsort", so, [["key", "Mới tạo trước"], ["upd", "Mới cập nhật trước"]], "Sắp xếp")}
-      ${canWrite() ? `<a class="btn primary" href="#/t-new">+ Tạo ticket</a>` : ""}
+      ${canWrite() ? `<a class="btn primary" href="#/t-new">${IC("plus")}Tạo ticket</a>` : ""}
       <span class="fresh">${rows.length} hiển thị · ${all.length} ticket · ${open} mở · ${all.length - open} đóng</span></div>
     ${readonlyNote()}
     <div class="tablewrap"><table class="info tlist"><thead><tr><th>Key</th><th>Tên ticket</th><th>Giai đoạn</th><th>Nhãn</th><th>Agent</th><th>Loại việc</th><th class="n">Point</th><th>Story</th><th>Ưu tiên</th><th>Cập nhật</th><th class="n" title="Comment">Cmt</th></tr></thead>
@@ -655,7 +747,7 @@ function pageTBoard() {
       <div class="ttl">${esc(t.title)}</div>${t.comments_n ? `<div class="fresh" style="margin-top:4px">${t.comments_n} comment · ${fmt(t.updated_at)}</div>` : ""}</a>`;
   return `<div class="page-head"><h2>Kanban</h2>${searchBox("tboard", "Tìm key, tên")}
       <select data-sel="bstory" aria-label="Story">${[["", "Mọi story"], ...stories.map((s) => [s, s])].map(([v, l]) => opt(v, sy, l)).join("")}</select>
-      ${canWrite() ? `<a class="btn primary" href="#/t-new">+ Tạo ticket</a>` : ""}<span class="fresh">${T.length} ticket · cột theo quy trình agent (trang Quy trình)</span></div>
+      ${canWrite() ? `<a class="btn primary" href="#/t-new">${IC("plus")}Tạo ticket</a>` : ""}<span class="fresh">${T.length} ticket · cột theo quy trình agent (trang Quy trình)</span></div>
     <div class="board kanban">${cols.map(([g, name]) => {
       let list = G[g].sort((a, b) => num(a.key) - num(b.key));
       if (g === "ready") list = G.running.concat(list);
@@ -718,7 +810,7 @@ function pageTNew() {
   if (!canWrite()) return `<div class="page-head"><h2>Tạo ticket</h2></div>${readonlyNote()}`;
   return `<div class="page-head"><h2>Tạo ticket</h2><span class="fresh">Số ticket cấp tự động (ES1-T…). Ticket có agent + nhãn ai-draft sẽ được /run-next nhận.</span></div>
     <form id="tnew" class="tform" autocomplete="off">${fieldsForm({ type: "task", priority: "none" }, "new")}
-      <div class="actions"><button type="submit" class="btn primary">Tạo ticket</button><a class="btn" href="#/t-list">Huỷ</a></div></form>`;
+      <div class="actions"><button type="submit" class="btn primary">${IC("plus")}Tạo ticket</button><a class="btn" href="#/t-list">${IC("x")}Huỷ</a></div></form>`;
 }
 function bindTNew() {
   const form = $("tnew"); if (!form) return;
@@ -750,7 +842,7 @@ async function loadTDetail(key, force) {
 function pageTDetail() {
   const t = TDETAIL.t;
   if (!t) return '<div class="empty">Đang tải…</div>';
-  if (t.error) return `<div class="page-head"><h2>${esc(TDETAIL.key)}</h2></div><p class="note">${status("critical", t.error)}</p><a class="btn" href="#/t-list">← Danh sách</a>`;
+  if (t.error) return `<div class="page-head"><h2>${esc(TDETAIL.key)}</h2></div><p class="note">${status("critical", t.error)}</p><a class="btn" href="#/t-list">${IC("arrow-left")}Danh sách</a>`;
   const K = tByKey(), closed = t.status === "Closed", dis = canWrite() ? "" : "disabled";
   const blocking = (DATA ? DATA.tickets : []).filter((x) => (x.blocked_by || []).includes(t.key));
   const runs = (DATA ? DATA.runs : []).filter((r) => r.ticket === t.key).slice(-5).reverse();
@@ -758,31 +850,31 @@ function pageTDetail() {
   const linkT = (k) => `<a href="#/t/${esc(k)}">${esc(k)}</a> ${K[k] ? (K[k].status === "Closed" ? status("good", "đóng") : status("warning", "mở")) : ""}`;
   const out = String(t.output_link || ""), outUrl = (out.match(/https?:\/\/\S+/) || [])[0];
   const flow = (t.labels || []).find((l) => FLOW_LABELS.includes(l)) || "";
-  return `<div class="tback"><a href="#/t-list">← Danh sách</a> · <a href="#/t-board">Kanban</a></div>
+  return `<div class="tback"><a class="btn sm" href="#/t-list">${IC("arrow-left")}Danh sách</a> <a class="btn sm" href="#/t-board">${IC("kanban")}Kanban</a></div>
   <div class="thead"><span class="key big">${esc(t.key)}</span>${status(closed ? "good" : "warning", closed ? "Đã đóng" : "Đang mở")} ${closed ? "" : stageOf(t)}
     ${(t.labels || []).map(lab).join(" ")}</div>
   <h2 class="ttitle" id="tTitle">${esc(t.title)}</h2>
   ${readonlyNote()}
   ${canWrite() ? `<div class="tbar">
-    <button class="btn" data-act="edit-title">Sửa tên</button>
-    <button class="btn ${closed ? "" : "primary"}" data-act="${closed ? "reopen" : "close"}">${closed ? "Mở lại" : "Đóng ticket"}</button>
+    <button class="btn" data-act="edit-title">${IC("edit")}Sửa tên</button>
+    <button class="btn ${closed ? "" : "primary"}" data-act="${closed ? "reopen" : "close"}">${closed ? IC("reopen") + "Mở lại" : IC("check") + "Đóng ticket"}</button>
     <label class="inline">Nhãn quy trình <select id="tFlow">${opt("", flow, "—")}${FLOW_LABELS.map((l) => opt(l, flow)).join("")}</select></label>
-    <button class="btn" data-act="flow">Đổi nhãn</button></div>` : ""}
+    <button class="btn" data-act="flow">${IC("tag")}Đổi nhãn</button></div>` : ""}
   <div class="tgrid">
     <div class="tmain">
-      <div class="tsec"><div class="sec-head"><h3>Mô tả</h3>${canWrite() ? `<button class="btn sm" data-act="edit-body">Sửa</button>` : ""}</div>
+      <div class="tsec"><div class="sec-head"><h3>Mô tả</h3>${canWrite() ? `<button class="btn sm" data-act="edit-body">${IC("edit")}Sửa</button>` : ""}</div>
         <div id="tBody" class="tbody">${t.body ? esc(t.body) : '<span class="fresh">(trống)</span>'}</div></div>
       <div class="tsec"><h3>Comment (${(t.comments || []).length})</h3>
         <div class="tcoms">${(t.comments || []).map((c) => `<div class="tcom"><div class="fresh"><b>${esc(c.by || "")}</b> · ${fmt(c.at)}</div><div class="tbody">${esc(c.text)}</div></div>`).join("") || '<div class="empty">Chưa có comment.</div>'}</div>
         ${canWrite() ? `<form id="tCom" class="tcomform"><textarea name="text" rows="3" placeholder="Viết comment (agent đọc được qua mcp ticket get)"></textarea>
-          <div class="actions"><button class="btn primary" type="submit">Gửi comment</button></div></form>` : ""}</div>
+          <div class="actions"><button class="btn primary" type="submit">${IC("send")}Gửi comment</button></div></form>` : ""}</div>
       <details class="tsec"><summary><h3 style="display:inline">Lịch sử (${(t.activity || []).length})</h3></summary>
         <table class="info"><tbody>${(t.activity || []).slice().reverse().map((a) => `<tr><td class="fresh nw">${fmt(a.at)}</td><td class="nw">${esc(a.by || "")}</td>
           <td class="nw"><b>${esc(a.field)}</b></td><td>${esc(a.old ?? "")}${a.old != null || a.new != null ? " → " : ""}${esc(a.new ?? "")}</td></tr>`).join("")}</tbody></table></details>
     </div>
     <aside class="tside">
       <form id="tFields" class="tform" autocomplete="off"><h3>Thông tin</h3>${fieldsForm(t, "edit")}
-        ${canWrite() ? `<div class="actions"><button class="btn primary" type="submit">Lưu thông tin</button></div>` : ""}</form>
+        ${canWrite() ? `<div class="actions"><button class="btn primary" type="submit">${IC("save")}Lưu thông tin</button></div>` : ""}</form>
       <dl class="tmeta">
         <dt>Đầu ra</dt><dd>${outUrl ? `<a href="${esc(outUrl)}" target="_blank" rel="noopener">${esc(outUrl.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out || "—")}</dd>
         <dt>Bị chặn bởi</dt><dd>${(t.blocked_by || []).map(linkT).join("<br>") || "—"}</dd>
@@ -827,7 +919,7 @@ function bindTDetail() {
     } else if (a === "edit-body") {
       const box = $("tBody"); TDETAIL.dirty = true;
       box.outerHTML = `<form id="tBodyForm"><textarea name="body" rows="14">${esc(t.body || "")}</textarea>
-        <div class="actions"><button class="btn primary" type="submit">Lưu mô tả</button><button class="btn" type="button" id="tBodyCancel">Huỷ</button></div></form>`;
+        <div class="actions"><button class="btn primary" type="submit">${IC("save")}Lưu mô tả</button><button class="btn" type="button" id="tBodyCancel">${IC("x")}Huỷ</button></div></form>`;
       $("tBodyCancel").onclick = () => { TDETAIL.dirty = false; $("info").innerHTML = pageTDetail(); bindTDetail(); };
       $("tBodyForm").onsubmit = (e) => { e.preventDefault(); done(tapi("update", { id: t.key, body: e.target.elements.body.value }), "Đã lưu mô tả"); };
     }
@@ -951,7 +1043,8 @@ function drawBurndown() {
   const x = (i) => pl + ((W - pl - pr) * i) / Math.max(1, n - 1), y = (v) => H - pb - ((H - pb - pt) * v) / top;
   let g = "";
   for (let v = 0; v <= top; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
-  st.days.forEach((d, i) => { if (i % 2 === 0 || i === n - 1) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
+  const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W - pl - pr) / 46))));
+  st.days.forEach((d, i) => { if (i % every === 0 || (i === n - 1 && (n - 1) % every >= every / 2)) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="${i === n - 1 ? "end" : "middle"}">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
   const ti = st.days.indexOf(today);
   if (ti >= 0) g += `<line x1="${x(ti)}" x2="${x(ti)}" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3"/><text class="axis" x="${x(ti) + 4}" y="${pt + 9}">hôm nay</text>`;
   g += `<line x1="${x(0)}" y1="${y(st.start)}" x2="${x(n - 1)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
@@ -1204,7 +1297,8 @@ function connect() {
 connect();
 setInterval(pollFeed, 3000);
 loadProject(); loadRaci(); route();
-const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (innerWidth > 900) $("menu").style.top = h + "px", $("menu").style.height = `calc(100vh - ${h}px)`; else $("menu").style.top = "0", $("menu").style.height = "auto"; };
+const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
+applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);
 window.addEventListener("resize", () => { if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); });
