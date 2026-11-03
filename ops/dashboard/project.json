@@ -997,7 +997,114 @@
     "Mọi dòng",
     "Role owner (CTO kiêm 9 vai) duyệt và chấm rubric, quyết merge; gate-reviewer chấm độc lập tại cổng và eval."
    ]
-  ]
+  ],
+  "agents": [
+   {
+    "id": "po",
+    "name": "PO",
+    "role": "Product Owner / PM",
+    "A": "Charter, PRD, thứ tự backlog, quyết định change request, kế hoạch release, hồ sơ G1/G5 cho người ký",
+    "C": "Hỏi Tech Lead, BA, QA đánh giá tác động change request; lấy point từ Tech Lead khi ưu tiên backlog. Được Tech Lead hỏi phạm vi (ES1-T42, ES1-T48)",
+    "I": "Nhận yêu cầu mới do Writer phân loại từ ticket hỗ trợ",
+    "no": "Chọn giải pháp kỹ thuật · gửi cam kết cho merchant/khách · duyệt chi tiền",
+    "src": "po.md"
+   },
+   {
+    "id": "ba",
+    "name": "BA",
+    "role": "Business Analyst",
+    "A": "SRS, story + AC Given/When/Then, bảng settings block, ma trận truy vết, Definition of Ready",
+    "C": "Hỏi PO và merchant bằng bộ câu hỏi stakeholder (mỗi câu có mặc định). Được QA hỏi về AC (ES1-T6)",
+    "I": "Báo Tech Lead và Designer khi story + AC chốt để chia task, viết UI spec",
+    "no": "Ước lượng (việc của Tech Lead) · thêm yêu cầu stakeholder chưa nói · chọn giải pháp kỹ thuật",
+    "src": "ba.md"
+   },
+   {
+    "id": "designer",
+    "name": "Designer",
+    "role": "UI/UX Designer",
+    "A": "UI spec theo block/trang, tokens.json, báo cáo lệch UI giữa preview và Figma",
+    "C": "Được Dev FE hỏi số đo Figma (ES1-T21, ES1-T31, ES1-T34), Tech Lead hỏi khi chia task (ES1-T43, ES1-T49), QA hỏi (ES1-T8)",
+    "I": "Báo Dev FE khi UI spec, token sẵn sàng",
+    "no": "Sửa code · đổi luồng nghiệp vụ BA đã chốt · ghi vào page Figma ngoài AI drafts",
+    "src": "designer.md"
+   },
+   {
+    "id": "techlead",
+    "name": "Tech Lead",
+    "role": "Tech Lead / Architect",
+    "A": "Kiến trúc, ADR, convention, chia task FE/BE, duyệt kỹ thuật PR, nợ kỹ thuật",
+    "C": "Được hỏi bởi Dev FE (ES1-T20, ES1-T54), Dev BE (ES1-T22, ES1-T35, ES1-T55), DevOps (ES1-T36), QA (ES1-T7), PO (tác động CR). Hỏi PO, Designer khi chia task (ES1-T48, ES1-T49)",
+    "I": "Báo Dev FE, Dev BE: task đã chia và verdict review PR (comment ticket)",
+    "no": "Viết code tính năng · đổi phạm vi (việc của PO) · merge trong pha 1 (chỉ ghi verdict)",
+    "src": "techlead.md"
+   },
+   {
+    "id": "dev-fe",
+    "name": "Dev FE",
+    "role": "Developer front-end",
+    "A": "Liquid block/snippet/template, CSS theo token, settings schema, locales, responsive, accessibility",
+    "C": "Hỏi Tech Lead (ES1-T20, ES1-T54) và Designer (ES1-T21, ES1-T31, ES1-T34) bằng ticket [Q]",
+    "I": "Báo Dev BE: markup có data-testid và tên partial để bám; QA: PR + preview",
+    "no": "Viết hay sửa JS (việc của Dev BE) · tự push preview, npm install",
+    "src": "dev-fe.md"
+   },
+   {
+    "id": "dev-be",
+    "name": "Dev BE",
+    "role": "Developer back-end (JS)",
+    "A": "Toàn bộ JS trong assets/, partial rendering, logic cart/variant/search, snippet xuất JSON cho JS",
+    "C": "Hỏi Tech Lead trước khi đổi markup FE hoặc contract (ES1-T22, ES1-T35, ES1-T55)",
+    "I": "Báo QA: PR + preview",
+    "no": "Đổi markup FE ngoài thẻ script · đổi contract chưa Tech Lead duyệt · tự push preview, npm install",
+    "src": "dev-be.md"
+   },
+   {
+    "id": "qa",
+    "name": "QA",
+    "role": "QA / Tester",
+    "A": "Test plan, test case, bộ regression, test report, GO/NO-GO chất lượng",
+    "C": "Hỏi BA, Tech Lead, Designer khi AC chưa rõ (ES1-T6, ES1-T7, ES1-T8)",
+    "I": "Báo Dev FE, Dev BE: bug theo mức P1–P4 (vd ES1-T58); nhận bug do Writer phân loại",
+    "no": "Sửa code · hạ mức bug · merge",
+    "src": "qa.md"
+   },
+   {
+    "id": "devops",
+    "name": "DevOps",
+    "role": "DevOps",
+    "A": "CI, preview theo nhánh, đóng gói zip, runbook, rollback, cảnh báo chi phí và slot theme",
+    "C": "Hỏi Tech Lead bằng ticket [Q] (ES1-T36)",
+    "I": "Báo QA, Dev: preview URL trên PR; người upload zip lên yum-dev cuối sprint",
+    "no": "Push live, publish, xoá theme · đụng store yum-dev",
+    "src": "devops.md"
+   },
+   {
+    "id": "writer",
+    "name": "Writer",
+    "role": "Technical Writer / Support",
+    "A": "Tài liệu merchant, hướng dẫn dùng theme trong Canvas, release note, phân loại ticket hỗ trợ",
+    "C": "Hỏi vai liên quan bằng ticket [Q] khi thiếu thông tin (chưa có ticket nào)",
+    "I": "Báo QA: bug; báo PO: yêu cầu mới (từ phân loại ticket)",
+    "no": "Hứa thời hạn sửa với merchant · tự chuyển ticket thành story (chỉ chuyển cho PO)",
+    "src": "writer.md"
+   }
+  ],
+  "extra": [
+   {
+    "name": "CTO · role owner 9 vai",
+    "text": "Duyệt và chấm rubric mọi đầu ra, quyết merge (/merge-pr), trả lời ticket [Q], ký G1/G5, quyết tranh chấp (charter)."
+   },
+   {
+    "name": "gate-reviewer",
+    "text": "Chấm rubric độc lập, chỉ đọc, không thấy ngữ cảnh người làm; điểm tầng 2 tại cổng và eval. Không thêm tiêu chí, không sửa artifact."
+   },
+   {
+    "name": "Mọi agent",
+    "text": "Thiếu thông tin: tạo ticket loại question gắn vai cần trả lời, ghi KHÔNG CHẮC ở đầu đầu ra và vẫn nộp; xong thì set_label ai-review kèm tóm tắt tự kiểm tra."
+   }
+  ],
+  "agents_note": "A và Không lấy nguyên văn từ dòng 'Chịu trách nhiệm A cho' và 'KHÔNG' trong theme-efitco/.claude/agents/*.md; R là loại việc trong orchestrator/raci.yaml; C lấy từ agent md và các ticket hỏi thực tế (key ghi trong ngoặc); I suy từ luồng bàn giao — CTO sửa trong project.json mục raci.agents."
  },
  "scrum": {
   "sprints": [
@@ -1213,5 +1320,95 @@
     ]
    ]
   }
+ },
+ "agent_flow": {
+  "title": "Luồng xử lý",
+  "columns": [
+   "#",
+   "Agent",
+   "Nhận",
+   "Làm",
+   "Giao cho"
+  ],
+  "rows": [
+   [
+    "1",
+    "PO",
+    "Mục tiêu từ CTO, yêu cầu mới từ Writer",
+    "Charter, PRD; ưu tiên backlog theo giá trị × chi phí (point từ Tech Lead)",
+    "BA: PRD, backlog đã xếp · CTO duyệt thứ Hai"
+   ],
+   [
+    "2",
+    "BA",
+    "PRD, trả lời bộ câu hỏi stakeholder",
+    "SRS, story + AC Given/When/Then, bảng settings, ma trận truy vết",
+    "Tech Lead, Designer: story + AC"
+   ],
+   [
+    "3",
+    "Designer",
+    "Story, Figma Efitco T10 (snapshot)",
+    "UI spec theo block, tokens.json; sau khi có preview thì so lệch UI",
+    "Dev FE: UI spec, token"
+   ],
+   [
+    "4",
+    "Tech Lead",
+    "Story + AC",
+    "Chia task FE/BE có point, blocked_by (FE trước BE), DoD có lệnh; ADR khi cần quyết kiến trúc",
+    "Dev FE, Dev BE: ticket ai-draft"
+   ],
+   [
+    "5",
+    "Dev FE",
+    "Task FE, UI spec, token",
+    "Liquid, CSS, schema, locales; gắn data-testid và tên partial; không JS",
+    "Orchestrator mở PR → QA; Dev BE: markup để bám"
+   ],
+   [
+    "6",
+    "Dev BE",
+    "Task BE, markup FE đã merge",
+    "JS progressive enhancement, partial rendering, ≤ 8 KB mỗi file, Playwright luồng chính",
+    "Orchestrator mở PR → QA"
+   ],
+   [
+    "7",
+    "DevOps",
+    "PR của Dev FE/BE",
+    "CI: theme-check, preview lên hoa-qua-nhap-khau, e2e, Lighthouse",
+    "QA, CTO: preview URL và kết quả check"
+   ],
+   [
+    "8",
+    "QA",
+    "Story + AC, preview",
+    "Test case, spec E2E, chạy trên preview; báo bug theo mức",
+    "Dev FE/BE: bug trên cùng nhánh; Writer: block đạt"
+   ],
+   [
+    "9",
+    "Tech Lead + CTO",
+    "PR CI xanh",
+    "Tech Lead review theo rubric; CTO /merge-pr: duyệt, chấm điểm, đóng ticket",
+    "develop; eval ghi điểm"
+   ],
+   [
+    "10",
+    "Writer + DevOps",
+    "Block đạt, PR đã merge",
+    "Tài liệu merchant, release note; zip theme cuối sprint",
+    "Người upload yum-dev, canvas_check"
+   ],
+   [
+    "11",
+    "gate-reviewer + kỹ sư AI",
+    "Đầu ra ở cổng, eval sửa/loại",
+    "Chấm rubric độc lập; sửa prompt, skill của agent bị sửa/loại",
+    "agent_version mới, chạy lại ticket cũ"
+   ]
+  ],
+  "note": "Mọi bước đi qua Orchestrator: nhánh feature/ai-<key>, hook chặn ghi ngoài phạm vi. Thiếu thông tin ở bước nào thì agent tạo ticket [Q] cho vai cần trả lời; ticket gốc chờ tới khi [Q] đóng."
  }
 }
