@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Thao tác ticket theo KEY (ES1-T23) — backend theo orchestrator/config.yaml (mặc định ticket nội bộ):
+"""Thao tác ticket nội bộ (data/tickets.db) theo KEY (ES1-T23):
   ticket.py show ES1-T23              in đầy đủ (kèm comment, lịch sử)
   ticket.py close ES1-T23 "ghi chú"   đóng + comment
   ticket.py reopen ES1-T23 "ghi chú"  mở lại
   ticket.py label ES1-T23 ai-draft    đổi nhãn ai-* (vd đưa ticket sửa nặng về chạy lại)
   ticket.py comment ES1-T23 "nội dung"
   ticket.py children TE-2             liệt kê ticket con của story
-  ticket.py init                      tạo data/tickets.db rỗng (khi không chuyển từ Zoho)
+  ticket.py init                      tạo data/tickets.db rỗng
   ticket.py backup                    sao lưu data/backup/tickets-YYYY-MM-DD.db (giữ 30 bản)
   ticket.py export [file.json]        xuất toàn bộ ticket + comment + lịch sử ra JSON"""
 import os, sys, json

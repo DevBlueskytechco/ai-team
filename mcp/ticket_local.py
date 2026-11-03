@@ -1,11 +1,11 @@
-"""Ticket nội bộ (SQLite) — thay Zoho Projects, không phụ thuộc API ngoài.
-Cùng giao diện với ticket_zoho: get, list, create, set_label, comment, set_review, set_task_type, set_status, is_done, update, all.
+"""Ticket nội bộ (SQLite) — nguồn ticket duy nhất của dự án, không phụ thuộc API ngoài.
+Giao diện: get, list, create, set_label, comment, set_review, set_task_type, set_status, is_done, update, all.
 
 - File dữ liệu: ai-team/data/tickets.db (không commit). Sao lưu: ops/ticket.py backup | export.
-- id ticket = key (ES1-T50). Ticket chuyển từ Zoho giữ id Zoho ở legacy_id; get() nhận cả key lẫn id Zoho cũ.
+- id ticket = key (ES1-T50). Ticket cũ (trước 03/11/2026) giữ id cũ ở legacy_id; get() nhận cả key lẫn id cũ.
 - Nhiều tiến trình dùng chung (Orchestrator, MCP của agent, dashboard, ops/): SQLite WAL + BEGIN IMMEDIATE khi ghi.
-- Mọi thay đổi ghi vào bảng activity (ai, lúc nào, trường nào, cũ → mới) như lịch sử của Zoho.
-Tạo dữ liệu lần đầu: python3 ops/ticket_migrate_zoho.py (kéo toàn bộ ticket + comment từ Zoho) hoặc ops/ticket.py init (rỗng).
+- Mọi thay đổi ghi vào bảng activity (ai, lúc nào, trường nào, cũ → mới).
+Khôi phục: chép bản mới nhất trong data/backup/ về data/tickets.db. Bắt đầu rỗng: python3 ops/ticket.py init.
 """
 import os, json, sqlite3, datetime, re, builtins
 
@@ -42,8 +42,8 @@ def actor(): return os.environ.get("AI_AGENT") or os.environ.get("TICKET_USER") 
 
 def connect(create=False):
     if not create and not os.path.exists(DB):
-        raise RuntimeError(f"Chưa có dữ liệu ticket nội bộ ({DB}). Chạy: python3 ops/ticket_migrate_zoho.py "
-                           "(chuyển từ Zoho) hoặc python3 ops/ticket.py init (bắt đầu rỗng).")
+        raise RuntimeError(f"Chưa có dữ liệu ticket nội bộ ({DB}). Khôi phục từ data/backup/ "
+                           "hoặc python3 ops/ticket.py init (bắt đầu rỗng).")
     os.makedirs(os.path.dirname(DB), exist_ok=True)
     c = sqlite3.connect(DB, timeout=15, isolation_level=None)
     c.row_factory = sqlite3.Row
@@ -78,7 +78,7 @@ def _resolve(c, id):
 
 
 def _keys(c, ids):
-    """Chuẩn hoá danh sách ticket chặn về key (nhận key, id Zoho cũ)."""
+    """Chuẩn hoá danh sách ticket chặn về key (nhận key hoặc id cũ)."""
     out = []
     for b in ids or []:
         try: out.append(_resolve(c, b)["id"])
@@ -127,7 +127,7 @@ def _apply(c, r, changes, by=None):
         c.execute(f"UPDATE tickets SET {', '.join(sets)} WHERE id=?", (*vals, r["id"]))
 
 
-# ---------------- giao diện chung (giống ticket_zoho) ----------------
+# ---------------- giao diện chung (dùng bởi ticket_server, Orchestrator, ops/) ----------------
 def get(id):
     c = connect()
     try:

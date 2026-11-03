@@ -335,7 +335,7 @@ function renderMenu() {
 
 function route() {
   let id = (location.hash.replace(/^#\/?/, "") || "dashboard");
-  if (id === "tickets") id = "t-list";                     // link cũ "Ticket Zoho"
+  if (id === "tickets") id = "t-list";                     // link cũ
   const tm = id.match(/^t\/([A-Za-z0-9-]+)$/);
   PAGE = tm ? "t-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
   if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
@@ -554,7 +554,7 @@ function pageStory() {
     <p class="note">Trạng thái story do CTO cập nhật trong project.json; số ticket con, đã đóng và point task đạt tính trực tiếp từ ticket nội bộ.</p>`;
 }
 
-/* ================= Ticket nội bộ (thay Zoho): danh sách, kanban, tạo, chi tiết ================= */
+/* ================= Ticket nội bộ: danh sách, kanban, tạo, chi tiết ================= */
 const AGENTS = ["po", "ba", "techlead", "designer", "dev-fe", "dev-be", "qa", "devops", "writer"];
 const FLOW_LABELS = ["ai-draft", "ai-review", "ai-sua", "ai-dat", "ai-loai"];
 const PRIO = { none: "—", low: "Thấp", medium: "Vừa", high: "Cao" };
@@ -590,7 +590,7 @@ const opt = (v, cur, label) => `<option value="${esc(v)}" ${String(v) === String
 const taskTypes = (agent) => (RACI && RACI[agent]) || [];
 const storyOpts = (cur) => { const st = PROJECT ? PROJECT.story : [];
   return opt("", cur, "—") + (cur && !st.some((s) => s.key === cur) ? opt(cur, cur, `${cur} (ticket cha)`) : "") + st.map((s) => opt(s.key, cur, `${s.key} · ${s.title}`)).join(""); };
-const readonlyNote = () => canWrite() ? "" : `<p class="note">${status("warning", "Chỉ xem")} Backend ticket đang là <b>${esc(DATA ? DATA.backend : "?")}</b>; sửa trên dashboard chỉ bật khi orchestrator/config.yaml có ticket_backend: local.</p>`;
+const readonlyNote = () => canWrite() ? "" : `<p class="note">${status("warning", "Chỉ xem")} Chưa kết nối được ticket nội bộ (data/tickets.db).</p>`;
 
 /* ---- Danh sách ---- */
 function pageTList() {
@@ -772,7 +772,7 @@ function pageTDetail() {
         <dt>Tạo</dt><dd>${fmt(t.created_at)} · ${esc(t.created_by || "")}</dd>
         <dt>Cập nhật</dt><dd>${fmt(t.updated_at)}</dd>
         ${t.closed_at ? `<dt>Đóng</dt><dd>${fmt(t.closed_at)}</dd>` : ""}
-        ${t.legacy_id ? `<dt>Zoho cũ</dt><dd class="fresh">${esc(t.legacy_id)}</dd>` : ""}
+        ${t.legacy_id ? `<dt>ID cũ</dt><dd class="fresh">${esc(t.legacy_id)}</dd>` : ""}
       </dl>
     </aside>
   </div>`;

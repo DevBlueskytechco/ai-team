@@ -4,8 +4,8 @@
 Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - evals/raw/_live.json, evals/raw/live/<key>.jsonl   agent đang chạy (Orchestrator ghi, cập nhật mỗi lượt)   — đọc mỗi 2s
   - evals/raw/_runs.jsonl                               lịch sử lượt chạy, chi phí                               — mỗi 2s
-  - Ticket (mcp/ticket_server, backend theo config.yaml) ticket nội bộ: đọc khi đổi (kiểm mỗi 2s); Zoho: mỗi 60s
-  - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ backend local, chỉ từ localhost, cần header X-Efitco
+  - Ticket nội bộ (mcp/ticket_local, data/tickets.db)  đọc lại khi dữ liệu đổi (kiểm dấu mỗi 2s)
+  - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ từ localhost, cần header X-Efitco
   - gh CLI (tài khoản CTO)                              PR mở + CI, CI develop                                   — mỗi 60s
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
 import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re
@@ -50,28 +50,24 @@ def load_tickets():
     with LOCK: STATE["tickets"] = rows; STATE["tickets_at"] = now(); STATE["backend"] = T.BACKEND; STATE["errors"].pop("ticket", None)
 
 def poll_tickets():
-    """local: đọc lại ngay khi dữ liệu đổi (kiểm dấu mỗi 2s, không tốn API); zoho: mỗi 60s."""
+    """Đọc lại ngay khi dữ liệu đổi (kiểm dấu mỗi 2s), tối thiểu 60s đọc đủ 1 lần."""
+    import ticket_local as L
     last, last_full = None, 0
     while True:
         try:
-            if T.BACKEND == "local":
-                import ticket_local as L
-                v = L.version()
-                if v != last or time.time() - last_full > 60: load_tickets(); last, last_full = v, time.time()
-                time.sleep(2); continue
-            load_tickets()
+            v = L.version()
+            if v != last or time.time() - last_full > 60: load_tickets(); last, last_full = v, time.time()
         except Exception as e:
             with LOCK: STATE["errors"]["ticket"] = str(e)[:300]; STATE["backend"] = T.BACKEND
-        time.sleep(2 if T.BACKEND == "local" else 60)
+        time.sleep(2)
 
 def backup_daily():
     """Ticket nội bộ: sao lưu 1 bản/ngày vào data/backup/ (giữ 30 bản)."""
     while True:
         try:
-            if T.BACKEND == "local":
-                import ticket_local as L
-                d = os.path.join(os.path.dirname(L.DB), "backup", f"tickets-{datetime.date.today().isoformat()}.db")
-                if os.path.exists(L.DB) and not os.path.exists(d): L.backup()
+            import ticket_local as L
+            d = os.path.join(os.path.dirname(L.DB), "backup", f"tickets-{datetime.date.today().isoformat()}.db")
+            if os.path.exists(L.DB) and not os.path.exists(d): L.backup()
         except Exception as e:
             with LOCK: STATE["errors"]["backup"] = str(e)[:200]
         time.sleep(3600)
@@ -250,7 +246,6 @@ class H(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
-        if T.BACKEND != "local": return self._send(409, json.dumps({"error": f"backend ticket đang là {T.BACKEND}: chỉ ghi được khi ticket_backend: local"}, ensure_ascii=False))
         n = int(self.headers.get("Content-Length") or 0)
         if n > 200_000: return self._send(413, '{"error":"quá lớn"}')
         try:

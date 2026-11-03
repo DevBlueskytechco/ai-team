@@ -24,7 +24,6 @@
       "Bash(git diff*)",
       "Bash(shopify theme check*)",
       "Bash(ops/dashboard.sh*)",
-      "Bash(python3 ops/ticket_migrate_zoho.py*)",
       "Bash(python3 ops/ticket.py backup*)",
       "Bash(python3 ops/ticket.py export*)"
     ],
