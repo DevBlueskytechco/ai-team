@@ -42,7 +42,7 @@ def poll_zoho():
             import ticket_server as T
             rows = []
             for t in T.all():
-                rows.append({k: t.get(k) for k in ("key", "status", "agent", "task_type", "side", "points", "labels", "parent", "blocked_by", "id")} |
+                rows.append({k: t.get(k) for k in ("key", "status", "agent", "task_type", "side", "points", "labels", "parent", "blocked_by", "id", "created_at", "output_link")} |
                             {"title": html.unescape(t.get("title") or ""), "review": {k: (t.get("review") or {}).get(k) for k in ("severity", "scores", "by", "at")}})
             with LOCK: STATE["tickets"] = rows; STATE["zoho_at"] = now(); STATE["errors"].pop("zoho", None)
         except Exception as e:
@@ -203,6 +203,9 @@ class H(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send(200, open(os.path.join(HERE, "index.html"), "rb").read(), "text/html; charset=utf-8")
+        if u.path == "/api/project":   # trang thông tin (chuyển từ Efitco-thong-tin-du-an.xlsx), đọc lại mỗi lần để sửa file là thấy
+            try: return self._send(200, open(os.path.join(HERE, "project.json"), "rb").read())
+            except Exception as e: return self._send(500, json.dumps({"error": str(e)}))
         if u.path == "/api/snapshot":
             return self._send(200, json.dumps(snapshot(), ensure_ascii=False, default=str))
         if u.path == "/api/live":
