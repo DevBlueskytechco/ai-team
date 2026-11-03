@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất.
 Chạy: source ops/env.sh && python3 ops/status.py"""
-import os, sys, json, subprocess
+import os, sys, json, subprocess, re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "mcp")); import ticket_server as T
 sys.path.insert(0, os.path.join(ROOT, "orchestrator"))
@@ -20,7 +20,9 @@ for t in sorted(rows, key=key):
           if (ids.get(b, {}).get("status") or "").lower() != "closed"]
     title = t.get("title") or ""
     if bl: state = "CHỜ " + ",".join(bl)
-    elif title.startswith("[Q]") or "hỏi" in title.lower()[:12]: state = "CÂU HỎI cho CTO"
+    elif (t.get("type") == "question" or title.startswith("[Q]") or re.search(r"(^|\s)hỏi[\s:(]", title.lower()[:40])) and not (
+            t.get("agent") and (t.get("task_type") or (t.get("agent") in ("dev-fe", "dev-be") and t.get("side"))) and not title.startswith("[Q]")):
+        state = "CÂU HỎI cho CTO"   # cùng quy tắc với dashboard: câu hỏi agent làm được (có task_type) thì theo nhãn ai-*
     elif not t.get("labels"): state = "CHƯA NHÃN"
     elif "ai-review" in t["labels"]: state = "CHỜ CTO chấm"
     elif "ai-draft" in t["labels"] and t.get("agent"): state = "SẴN SÀNG"

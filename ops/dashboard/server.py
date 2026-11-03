@@ -89,6 +89,7 @@ def run_jobs(r):
     return jobs
 
 PENDING = ("queued", "in_progress", "pending", "waiting", "requested", "expected", "")
+GH_WAKE = threading.Event()   # ticker đánh thức khi lượt agent/Orchestrator vừa kết thúc
 def poll_gh():
     while True:
         busy = False
@@ -108,22 +109,25 @@ def poll_gh():
                 try: r["jobs"] = run_jobs(r)
                 except Exception: r["jobs"] = {}
             busy = any(v in PENDING for p in out for v in p["checks"].values()) or any(r.get("status") != "completed" for r in runs[:1])
-            merged = json.loads(sh("gh", "pr", "list", "-R", REPO, "--state", "merged", "-L", "100", "--json",
+            merged = json.loads(sh("gh", "pr", "list", "-R", REPO, "--state", "merged", "-L", "200", "--json",
                                    "number,title,headRefName,createdAt,mergedAt,url") or "[]")
             merged = [{"number": p["number"], "title": p["title"], "branch": p["headRefName"], "createdAt": p["createdAt"],
                        "mergedAt": p["mergedAt"], "url": p["url"]} for p in sorted(merged, key=lambda p: p.get("mergedAt") or "", reverse=True)]
             with LOCK: STATE["prs"] = out; STATE["merged"] = merged; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
         except Exception as e:
             with LOCK: STATE["errors"]["gh"] = str(e)[:200]
-        time.sleep(20 if busy else 60)   # CI đang chạy thì cập nhật nhanh hơn
+        GH_WAKE.wait(20 if busy else 60); GH_WAKE.clear()   # CI đang chạy thì 20s; lượt vừa xong thì lấy ngay
 
 # ---------- nguồn nhanh (file local) ----------
 def read_runs():
+    """Lượt chạy = bản ghi Orchestrator (luôn có started_at). Bỏ dòng do hook Stop của theme (.claude/hooks/log-cost.sh) ghi
+    cùng file — chỉ có ts/session, không phải một lượt — và dòng agent claude-code_* (Claude Code tự đặt AI_AGENT)."""
     p = os.path.join(RAW, "_runs.jsonl"); out = []
     if os.path.exists(p):
         for l in open(p, encoding="utf-8"):
             try: r = json.loads(l)
             except Exception: continue
+            if not r.get("started_at") or not r.get("agent") or str(r.get("agent")).startswith("claude-code"): continue
             out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model")})
     return sorted(out, key=lambda r: r.get("started_at") or "")
 
@@ -166,12 +170,18 @@ def _count(path):
         for c in msg.get("content") or []:
             if c.get("type") == "tool_use":
                 tools += 1; i = c.get("input") or {}
-                last = f"{c.get('name')} " + str(i.get("command") or i.get("file_path") or i.get("pattern") or "")[:140]
+                last = f"{c.get('name')} " + short(i.get("command") or i.get("file_path") or i.get("pattern") or "")[:140]
             elif c.get("type") == "text" and c.get("text", "").strip():
                 last = c["text"].strip().replace("\n", " ")[:160]
     return len(turns), tools, last
 
 LIVE_SRC = {}   # ticket → file sự kiện đang dùng cho /api/live
+HOME = os.path.expanduser("~")
+def short(s):
+    """/Users/x/.../theme-efitco/blocks/a.liquid → blocks/a.liquid; ai-team → ai-team/…; home → ~."""
+    s = str(s or "")
+    for a, b in ((THEME + os.sep, ""), (ROOT + os.sep, "ai-team/"), (HOME + os.sep, "~/")): s = s.replace(a, b)
+    return s
 
 def read_live():
     """Agent đang chạy. Ưu tiên _live.json (Orchestrator mới); nếu thiếu/cũ thì dò tiến trình + transcript."""
@@ -210,16 +220,16 @@ def live_events(key, limit=60):
             for c in (e.get("message") or {}).get("content") or []:
                 if c.get("type") == "tool_use":
                     i = c.get("input") or {}
-                    ev.append({"kind": "tool", "name": c.get("name"), "text": str(i.get("command") or i.get("file_path") or i.get("pattern") or i.get("description") or "")[:200]})
+                    ev.append({"kind": "tool", "name": c.get("name"), "text": short(i.get("command") or i.get("file_path") or i.get("pattern") or i.get("description") or "")[:200]})
                 elif c.get("type") == "text" and c.get("text", "").strip():
-                    ev.append({"kind": "say", "text": c["text"].strip()[:400]})
+                    ev.append({"kind": "say", "text": short(c["text"].strip())[:400]})
         elif t == "user":
             for c in (e.get("message") or {}).get("content") or []:
                 if isinstance(c, dict) and c.get("type") == "tool_result" and c.get("is_error"):
                     txt = c.get("content"); txt = txt if isinstance(txt, str) else json.dumps(txt)[:200]
-                    ev.append({"kind": "error", "text": str(txt)[:200]})
+                    ev.append({"kind": "error", "text": short(txt)[:200]})
         elif t == "result":
-            ev.append({"kind": "done", "text": f"xong · {e.get('num_turns')} turn · {round((e.get('duration_ms') or 0) / 60000, 1)} phút · lỗi={e.get('is_error')}"})
+            ev.append({"kind": "done", "text": f"{'lỗi' if e.get('is_error') else 'xong'} · {e.get('num_turns')} turn · {round((e.get('duration_ms') or 0) / 60000, 1)} phút"})
     return ev[-limit:]
 
 def now(): return datetime.datetime.now().astimezone().isoformat(timespec="seconds")   # kèm múi giờ để trình duyệt tính "x phút trước" đúng
@@ -267,8 +277,12 @@ def snapshot():
     return s
 
 def ticker():
+    prev = None
     while True:
         s = snapshot(); s.pop("server_time")
+        lv = s.get("live") or {}; cur = (lv.get("ticket"), lv.get("phase")) if lv.get("alive") else None
+        if prev and cur != prev: GH_WAKE.set()   # agent xong / Orchestrator vừa đẩy code, mở PR → cập nhật PR + CI ngay
+        prev = cur
         h = hashlib.sha1(json.dumps(s, sort_keys=True, default=str).encode()).hexdigest()
         if h != VERSION["hash"]: VERSION["hash"] = h; VERSION["n"] += 1
         time.sleep(2)
@@ -326,9 +340,9 @@ class H(BaseHTTPRequestHandler):
             return self._send(400, json.dumps({"error": str(e).strip("'")}, ensure_ascii=False))
         except Exception as e:
             return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
-    def _send(self, code, body, ctype="application/json; charset=utf-8"):
+    def _send(self, code, body, ctype="application/json; charset=utf-8", cache="no-store"):
         b = body if isinstance(body, bytes) else body.encode()
-        self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Cache-Control", "no-store")
+        self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Cache-Control", cache)
         self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
     def do_GET(self):
         u = urlparse(self.path)
@@ -339,7 +353,7 @@ class H(BaseHTTPRequestHandler):
             fp = os.path.join(HERE, "static", name)
             if re.fullmatch(r"[a-z0-9][a-z0-9._-]*\.(png|svg|ico)", name) and os.path.isfile(fp):
                 ctype = {"png": "image/png", "svg": "image/svg+xml", "ico": "image/x-icon"}[name.rsplit(".", 1)[1]]
-                return self._send(200, open(fp, "rb").read(), ctype)
+                return self._send(200, open(fp, "rb").read(), ctype, cache="public, max-age=3600")
             return self._send(404, '{"error":"not found"}')
         if u.path == "/api/project":   # trang thông tin (chuyển từ Efitco-thong-tin-du-an.xlsx), đọc lại mỗi lần để sửa file là thấy
             try: return self._send(200, open(os.path.join(HERE, "project.json"), "rb").read())

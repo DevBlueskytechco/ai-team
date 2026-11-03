@@ -37,7 +37,12 @@ CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT);
 
 
 def now(): return datetime.datetime.now().isoformat(timespec="seconds")
-def actor(): return os.environ.get("AI_AGENT") or os.environ.get("TICKET_USER") or "cto"
+def actor():
+    """Người thao tác. AI_AGENT do Orchestrator đặt cho agent; Claude Code cũng tự đặt AI_AGENT=claude-code_<bản>_agent
+    cho mọi lệnh nó chạy — giá trị đó không phải agent của team nên bỏ qua, rơi về TICKET_USER (Orchestrator) hoặc cto."""
+    a = os.environ.get("AI_AGENT") or ""
+    if a.startswith("claude-code"): a = ""
+    return a or os.environ.get("TICKET_USER") or "cto"
 
 
 def connect(create=False):

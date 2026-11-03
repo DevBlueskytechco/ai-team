@@ -13,6 +13,10 @@ CFG = yaml.safe_load(open(os.path.join(HERE, "config.yaml")))
 RACI = yaml.safe_load(open(os.path.join(HERE, "raci.yaml")))
 THEME = os.path.abspath(os.path.join(ROOT, CFG["theme_dir"]))
 sys.path.insert(0, os.path.join(ROOT, "mcp")); import ticket_server as T
+# Thao tác ticket của chính Orchestrator (comment PR, đổi nhãn, nhắc việc) ghi tên "orchestrator". /run-next chạy trong Claude Code,
+# nơi AI_AGENT=claude-code_<bản>_agent — bỏ đi; agent con vẫn nhận AI_AGENT=<agent> qua env riêng ở run_agent.
+if os.environ.get("AI_AGENT", "").startswith("claude-code"): os.environ.pop("AI_AGENT")
+os.environ["TICKET_USER"] = "orchestrator"
 
 def agent_version(agent):
     h = hashlib.sha256()

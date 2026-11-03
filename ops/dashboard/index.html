@@ -147,6 +147,7 @@ nav.menu .cnt:empty{display:none}
 .app.collapsed nav.menu a[aria-current="page"]::before{left:-5px}
 .navback{display:none}
 .navhead{display:none}
+@media (max-width:1000px){#fresh,#themeBtn span{display:none}}
 @media (max-width:600px){#fresh,#themeBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
 /* màn hẹp: menu là ngăn kéo trượt từ trái, có nền mờ */
 @media (max-width:900px){
@@ -164,7 +165,8 @@ nav.menu .cnt:empty{display:none}
 .page-head h2{margin:0;font-size:16px;text-transform:none;letter-spacing:0;color:var(--text)}
 .page-head input,.page-head select{font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
 .page-head input{min-width:220px}
-.info td{overflow-wrap:anywhere}
+.info td{overflow-wrap:break-word}
+.info td.ttl{min-width:200px} .info.flow td:nth-child(n+3){min-width:170px}
 .info td.k{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
 .info td.nw{white-space:nowrap}
 .info td.k.wrap{white-space:normal}
@@ -237,7 +239,7 @@ details.tsec summary{cursor:pointer}
 .legend-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px;margin:0 0 14px;color:var(--text-2)}
 .legend-dl dt{font-weight:600;color:var(--text)} .legend-dl dd{margin:0}
 .legend i.dash{background:none;border-top:2px dashed var(--muted);height:0;width:14px;vertical-align:3px}
-#bdChart svg{display:block;width:100%;height:200px}
+#bdChart svg{display:block;width:100%;height:220px}
 .rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin:0 0 6px}
 .rcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface)}
 .rcard header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;margin-bottom:8px}
@@ -282,6 +284,9 @@ details.tv{margin-top:4px} details.tv summary{cursor:pointer}
 .raci th.rc .av{display:block;margin:0 auto 3px}
 .todayrev{grid-column:span 12;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:9px 14px;font-size:13px}
 .todayrev .who{display:inline-flex;align-items:center;gap:6px}
+.noown{color:var(--muted);font-style:italic}
+.md{white-space:normal} .md p{margin:0 0 8px} .md ul,.md ol{margin:2px 0 8px;padding-left:20px} .md li{margin:2px 0} .md h4{margin:10px 0 4px;font-size:14px}
+.md code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
 .pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:6px}
 .pcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;grid-template-columns:64px 1fr;gap:4px 12px;align-items:start}
 .pcard .av{grid-row:span 4}
@@ -392,9 +397,9 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
       <label class="fresh">Kỳ <select id="period"><option value="7">7 ngày</option><option value="14">14 ngày</option><option value="30">30 ngày</option></select></label>
     </div>
     <div class="rep" id="report"></div>
-    <div class="legend"><span><i style="background:var(--series-1)"></i>Lượt agent chạy</span><span><i style="background:var(--series-2)"></i>PR đã merge</span></div>
-    <div class="chart" id="tpChart"><svg role="img" aria-label="Lượt agent chạy và PR đã merge theo ngày"></svg><div class="tip" id="tip"></div></div>
-    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table><thead><tr><th>Ngày</th><th class="n">Lượt chạy</th><th class="n">Lượt lỗi</th><th class="n">PR merge</th><th class="n">Ticket chấm</th></tr></thead><tbody id="tpTable"></tbody></table></div></details>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>Lượt agent chạy</span><span><i style="background:var(--series-2)"></i>PR agent đã merge</span></div>
+    <div class="chart" id="tpChart"><svg role="img" aria-label="Lượt agent chạy và PR agent đã merge theo ngày"></svg><div class="tip" id="tip"></div></div>
+    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table><thead><tr><th>Ngày</th><th class="n">Lượt chạy</th><th class="n">Lượt lỗi</th><th class="n">PR agent merge</th><th class="n">Ticket chấm</th></tr></thead><tbody id="tpTable"></tbody></table></div></details>
   </section>
 
   <section class="span-6" aria-labelledby="h-agents">
@@ -415,7 +420,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   </section>
 
   <section class="span-6" aria-labelledby="h-merged">
-    <h2 id="h-merged">PR đã merge gần đây</h2>
+    <h2 id="h-merged">PR agent đã merge gần đây</h2>
     <div class="tablewrap"><table><thead><tr><th>PR</th><th>Ticket</th><th>Merge lúc</th><th class="n">Mở → merge</th></tr></thead><tbody id="merged"></tbody></table></div>
   </section>
 
@@ -463,11 +468,18 @@ function ago(iso) {
 }
 const dur = (s) => (s >= 3600 ? `${Math.floor(s / 3600)}h ` : "") + `${Math.floor((s % 3600) / 60)}m ${s % 60}s`;
 
+// Câu hỏi chờ người trả lời: loại question, tên bắt đầu [Q] hoặc có chữ "hỏi" đầu tên — trừ ticket agent làm được
+// (có agent + task_type, hoặc dev-fe/dev-be có phía; không phải [Q]) như ES1-T34, ES1-T41: Orchestrator vẫn chạy, theo nhãn ai-*.
+// Dùng chung cho Dashboard, Kanban, báo cáo và ops/status.py.
+const agentWork = (t) => !!t.agent && (!!t.task_type || (["dev-fe", "dev-be"].includes(t.agent) && !!t.side)) && !/^\[Q\]/.test(t.title || "");
+const isQ = (t) => (t.type === "question" || /^\[Q\]/.test(t.title || "") || /(^|\s)hỏi[\s:(]/i.test((t.title || "").slice(0, 40))) && !agentWork(t);
+const isWork = (t) => !isQ(t);
+const isAgentPR = (p) => /^feature\/ai-/.test((p && p.branch) || "");   // PR do agent mở; PR patch/fix/ci của CTO không tính vào chỉ số agent
 function classify(t) {
-  const L = t.labels || [], title = t.title || "", closed = (t.status || "").toLowerCase() === "closed";
+  const L = t.labels || [], closed = (t.status || "").toLowerCase() === "closed";
   if (closed) return "done";
   if (DATA && DATA.live && DATA.live.alive && DATA.live.ticket === t.key) return "running";
-  if (title.startsWith("[Q]") || /^hỏi /i.test(title)) return "question";
+  if (isQ(t)) return "question";
   if (L.includes("ai-review")) return "review";
   if (L.includes("ai-sua")) return "fix";
   if (L.includes("ai-draft") && t.agent) {
@@ -527,6 +539,9 @@ const av = (id, s = 20) => (isAgent(id) ? `<img class="av" src="/static/agent-${
 const agentTag = (id, s = 20) => (!id ? "" : isAgent(id) ? `<span class="agtag" title="${esc(agentRole(id))}">${av(id, s)}<span>${esc(id)}</span></span>` : esc(id));
 const agChip = (id) => (isAgent(id) ? `<span class="chip agchip" title="${esc(agentRole(id))}">${av(id, 16)}${esc(id)}</span>` : `<span class="chip">${esc(id)}</span>`);
 let ROLES = null, ROLEDIRTY = false;
+const who = (b) => isAgent(b) ? agentTag(b, 16) : /^claude-code/.test(b || "") ? `<span title="${esc(b)}">Claude Code</span>` : esc(b || "");
+const unowned = (r) => !r.owner || r.owner === "—" || r.owner === r.role;   // role owner còn để mặc định = tên vai trò
+const ownerHtml = (r, cls = "") => unowned(r) ? '<span class="noown">chưa gán người</span>' : `<b class="${cls}">${esc(r.owner)}</b>`;
 const roleRow = (agent) => (ROLES ? ROLES.rows.find((r) => r.agent === agent) : null);
 async function loadRoles() {
   try { ROLES = await (await fetch("/api/roles", { cache: "no-store" })).json(); } catch (e) { ROLES = { rows: [], days: [] }; }
@@ -551,7 +566,7 @@ function applyNav() {
 $("navToggle").onclick = () => {
   if (isNarrow()) NAV.open = !NAV.open;
   else { NAV.collapsed = !NAV.collapsed; try { localStorage.setItem("efitco-nav", NAV.collapsed ? "collapsed" : "open"); } catch (e) {} }
-  applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE === "scrum") setTimeout(drawBurndown, 220); if (PAGE.startsWith("r-")) setTimeout(renderInfo, 220);
+  applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE.startsWith("r-")) setTimeout(renderInfo, 220);
 };
 $("navBack").onclick = () => { NAV.open = false; applyNav(); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && NAV.open) { NAV.open = false; applyNav(); $("navToggle").focus(); } });
@@ -626,7 +641,7 @@ function renderInfoInner(box) {
       `<p class="note fresh print-only">In lúc ${new Date().toLocaleString("vi-VN")} · dữ liệu ticket nội bộ, GitHub, lượt chạy agent · © 2026 NextSky Ecom</p>`;
     bindSearch(); bindCopy(COPY); runDraws(); if (PAGE === "r-sprint") drawBurndown(); return;
   }
-  else if (PAGE === "scrum") { box.innerHTML = pageScrum(); bindSearch(); drawBurndown(); return; }
+  else if (PAGE === "scrum") { box.innerHTML = pageScrum(); bindSearch(); return; }
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
     if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
@@ -776,14 +791,14 @@ function pageRoles() {
   const ag = ROLES.rows.filter((r) => r.agent);
   const cnt = (a) => { const m = T.filter((t) => t.agent === a && t.status !== "Closed"); return { open: m.length, rev: m.filter((t) => classify(t) === "review").length, run: m.filter((t) => classify(t) === "running").length }; };
   const wk = days.filter((d) => ag.some((r) => r.day === d) || ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"].includes(d));
-  return `<div class="page-head"><h2>Vai trò</h2><span class="fresh">${ag.length} agent · Role owner và ngày duyệt cố định sửa ở bảng cuối trang</span></div>
+  return `<div class="page-head"><h2>Vai trò</h2><span class="fresh">${ag.length} agent · Role owner và ngày duyệt cố định sửa ở bảng cuối trang</span>${ROLES.rows.filter((r) => r.agent && unowned(r)).length ? status("warning", `${ROLES.rows.filter((r) => r.agent && unowned(r)).length} vai chưa gán người — điền tên ở bảng cuối trang`) : ""}</div>
     <div class="pcards">${ag.map((r) => { const c = cnt(r.agent), a = PROJECT && PROJECT.raci && (PROJECT.raci.agents || []).find((x) => x.id === r.agent);
       return `<article class="pcard">${av(r.agent, 64)}<div class="nm">${esc(r.role)}</div><div class="rl"><span class="chip">${esc(r.agent)}</span>${a ? " " + esc(a.role) : ""}</div>
-        <div class="own">Role owner: <b>${esc(r.owner || "—")}</b>${r.day ? ` · duyệt <b>${esc(r.day)}</b>` : ""}</div>
+        <div class="own">Role owner: ${ownerHtml(r)}${r.day ? ` · duyệt <b>${esc(r.day)}</b>` : ""}</div>
         <div class="st">${c.run ? status("warning", "đang chạy") + " " : ""}${c.open} ticket mở · ${c.rev} chờ chấm</div></article>`; }).join("")}</div>
     <h3 class="sub">Lịch duyệt trong tuần</h3>
     <div class="week" style="grid-template-columns:repeat(${Math.min(wk.length, 7)},minmax(0,1fr))">${wk.map((d) => `<div class="day ${d === today ? "today" : ""}"><h4>${esc(d)}${d === today ? " · hôm nay" : ""}</h4>
-      ${ag.filter((r) => r.day === d).map((r) => `<div class="who">${av(r.agent, 24)}<div><div>${esc(r.role)}</div><div class="fresh">${esc(r.owner)}</div></div></div>`).join("") || '<div class="fresh">—</div>'}</div>`).join("")}</div>
+      ${ag.filter((r) => r.day === d).map((r) => `<div class="who">${av(r.agent, 24)}<div><div>${esc(r.role)}</div><div class="fresh">${unowned(r) ? '<span class="noown">chưa gán người</span>' : esc(r.owner)}</div></div></div>`).join("") || '<div class="fresh">—</div>'}</div>`).join("")}</div>
     <h3 class="sub">Role owner và ngày duyệt cố định</h3>
     <div class="tablewrap"><table class="info rtable"><thead><tr><th>Vai trò</th><th>Agent</th><th>Role owner</th><th>Ngày duyệt cố định</th><th>Ghi chú</th><th>Sửa lần cuối</th></tr></thead>
       <tbody>${ROLES.rows.map((r, i) => `<tr data-i="${i}"><td class="nw"><b>${esc(r.role)}</b></td><td class="nw">${r.agent ? agentTag(r.agent, 22) : '<span class="fresh">người</span>'}</td>
@@ -826,25 +841,29 @@ function pageProcess() {
     ${diagramFlow()}${diagramStates()}${["steps", "rhythm", "incidents", "rules"].map((k) => tableOf(P[k], "process")).join("")}`;
 }
 
+// Trạng thái story theo ticket con (không tính câu hỏi): chưa có ticket = Chưa làm; có mà chưa đóng cái nào = Đã chia task; đóng một phần = Đang làm; đóng hết = Xong ticket
+const storyState = (kids) => { const w = kids.filter(isWork), d = w.filter((t) => t.status === "Closed").length, q = kids.filter((t) => isQ(t) && t.status !== "Closed").length;
+  return !w.length ? ["none", "Chưa làm", q] : d === w.length ? ["good", "Xong ticket", q] : d ? ["warning", "Đang làm", q] : ["warning", "Đã chia task", q]; };
+const storyCell = (s, kids) => { const [k, l, q] = storyState(kids);
+  return status(k, l) + (q ? `<div class="fresh">còn ${q} câu hỏi mở</div>` : "") + (s.status && s.status !== l ? `<div class="fresh">CTO ghi: ${esc(s.status)}</div>` : ""); };
 function pageStory() {
   const T = DATA ? DATA.tickets : [];
   const rows = PROJECT.story.map((s) => {
     const kids = T.filter((t) => t.parent === s.key), done = kids.filter((t) => (t.status || "").toLowerCase() === "closed").length;
     const pts = kids.filter((t) => (t.labels || []).includes("ai-dat")).reduce((a, t) => a + (Number(t.points) || 0), 0);
-    return { ...s, kids: kids.length, done, pts, pct: kids.length ? Math.round((done / kids.length) * 100) : 0 };
+    return { ...s, kidsT: kids, state: storyState(kids)[1], kids: kids.length, done, pts, pct: kids.length ? Math.round((done / kids.length) * 100) : 0 };
   });
   const sum = (k) => rows.reduce((a, r) => a + (r[k] || 0), 0);
-  const tk = sum("kids"), td = sum("done"), xong = rows.filter((r) => r.status === "Xong").reduce((a, r) => a + r.points, 0);
-  const st = (v) => status(v === "Xong" ? "good" : v === "Chưa làm" ? "none" : "warning", v);
+  const tk = sum("kids"), td = sum("done"), xong = rows.filter((r) => r.state === "Xong ticket").reduce((a, r) => a + r.points, 0);
   return `<div class="page-head"><h2>Story</h2><span class="fresh">${rows.length} story · ${sum("points")} point sơ bộ</span></div>
-    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Phía</th><th class="n">Point</th><th>Trạng thái (CTO)</th>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Phía</th><th class="n">Point</th><th>Trạng thái</th>
       <th class="n">Ticket con</th><th class="n">Đã đóng</th><th style="min-width:140px">% ticket đóng</th><th class="n">Point task đạt</th></tr></thead>
-    <tbody>${rows.map((r) => `<tr><td class="k">${esc(r.key)}</td><td>${esc(r.title)}</td><td class="nw">${esc(r.side)}</td><td class="n">${r.points}</td><td class="nw">${st(r.status)}</td>
+    <tbody>${rows.map((r) => `<tr><td class="k">${esc(r.key)}</td><td>${esc(r.title)}</td><td class="nw">${esc(r.side)}</td><td class="n">${r.points}</td><td class="nw">${storyCell(r, r.kidsT)}</td>
       <td class="n">${r.kids}</td><td class="n">${r.done}</td><td><div class="story" style="grid-template-columns:1fr 40px;padding:0"><div class="bar"><i style="width:${r.pct}%"></i></div><span class="fresh">${r.pct}%</span></div></td>
       <td class="n">${r.pts}</td></tr>`).join("")}</tbody>
     <tfoot><tr><td colspan="3">Tổng</td><td class="n">${sum("points")}</td><td class="nw">Story xong: ${xong} point</td><td class="n">${tk}</td><td class="n">${td}</td>
       <td>${tk ? Math.round((td / tk) * 100) : 0}%</td><td class="n">${sum("pts")}</td></tr></tfoot></table></div>
-    <p class="note">Trạng thái story do CTO cập nhật trong project.json; số ticket con, đã đóng và point task đạt tính trực tiếp từ ticket nội bộ.</p>`;
+    <p class="note">Trạng thái tính từ ticket con, không tính câu hỏi: chưa có ticket = Chưa làm, có ticket nhưng chưa đóng cái nào = Đã chia task, đóng một phần = Đang làm, đóng hết = Xong ticket; câu hỏi còn mở ghi riêng. Cột ticket con và % tính cả câu hỏi. Dòng “CTO ghi” là trạng thái trong project.json khi khác. Số ticket con, đã đóng và point task đạt tính trực tiếp từ ticket nội bộ.</p>`;
 }
 
 /* ================= Ticket nội bộ: danh sách, kanban, tạo, chi tiết ================= */
@@ -1030,6 +1049,25 @@ async function loadTDetail(key, force) {
   if (PAGE === "t-detail") { $("info").innerHTML = pageTDetail(); bindTDetail(); }
 }
 
+/* Markdown tối thiểu cho mô tả/comment: tiêu đề #, gạch đầu dòng, danh sách số, `code`, **đậm**, link http và ES1-Txx. Escape trước, an toàn XSS. */
+function md(src) {
+  const inline = (x) => x.split(/(`[^`]+`)/).map((part, i) => i % 2 ? `<code>${part.slice(1, -1)}</code>` :
+    part.split(/(https?:\/\/[^\s<]+)/).map((p, j) => j % 2 ? `<a href="${p}" target="_blank" rel="noopener">${p}</a>` :
+      p.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\b(ES1-T\d+)\b/g, '<a href="#/t/$1">$1</a>')).join("")).join("");
+  let out = "", list = null, para = [];
+  const flushP = () => { if (para.length) out += `<p>${para.map(inline).join("<br>")}</p>`; para = []; };
+  const flushL = () => { if (list) out += `<${list.tag}>${list.items.map((x) => `<li>${inline(x)}</li>`).join("")}</${list.tag}>`; list = null; };
+  esc(src || "").split("\n").forEach((raw) => {
+    const l = raw.replace(/\s+$/, ""), b = l.match(/^\s*[-*•]\s+(.*)$/), n = l.match(/^\s*\d+[.)]\s+(.*)$/), h = l.match(/^#{1,4}\s+(.*)$/);
+    if (b || n) { flushP(); const tag = b ? "ul" : "ol"; if (!list || list.tag !== tag) { flushL(); list = { tag, items: [] }; } list.items.push((b || n)[1]); return; }
+    if (list && /^\s{2,}\S/.test(l)) { list.items[list.items.length - 1] += " " + l.trim(); return; }
+    flushL();
+    if (h) { flushP(); out += `<h4>${inline(h[1])}</h4>`; return; }
+    if (!l.trim()) { flushP(); return; }
+    para.push(l);
+  });
+  flushP(); flushL(); return out;
+}
 function pageTDetail() {
   const t = TDETAIL.t;
   if (!t) return '<div class="empty">Đang tải…</div>';
@@ -1054,13 +1092,13 @@ function pageTDetail() {
   <div class="tgrid">
     <div class="tmain">
       <div class="tsec"><div class="sec-head"><h3>Mô tả</h3>${canWrite() ? `<button class="btn sm" data-act="edit-body">${IC("edit")}Sửa</button>` : ""}</div>
-        <div id="tBody" class="tbody">${t.body ? esc(t.body) : '<span class="fresh">(trống)</span>'}</div></div>
+        <div id="tBody" class="tbody md">${t.body ? md(t.body) : '<span class="fresh">(trống)</span>'}</div></div>
       <div class="tsec"><h3>Comment (${(t.comments || []).length})</h3>
-        <div class="tcoms">${(t.comments || []).map((c) => `<div class="tcom"><div class="fresh"><b>${esc(c.by || "")}</b> · ${fmt(c.at)}</div><div class="tbody">${esc(c.text)}</div></div>`).join("") || '<div class="empty">Chưa có comment.</div>'}</div>
+        <div class="tcoms">${(t.comments || []).map((c) => `<div class="tcom"><div class="fresh"><b>${who(c.by)}</b> · ${fmt(c.at)}</div><div class="tbody md">${md(c.text)}</div></div>`).join("") || '<div class="empty">Chưa có comment.</div>'}</div>
         ${canWrite() ? `<form id="tCom" class="tcomform"><textarea name="text" rows="3" placeholder="Viết comment (agent đọc được qua mcp ticket get)"></textarea>
           <div class="actions"><button class="btn primary" type="submit">${IC("send")}Gửi comment</button></div></form>` : ""}</div>
       <details class="tsec"><summary><h3 style="display:inline">Lịch sử (${(t.activity || []).length})</h3></summary>
-        <table class="info"><tbody>${(t.activity || []).slice().reverse().map((a) => `<tr><td class="fresh nw">${fmt(a.at)}</td><td class="nw">${esc(a.by || "")}</td>
+        <table class="info"><tbody>${(t.activity || []).slice().reverse().map((a) => `<tr><td class="fresh nw">${fmt(a.at)}</td><td class="nw">${who(a.by)}</td>
           <td class="nw"><b>${esc(a.field)}</b></td><td>${esc(a.old ?? "")}${a.old != null || a.new != null ? " → " : ""}${esc(a.new ?? "")}</td></tr>`).join("")}</tbody></table></details>
     </div>
     <aside class="tside">
@@ -1072,9 +1110,9 @@ function pageTDetail() {
         <dt>Đầu ra</dt><dd>${outUrl ? `<a href="${esc(outUrl)}" target="_blank" rel="noopener">${esc(outUrl.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out || "—")}</dd>
         <dt>Bị chặn bởi</dt><dd>${(t.blocked_by || []).map(linkT).join("<br>") || "—"}</dd>
         <dt>Đang chặn</dt><dd>${blocking.map((x) => linkT(x.key)).join("<br>") || "—"}</dd>
-        <dt>Chấm điểm</dt><dd>${rv.severity ? `${esc(rv.severity)} · ${esc(rv.by || "")} · ${esc(rv.at || "")}<br><span class="fresh">${esc(Object.entries(rv.scores || {}).map(([k, v]) => `${k}=${v}`).join(", "))}</span>${rv.reason ? `<br>${esc(rv.reason)}` : ""}` : "—"}</dd>
+        <dt>Chấm điểm</dt><dd>${rv.severity ? `${esc(rv.severity)} · ${who(rv.by)} · ${esc(rv.at || "")}<br><span class="fresh">${esc(Object.entries(rv.scores || {}).map(([k, v]) => `${k}=${v}`).join(", "))}</span>${rv.reason ? `<br>${esc(rv.reason)}` : ""}` : "—"}</dd>
         <dt>Lượt agent</dt><dd>${runs.map((r) => `${fmt(r.started_at)} · ${agentTag(r.agent, 16)} · ${r.num_turns ?? "—"} turn${r.duration_s != null ? " · " + dur(r.duration_s) : ""} ${r.is_error ? status("critical", "lỗi") : ""}`).join("<br>") || "—"}</dd>
-        <dt>Tạo</dt><dd>${fmt(t.created_at)} · ${esc(t.created_by || "")}</dd>
+        <dt>Tạo</dt><dd>${fmt(t.created_at)} · ${who(t.created_by)}</dd>
         <dt>Cập nhật</dt><dd>${fmt(t.updated_at)}</dd>
         ${t.closed_at ? `<dt>Đóng</dt><dd>${fmt(t.closed_at)}</dd>` : ""}
         ${t.legacy_id ? `<dt>ID cũ</dt><dd class="fresh">${esc(t.legacy_id)}</dd>` : ""}
@@ -1179,80 +1217,64 @@ const dOnly = (iso) => (iso ? String(iso).slice(0, 10) : null);
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 const todayKey = () => dayKey(new Date().toISOString());
 
-function sprintStats(sp, T) {
-  const days = []; for (let d = sp.start; d <= sp.end; d = addDays(d, 1)) days.push(d);
-  const pts = (t) => Number(t.points) || 0;
-  const scope = T.filter((t) => pts(t) > 0 && dOnly(t.created_at) <= sp.end && (t.status !== "Closed" || !t.closed_at || dOnly(t.closed_at) >= sp.start));
-  const remaining = (d) => scope.filter((t) => dOnly(t.created_at) <= d && !(t.status === "Closed" && t.closed_at && dOnly(t.closed_at) <= d)).reduce((a, t) => a + pts(t), 0);
-  const closedIn = T.filter((t) => t.status === "Closed" && t.closed_at && dOnly(t.closed_at) >= sp.start && dOnly(t.closed_at) <= sp.end);
-  const createdIn = T.filter((t) => dOnly(t.created_at) >= sp.start && dOnly(t.created_at) <= sp.end);
-  const today = todayKey();
-  return { days, scope, closedIn, createdIn, today,
-    burn: days.map((d) => ({ d, rem: d <= today ? remaining(d) : null })),
-    start: remaining(addDays(sp.start, -1)) || scope.filter((t) => dOnly(t.created_at) <= sp.start).reduce((a, t) => a + pts(t), 0),
-    donePts: closedIn.reduce((a, t) => a + pts(t), 0) };
-}
-
 function pageScrum() {
   const S = PROJECT.scrum; if (!S) return '<div class="empty">project.json chưa có mục scrum.</div>';
-  const T = DATA ? DATA.tickets : [], today = todayKey();
-  const cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end);
-  const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1);
-  const sp = S.sprints[idx], st = sprintStats(sp, T);
-  const dayN = today < sp.start ? 0 : today > sp.end ? st.days.length : st.days.indexOf(today) + 1;
-  const open = st.scope.filter((t) => t.status !== "Closed").length;
-  const tiles = [
-    ["Thời gian", `${sp.start.slice(8)}/${sp.start.slice(5, 7)} – ${sp.end.slice(8)}/${sp.end.slice(5, 7)}`, today < sp.start ? "chưa bắt đầu" : today > sp.end ? "đã kết thúc" : `ngày ${dayN}/${st.days.length}`],
-    ["Point trong sprint", st.scope.reduce((a, t) => a + (Number(t.points) || 0), 0), `${st.scope.length} ticket có point`],
-    ["Point đã xong", st.donePts, `${st.closedIn.length} ticket đóng trong sprint`],
-    ["Point còn lại", st.burn.filter((b) => b.rem != null).slice(-1)[0]?.rem ?? st.start, `${open} ticket có point còn mở`],
-    ["Ticket tạo mới", st.createdIn.length, "trong sprint"],
-  ];
-  const vel = S.sprints.map((s) => { const x = sprintStats(s, T); return [s.name, `${s.start} → ${s.end}`, x.donePts, x.closedIn.length, x.createdIn.length, s.goal || "—"]; });
-  return `<div class="page-head"><h2>Agile/Scrum</h2>
-      <select data-sel="sprint" aria-label="Sprint">${S.sprints.map((s, i) => opt(i, idx, `${s.name}${i === cur ? " (hiện tại)" : ""}`)).join("")}</select>
-      <span class="fresh">Mục tiêu: ${esc(sp.goal || "chưa ghi — sửa project.json scrum.sprints")}</span></div>
-    <div class="rep">${tiles.map(([l, v, s]) => `<div class="t"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("")}</div>
-    <h3 class="sub">Burndown (story point)</h3>
-    <div class="legend"><span><i style="background:var(--series-1)"></i>Point còn lại</span><span><i class="dash"></i>Đường lý tưởng</span></div>
-    <div class="chart" id="bdChart"><svg role="img" aria-label="Burndown ${esc(sp.name)}: point còn lại theo ngày so với đường lý tưởng"></svg><div class="tip" id="bdTip"></div></div>
-    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table class="info"><thead><tr><th>Ngày</th><th class="n">Point còn lại</th><th class="n">Lý tưởng</th></tr></thead>
-      <tbody>${st.burn.map((b, i) => `<tr><td>${b.d}</td><td class="n">${b.rem ?? "—"}</td><td class="n">${(st.start - (st.start * i) / Math.max(1, st.days.length - 1)).toFixed(1)}</td></tr>`).join("")}</tbody></table></div></details>
-    <p class="note">Point lấy từ ticket nội bộ (task FE/BE có point). Ticket thêm giữa sprint làm đường còn lại đi lên. ${esc(S.sprint_note)}</p>
+  const today = todayKey(), cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end), sp = S.sprints[cur >= 0 ? cur : S.sprints.length - 1];
+  const days = daysOf(sp.start, sp.end), dayN = today < sp.start ? 0 : today > sp.end ? days.length : days.indexOf(today) + 1;
+  const stt = (s) => (today > s.end ? status("good", "đã qua") : today >= s.start ? status("warning", "đang chạy") : status("none", "sắp tới"));
+  return `<div class="page-head"><h2>Agile/Scrum</h2><span class="fresh">cách team chạy Scrum với agent — số liệu sprint xem ở Báo cáo sprint</span></div>
+    <div class="todayrev" style="margin-bottom:14px">${IC("calendar")}<b>${esc(sp.name)}</b><span>${ddmm(sp.start)} → ${ddmm(sp.end)} · ${today < sp.start ? "chưa bắt đầu" : today > sp.end ? "đã kết thúc" : `ngày ${dayN}/${days.length}`}</span>
+      <span>mục tiêu: ${sp.goal ? esc(sp.goal) : '<span class="noown">chưa ghi — sửa project.json scrum.sprints</span>'}</span>
+      <a href="#/r-sprint" onclick="Q.sprint=''" style="margin-left:auto">Burndown, vận tốc, phạm vi →</a></div>
     ${diagramScrum()}
-    <h3 class="sub">Vận tốc theo sprint</h3>
-    <div class="tablewrap"><table class="info"><thead><tr><th>Sprint</th><th>Thời gian</th><th class="n">Point xong</th><th class="n">Ticket đóng</th><th class="n">Ticket tạo</th><th>Mục tiêu</th></tr></thead>
-      <tbody>${vel.map((r) => `<tr>${r.map((c, i) => `<td class="${i >= 2 && i <= 4 ? "n" : i === 1 ? "nw fresh" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <h3 class="sub">Lịch sprint</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Sprint</th><th>Thời gian</th><th>Trạng thái</th><th>Mục tiêu</th></tr></thead>
+      <tbody>${S.sprints.map((s) => `<tr><td class="nw"><b>${esc(s.name)}</b></td><td class="nw fresh">${ddmm(s.start)} → ${ddmm(s.end)}</td><td class="nw">${stt(s)}</td><td class="ttl">${s.goal ? esc(s.goal) : '<span class="noown">chưa ghi</span>'}</td></tr>`).join("")}</tbody></table></div>
     ${["roles", "events", "artifacts", "dor", "dod"].map((k) => tableOf(S[k], "scrum")).join("")}`;
 }
 
+/* Burndown sprint: point còn lại + đường phạm vi (ticket thêm giữa sprint làm phạm vi đi lên) + đường lý tưởng từ phạm vi ngày đầu */
+function sprintBurn(sp, T) {
+  const r = sprintReport(sp, T), today = todayKey(), days = daysOf(sp.start, sp.end), P = (a) => a.reduce((x, t) => x + pts(t), 0);
+  const rows = days.map((d) => { if (d > today) return { d, scope: null, done: null, rem: null };
+    const scope = P(r.committed) + P(r.added.filter((t) => dOnly(t.created_at) <= d)), done = P(r.scope.filter((t) => t.status === "Closed" && t.closed_at && dOnly(t.closed_at) <= d));
+    return { d, scope, done, rem: scope - done }; });
+  const base = rows[0].scope ?? r.cp, n = days.length;
+  rows.forEach((x, i) => (x.ideal = Math.round((base - (base * i) / Math.max(1, n - 1)) * 10) / 10));
+  return { days, rows, base };
+}
+function burnTable(B) {
+  return `<details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table class="info"><thead><tr><th>Ngày</th><th class="n">Phạm vi</th><th class="n">Hoàn thành</th><th class="n">Còn lại</th><th class="n">Lý tưởng</th></tr></thead>
+    <tbody>${B.rows.map((b) => `<tr><td class="nw">${ddmm(b.d)}</td><td class="n">${b.scope ?? "—"}</td><td class="n">${b.done ?? "—"}</td><td class="n">${b.rem ?? "—"}</td><td class="n">${b.ideal}</td></tr>`).join("")}</tbody></table></div></details>`;
+}
 function drawBurndown() {
   const S = PROJECT && PROJECT.scrum, el = $("bdChart"); if (!S || !el) return;
   const today = todayKey(), cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end);
   const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1);
-  const st = sprintStats(S.sprints[idx], DATA ? DATA.tickets : []);
-  const svg = el.querySelector("svg"), W = svg.clientWidth || 900, H = 200, pl = 34, pr = 10, pt = 10, pb = 24, n = st.days.length;
-  const max = Math.max(1, st.start, ...st.burn.map((b) => b.rem || 0)), step = max <= 10 ? 2 : max <= 30 ? 5 : 10, top = Math.ceil(max / step) * step;
+  const B = sprintBurn(S.sprints[idx], DATA ? DATA.tickets : []), n = B.days.length;
+  const svg = el.querySelector("svg"), W = svg.clientWidth || 900, H = 220, pl = 34, pr = 40, pt = 12, pb = 24;
+  const max = Math.max(1, B.base, ...B.rows.map((b) => b.scope || 0)), step = niceStep(max / 4), top = Math.ceil(max / step) * step;
   const x = (i) => pl + ((W - pl - pr) * i) / Math.max(1, n - 1), y = (v) => H - pb - ((H - pb - pt) * v) / top;
   let g = "";
-  for (let v = 0; v <= top; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
+  for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${fmtV(v)}</text>`;
   const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W - pl - pr) / 46))));
-  st.days.forEach((d, i) => { if (i % every === 0 || (i === n - 1 && (n - 1) % every === 0)) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="${i === n - 1 ? "end" : "middle"}">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
-  const ti = st.days.indexOf(today);
+  B.days.forEach((d, i) => { if (i % every === 0) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${ddmm(d)}</text>`; });
+  const ti = B.days.indexOf(today);
   if (ti >= 0) g += `<line x1="${x(ti)}" x2="${x(ti)}" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3"/><text class="axis" x="${x(ti) + 4}" y="${pt + 9}">hôm nay</text>`;
-  g += `<line x1="${x(0)}" y1="${y(st.start)}" x2="${x(n - 1)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-  const pts = st.burn.map((b, i) => (b.rem == null ? null : [x(i), y(b.rem)])).filter(Boolean);
-  if (pts.length) {
-    g += `<polyline points="${pts.map((p) => p.join(",")).join(" ")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
-    pts.forEach((p) => (g += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2"/>`));
-  }
-  st.days.forEach((d, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
+  g += `<line x1="${x(0)}" y1="${y(B.base)}" x2="${x(n - 1)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  const line = (key, color, w) => { const p = B.rows.map((b, i) => (b[key] == null ? null : [x(i), y(b[key]), b[key]])).filter(Boolean); if (!p.length) return "";
+    const L = p[p.length - 1];
+    return `<polyline points="${p.map((q) => q[0] + "," + q[1]).join(" ")}" fill="none" stroke="var(${color})" stroke-width="${w}" stroke-linejoin="round"/>` +
+      p.map((q) => `<circle cx="${q[0]}" cy="${q[1]}" r="3.5" fill="var(${color})" stroke="var(--surface)" stroke-width="2"/>`).join("") +
+      `<text class="axis vl" x="${L[0] + 7}" y="${L[1] + 4}">${L[2]}</text>`; };
+  g += line("scope", "--series-2", 1.75) + line("rem", "--series-1", 2.25);
+  B.days.forEach((d, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
   const tip = $("bdTip");
   svg.querySelectorAll("rect[data-i]").forEach((r) => {
-    r.onmousemove = (e) => { const i = +r.dataset.i, b = st.burn[i], ideal = st.start - (st.start * i) / Math.max(1, n - 1);
-      tip.style.display = "block"; tip.innerHTML = `<b>${b.d}</b><br>Point còn lại: ${b.rem ?? "—"}<br>Lý tưởng: ${ideal.toFixed(1)}`;
-      const bx = el.getBoundingClientRect(); tip.style.left = Math.min(e.clientX - bx.left + 10, bx.width - 150) + "px"; tip.style.top = e.clientY - bx.top - 60 + "px"; };
+    r.onmousemove = (e) => { const b = B.rows[+r.dataset.i];
+      tip.style.display = "block"; tip.innerHTML = `<b>${ddmm(b.d)}</b><br>Phạm vi: ${b.scope ?? "—"} point<br>Hoàn thành: ${b.done ?? "—"}<br>Còn lại: ${b.rem ?? "—"}<br>Lý tưởng: ${b.ideal}`;
+      const bx = el.getBoundingClientRect(); tip.style.left = Math.min(e.clientX - bx.left + 10, bx.width - 150) + "px"; tip.style.top = e.clientY - bx.top - 80 + "px"; };
     r.onmouseleave = () => (tip.style.display = "none");
   });
 }
@@ -1296,8 +1318,6 @@ const median = (a) => { const s = a.filter((x) => x != null && isFinite(x)).sort
 const hoursBetween = (a, b) => (new Date(b) - new Date(a)) / 36e5;
 const fmtH = (h) => (h == null ? "—" : h < 1 ? `${Math.round(h * 60)} phút` : h < 24 ? `${h.toFixed(1)} giờ` : `${(h / 24).toFixed(1)} ngày`);
 const pct = (a, b) => (b ? Math.round((a / b) * 100) + "%" : "—");
-const isQ = (t) => t.type === "question" || /^\[Q\]/.test(t.title || "") || /(^|\s)hỏi[\s:(]/i.test((t.title || "").slice(0, 40));
-const isWork = (t) => !isQ(t);
 const pts = (t) => Number(t.points) || 0;
 const inRange = (d, from, to) => d && d >= from && d <= to;
 const closedIn = (t, from, to) => t.status === "Closed" && inRange(dOnly(t.closed_at), from, to);
@@ -1369,7 +1389,9 @@ function lineChart(id, cats, series, o = {}) {
       const p = s.values.map((v, i) => (v == null ? null : [x(i), y(v)])).filter(Boolean); if (!p.length) return;
       g += `<polyline points="${p.map((q) => q.join(",")).join(" ")}" fill="none" stroke="var(${s.color})" stroke-width="${s.dash ? 1.5 : 2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""} stroke-linejoin="round"/>`;
       const last = p[p.length - 1], lv = s.values.filter((v) => v != null).slice(-1)[0];
-      if (!s.dash) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${last[0] + 7}" y="${last[1] + 4}">${fmtV(lv)}</text>`;
+      if (s.all) s.values.forEach((v, i) => { if (v == null) return; const ty = y(v) - 9 < pt + 8 ? y(v) + 17 : y(v) - 9, an = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
+        g += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${x(i) + (an === "start" ? 6 : an === "end" ? -6 : 0)}" y="${ty}" text-anchor="${an}">${fmtV(v, o.unit)}</text>`; });
+      else if (!s.dash) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${last[0] + 7}" y="${last[1] + 4}">${fmtV(lv)}</text>`;
     });
     g += `<line class="cross" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3" style="display:none"/>`;
     cats.forEach((c, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
@@ -1405,7 +1427,7 @@ const COPY = {};
 
 /* ---------- 1. Báo cáo tuần ---------- */
 function weekStats(from, to) {
-  const T = DATA ? DATA.tickets : [], R = DATA ? DATA.runs : [], M = DATA ? DATA.merged || [] : [];
+  const T = DATA ? DATA.tickets : [], R = DATA ? DATA.runs : [], M = (DATA ? DATA.merged || [] : []).filter(isAgentPR);
   const done = T.filter((t) => isWork(t) && closedIn(t, from, to)), created = T.filter((t) => isWork(t) && createdIn(t, from, to));
   const qs = T.filter((t) => isQ(t) && createdIn(t, from, to)), runs = R.filter((r) => inRange(dayKey(r.started_at), from, to));
   const merged = M.filter((p) => inRange(dayKey(p.mergedAt), from, to)), rev = T.filter((t) => t.review && inRange(String(t.review.at || "").slice(0, 10), from, to));
@@ -1424,16 +1446,16 @@ function pageRWeek() {
   const tiles = [
     ["Ticket hoàn thành", S.done.length, delta(S.done.length, P.done.length)], ["Point hoàn thành", S.donePts, delta(S.donePts, P.donePts)],
     ["Ticket mới", S.created.length, `${S.qs.length} câu hỏi mới`], ["Lượt agent", S.runs.length, S.runs.length ? `${pct(S.ok, S.runs.length)} thành công` : "—"],
-    ["PR merge", S.merged.length, S.lead != null ? `trung vị mở → merge ${fmtH(S.lead)}` : "—"], ["Tỉ lệ đạt", pct(S.dat, S.rev.length), `${S.rev.length} ticket chấm trong tuần`],
+    ["PR agent merge", S.merged.length, S.lead != null ? `trung vị mở → merge ${fmtH(S.lead)}` : "—"], ["Tỉ lệ đạt", pct(S.dat, S.rev.length), `${S.rev.length} ticket chấm trong tuần`],
   ];
   COPY.week = [`Báo cáo tuần ${ddmm(from)}–${ddmm(to)} · Efitco`,
     `- Hoàn thành: ${S.done.length} ticket, ${S.donePts} point (tuần trước ${P.done.length} ticket, ${P.donePts} point)`,
     `- Ticket mới: ${S.created.length}; câu hỏi mới: ${S.qs.length}`,
-    `- Agent: ${S.runs.length} lượt, ${pct(S.ok, S.runs.length)} thành công; PR merge: ${S.merged.length}${S.lead != null ? ` (trung vị mở → merge ${fmtH(S.lead)})` : ""}`,
+    `- Agent: ${S.runs.length} lượt, ${pct(S.ok, S.runs.length)} thành công; PR agent merge: ${S.merged.length}${S.lead != null ? ` (trung vị mở → merge ${fmtH(S.lead)})` : ""}`,
     `- Chấm: ${S.rev.length} ticket, tỉ lệ đạt ${pct(S.dat, S.rev.length)}`,
     `- Chờ CTO: ${waiting.length}${waiting.length ? " (" + waiting.slice(0, 8).map((x) => x.t.key).join(", ") + ")" : ""}`,
     `- Bị chặn: ${blocked.length}${blocked.length ? " (" + blocked.map((t) => `${t.key} chờ ${(t.blocked_by || []).join("/")}`).join(", ") + ")" : ""}`].join("\n");
-  const cmp = [{ label: "Ticket hoàn thành", short: "Hoàn thành" }, { label: "Ticket mới", short: "Mới" }, { label: "Câu hỏi mới", short: "Câu hỏi" }, { label: "Lượt agent", short: "Lượt agent" }, { label: "PR merge", short: "PR merge" }, { label: "Ticket chấm", short: "Đã chấm" }];
+  const cmp = [{ label: "Ticket hoàn thành", short: "Hoàn thành" }, { label: "Ticket mới", short: "Mới" }, { label: "Câu hỏi mới", short: "Câu hỏi" }, { label: "Lượt agent", short: "Lượt agent" }, { label: "PR agent merge", short: "PR agent" }, { label: "Ticket chấm", short: "Đã chấm" }];
   return `<div class="page-head"><h2>Báo cáo tuần</h2>
       <select data-sel="rweek" aria-label="Tuần">${weeks.map((w, i) => opt(i, wi, `${i === 0 ? "Tuần này" : i === 1 ? "Tuần trước" : "Tuần"} · ${ddmm(w)}–${ddmm(addDays(w, 6))}`)).join("")}</select>${tools("week")}</div>
     ${repTiles(tiles)}
@@ -1444,16 +1466,16 @@ function pageRWeek() {
         { name: "Tuần này", color: "--series-1", values: [S.done.length, S.created.length, S.qs.length, S.runs.length, S.merged.length, S.rev.length] }], { aria: "So sánh số lượng tuần này với tuần trước", labels: true, lw: 60 }), "cùng đơn vị: số lượng")}
     </div>
     <div class="rgrid">
-      ${card(`Đã hoàn thành (${S.done.length})`, `<div class="tablewrap"><table class="info"><tbody>${S.done.sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at))).map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${sevChip(t.review && t.review.severity)}</td></tr>`).join("") || '<tr><td class="empty">Chưa có ticket đóng trong tuần.</td></tr>'}</tbody></table></div>`)}
-      ${card(`Cần CTO xử lý (${waiting.length})`, `<div class="tablewrap"><table class="info"><tbody>${waiting.map(({ t, age }) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent, 16)}${roleRow(t.agent) && roleRow(t.agent).day ? `<div class="fresh">duyệt ${esc(roleRow(t.agent).day)}</div>` : ""}</td><td class="nw">${stageOf(t)}</td><td class="n nw">${age >= 2 ? status("warning", Math.floor(age) + " ngày") : Math.floor(age) + " ngày"}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`, "đang chờ chấm hoặc chờ trả lời, cũ nhất lên đầu; ≥ 2 ngày có cảnh báo")}
+      ${card(`Đã hoàn thành (${S.done.length})`, `<div class="tablewrap"><table class="info"><tbody>${S.done.sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at))).map((t) => `<tr><td class="k">${tkey(t)}</td><td class="ttl">${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${sevChip(t.review && t.review.severity)}</td></tr>`).join("") || '<tr><td class="empty">Chưa có ticket đóng trong tuần.</td></tr>'}</tbody></table></div>`)}
+      ${card(`Cần CTO xử lý (${waiting.length})`, `<div class="tablewrap"><table class="info"><tbody>${waiting.map(({ t, age }) => `<tr><td class="k">${tkey(t)}</td><td class="ttl">${esc(t.title)}</td><td class="nw">${agentTag(t.agent, 16)}${roleRow(t.agent) && roleRow(t.agent).day ? `<div class="fresh">duyệt ${esc(roleRow(t.agent).day)}</div>` : ""}</td><td class="nw">${stageOf(t)}</td><td class="n nw">${age >= 2 ? status("warning", Math.floor(age) + " ngày") : Math.floor(age) + " ngày"}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`, "đang chờ chấm hoặc chờ trả lời, cũ nhất lên đầu; ≥ 2 ngày có cảnh báo")}
     </div>
-    ${card(`Bị chặn (${blocked.length})`, `<div class="tablewrap"><table class="info"><tbody>${blocked.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">chờ ${(t.blocked_by || []).map((b) => K[b] ? `<a href="#/t/${esc(b)}">${esc(b)}</a>` : esc(b)).join(", ")}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`)}`;
+    ${card(`Bị chặn (${blocked.length})`, `<div class="tablewrap"><table class="info"><tbody>${blocked.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="ttl">${esc(t.title)}</td><td class="nw">chờ ${(t.blocked_by || []).map((b) => K[b] ? `<a href="#/t/${esc(b)}">${esc(b)}</a>` : esc(b)).join(", ")}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`)}`;
 }
 
 /* ---------- 2. Hiệu suất ---------- */
 function pageRPerf() {
   const n = Number(Q.rper ?? 14), { from, to } = periodRange(n), T = DATA ? DATA.tickets : [], R = (DATA ? DATA.runs : []).filter((r) => inRange(dayKey(r.started_at), from, to));
-  const M = (DATA ? DATA.merged || [] : []).filter((p) => inRange(dayKey(p.mergedAt), from, to)), K = tByKey();
+  const M = (DATA ? DATA.merged || [] : []).filter((p) => isAgentPR(p) && inRange(dayKey(p.mergedAt), from, to)), K = tByKey();
   const done = T.filter((t) => isWork(t) && closedIn(t, from, to)), qs = T.filter((t) => isQ(t) && createdIn(t, from, to));
   const cyc = done.map((t) => hoursBetween(t.created_at, t.closed_at)).filter((h) => h >= 0);
   const span = daysOf(from, to), weeks = Math.max(1, span.length / 7);
@@ -1461,7 +1483,7 @@ function pageRPerf() {
   const tiles = [
     ["Ticket hoàn thành", done.length, `${(done.length / weeks).toFixed(1)} ticket/tuần · ${done.reduce((a, t) => a + pts(t), 0)} point`],
     ["Cycle time trung vị", fmtH(median(cyc)), "tạo ticket → đóng"],
-    ["PR: mở → merge", fmtH(median(M.map((p) => hoursBetween(p.createdAt, p.mergedAt)))), `trung vị ${M.length} PR`],
+    ["PR agent: mở → merge", fmtH(median(M.map((p) => hoursBetween(p.createdAt, p.mergedAt)))), `trung vị ${M.length} PR agent`],
     ["Lượt agent", R.length, R.length ? `${pct(R.filter((r) => !r.is_error).length, R.length)} thành công` : "—"],
     ["Thời gian một lượt", fmtH(median(dd)), dd.length ? `trung vị · TB ${Math.round(R.reduce((a, r) => a + (r.num_turns || 0), 0) / Math.max(1, R.length))} turn` : "chưa ghi thời lượng"],
     ["Câu hỏi / ticket xong", done.length ? (qs.length / done.length).toFixed(2) : "—", `${qs.length} câu hỏi phát sinh`],
@@ -1488,7 +1510,7 @@ function pageRPerf() {
     <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Thành công</th><th class="n">Thời gian/lượt</th><th class="n">TB turn</th><th class="n">Ticket xong</th><th class="n">Point</th><th class="n">Cycle time</th><th class="n" title="Câu hỏi agent tạo ra khi thiếu thông tin">Câu hỏi đã tạo</th></tr></thead>
       <tbody>${st.map((x) => `<tr><td class="nw">${agentTag(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
         <td class="n">${x.done}</td><td class="n">${x.pts}</td><td class="n">${fmtH(x.cyc)}</td><td class="n">${x.asked}</td></tr>`).join("")}</tbody></table></div>
-    <p class="note">Cycle time = ngày đóng − ngày tạo ticket (ticket chuyển từ Zoho giữ ngày gốc). Câu hỏi gán cho agent của ticket được nhắc trong tên câu hỏi. Lượt chạy trước 03/11 chưa ghi thời lượng.</p>`;
+    <p class="note">Cycle time = ngày đóng − ngày tạo ticket (ticket chuyển từ Zoho giữ ngày gốc). Câu hỏi gán cho agent của ticket được nhắc trong tên câu hỏi. Lượt chạy trước 03/11 chưa ghi thời lượng. PR chỉ tính PR agent (nhánh feature/ai-*), không tính PR patch/fix/ci của CTO.</p>`;
 }
 
 /* ---------- 3. Chất lượng ---------- */
@@ -1513,13 +1535,14 @@ function pageRQuality() {
   crit.sort((x, y) => x.avg - y.avg || y.n - x.n);
   const weeks = []; for (let w = weekStart(from); w <= to; w = addDays(w, 7)) weeks.push({ label: `Tuần ${ddmm(w)}`, short: ddmm(w), from: w, to: addDays(w, 6) });
   const wr = (w) => rev.filter((t) => inRange(String(t.review.at).slice(0, 10), w.from, w.to));
+  const wk2 = weeks.map((w) => { const k = wr(w).length; return { ...w, label: `${w.label} · ${k} ticket chấm`, short: `${w.short} (${k})` }; });
   const lessons = rev.filter((t) => t.review.severity !== "dat" && t.review.reason).sort((a, b) => String(b.review.at).localeCompare(String(a.review.at)));
   return `<div class="page-head"><h2>Chất lượng</h2>${periodSel("rper", n)}${tools()}</div>
     ${repTiles(tiles)}
     <div class="rgrid">
       ${card("Kết quả chấm theo agent", `<div class="legend">${SEV.map(([, l, c]) => `<span><i style="background:var(${c})"></i>${l}</span>`).join("")}</div>` +
         barChart("rqSev", agents.map((a) => ({ label: a, av: a })), SEV.map(([k, l, c]) => ({ name: l, color: c, values: agents.map((a) => rev.filter((t) => t.agent === a && t.review.severity === k).length) })), { aria: "Số ticket đạt, sửa nhẹ, sửa nặng, loại theo agent", labels: true, lw: 60 }).replace(/^<div class="legend">.*?<\/div>/, ""), "mỗi cột có nhãn số; màu theo mức, kèm chú thích chữ")}
-      ${card("Tỉ lệ đạt theo tuần", lineChart("rqTrend", weeks, [{ name: "Tỉ lệ đạt (%)", color: "--series-1", values: weeks.map((w) => { const r = wr(w); return r.length ? Math.round((r.filter((t) => t.review.severity === "dat").length / r.length) * 100) : null; }) }], { aria: "Tỉ lệ đạt theo tuần", unit: "%" }), "phần trăm ticket chấm đạt trong tuần")}
+      ${card("Tỉ lệ đạt theo tuần", lineChart("rqTrend", wk2, [{ name: "Tỉ lệ đạt (%)", color: "--series-1", all: true, values: weeks.map((w) => { const r = wr(w); return r.length ? Math.round((r.filter((t) => t.review.severity === "dat").length / r.length) * 100) : null; }) }], { aria: "Tỉ lệ đạt theo tuần", unit: "%" }), "phần trăm ticket chấm đạt trong tuần; số trong ngoặc = số ticket chấm — tuần ít ticket thì tỉ lệ dao động mạnh")}
     </div>
     ${card("Tiêu chí rubric yếu nhất", hbars(crit.slice(0, 10).map((c) => ({ label: `${c.a} · ${c.id}`, title: c.text, v: c.avg, text: `${c.avg.toFixed(2)} / 2 · ${c.n} lần`, color: c.avg < 1.5 ? "--warning" : "--series-1" })), { max: 2, mark: 1.6, markLabel: "ngưỡng 80% (1,6/2)" }), "trung bình điểm 0–2 mỗi tiêu chí; vạch dọc = ngưỡng đạt 80% của rubric; tiêu chí dưới 1,5 tô màu cảnh báo — ưu tiên sửa prompt/skill")}
     <h3 class="sub">Điểm theo tiêu chí rubric</h3>
@@ -1527,7 +1550,7 @@ function pageRQuality() {
       <tbody>${crit.map((c) => `<tr><td class="nw">${agentTag(c.a)}</td><td class="k">${esc(c.id)}</td><td>${esc(c.text)}</td><td class="n">${c.n}</td><td class="n">${c.avg.toFixed(2)}</td><td class="n">${c.d0}</td><td class="n">${c.d1}</td><td class="n">${c.d2}</td>
         <td class="nw">${c.avg >= 1.6 ? status("good", "đạt ngưỡng") : c.avg >= 1.5 ? status("warning", "sát ngưỡng") : status("serious", "cần cải thiện")}</td></tr>`).join("") || '<tr><td colspan="9" class="empty">Chưa có điểm rubric trong kỳ.</td></tr>'}</tbody></table></div>
     <h3 class="sub">Bài học từ ticket phải sửa / loại</h3>
-    <div class="tablewrap"><table class="info"><tbody>${lessons.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="nw">${agentTag(t.agent)}</td><td class="nw">${sevChip(t.review.severity)}</td><td>${esc(t.review.reason)}</td><td class="fresh nw">${esc(t.review.at || "")}</td></tr>`).join("") || '<tr><td class="empty">Chưa có lý do ghi khi chấm sửa/loại.</td></tr>'}</tbody></table></div>`;
+    <div class="tablewrap"><table class="info"><tbody>${lessons.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="nw">${agentTag(t.agent)}</td><td class="nw">${sevChip(t.review.severity)}</td><td class="ttl">${esc(t.review.reason)}</td><td class="fresh nw">${esc(t.review.at || "")}</td></tr>`).join("") || '<tr><td class="empty">Chưa có lý do ghi khi chấm sửa/loại.</td></tr>'}</tbody></table></div>`;
 }
 
 /* ---------- 4. Kết quả dự án ---------- */
@@ -1535,11 +1558,11 @@ function pageRResults() {
   const T = DATA ? DATA.tickets : [], start = firstDay(), today = todayKey(), days = daysOf(start, today);
   const work = T.filter(isWork), withPts = work.filter((t) => pts(t) > 0), S = PROJECT.story || [];
   const st = S.map((s) => { const k = T.filter((t) => t.parent === s.key), d = k.filter((t) => t.status === "Closed");
-    return { ...s, n: k.length, d: d.length, pct: k.length ? d.length / k.length : 0, first: k.map((t) => dOnly(t.created_at)).sort()[0], last: k.length && d.length === k.length ? d.map((t) => dOnly(t.closed_at)).sort().slice(-1)[0] : null }; });
-  const storyDone = st.filter((s) => s.n && s.d === s.n).length, evN = DATA ? DATA.evals_n || 0 : 0, evReviewed = T.filter((t) => t.review && t.review.severity).length;
+    return { ...s, kidsT: k, ss: storyState(k)[1], n: k.length, d: d.length, pct: k.length ? d.length / k.length : 0, first: k.map((t) => dOnly(t.created_at)).sort()[0], last: k.length && d.length === k.length ? d.map((t) => dOnly(t.closed_at)).sort().slice(-1)[0] : null }; });
+  const storyDone = st.filter((s) => s.ss === "Xong ticket").length, evN = DATA ? DATA.evals_n || 0 : 0, evReviewed = T.filter((t) => t.review && t.review.severity).length;
   const totalPts = withPts.reduce((a, t) => a + pts(t), 0), donePts = withPts.filter((t) => t.status === "Closed").reduce((a, t) => a + pts(t), 0);
   const sp = ((PROJECT.scrum || {}).sprints || []).find((s) => s.start <= today && today <= s.end);
-  const tiles = [["Story hoàn tất", `${storyDone}/${S.length}`, `${st.filter((s) => s.n && s.d < s.n).length} story đang làm`],
+  const tiles = [["Story hoàn tất", `${storyDone}/${S.length}`, `${st.filter((s) => ["Đang làm", "Đã chia task"].includes(s.ss)).length} story đang làm`],
     ["Ticket đã đóng", `${work.filter((t) => t.status === "Closed").length}/${work.length}`, "không tính câu hỏi"],
     ["Point hoàn thành", `${donePts}/${totalPts}`, pct(donePts, totalPts) + " point đã ước lượng"],
     ["Bản ghi eval", `${evN}/300`, `${evReviewed} ticket đã chấm · mục tiêu tuần 12`],
@@ -1559,7 +1582,7 @@ function pageRResults() {
     ["Lên Canvas store thật", "charter: tuần 11 (sau Sprint 4)", "none", "sắp tới"], ["Eval, ký G5", "charter: tuần 13–14", "none", "sắp tới"]];
   return `<div class="page-head"><h2>Kết quả dự án</h2><span class="fresh">từ ${ddmm(start)} tới hôm nay</span>${tools()}</div>
     ${repTiles(tiles)}
-    ${card("Mục tiêu đo được (charter)", `<div class="tablewrap"><table class="info"><tbody>${goals.map(([g, [k, ev]], i) => `<tr><td class="n">${i + 1}</td><td>${esc(g)}</td><td class="nw">${status(k, k === "good" ? "đạt" : k === "warning" ? "đang làm" : "chưa đo")}</td><td>${esc(ev)}</td></tr>`).join("")}</tbody></table></div>
+    ${card("Mục tiêu đo được (charter)", `<div class="tablewrap"><table class="info"><tbody>${goals.map(([g, [k, ev]], i) => `<tr><td class="n">${i + 1}</td><td class="ttl">${esc(g)}</td><td class="nw">${status(k, k === "good" ? "đạt" : k === "warning" ? "đang làm" : "chưa đo")}</td><td>${esc(ev)}</td></tr>`).join("")}</tbody></table></div>
       <div style="margin-top:10px">${hbars([{ label: "Bản ghi eval", v: evN, text: `${evN} / 300` }], { max: 300 })}</div>`)}
     <div class="rgrid">
       ${card("Burn-up point", lineChart("rrBurn", cats, [{ name: "Phạm vi (point đã ước lượng)", color: "--series-2", values: scopeV }, { name: "Đã hoàn thành", color: "--series-1", values: doneV }], { aria: "Burn-up: point phạm vi và point hoàn thành tích luỹ theo ngày" }), "khoảng cách giữa 2 đường = point còn lại")}
@@ -1569,8 +1592,8 @@ function pageRResults() {
     <h3 class="sub">Mốc</h3>
     <div class="tablewrap"><table class="info"><thead><tr><th>Mốc</th><th>Thời gian</th><th>Trạng thái</th></tr></thead><tbody>${ms.map(([a, b, k, l]) => `<tr><td>${esc(a)}</td><td class="nw">${esc(b)}</td><td>${status(k, l)}</td></tr>`).join("")}</tbody></table></div>
     <h3 class="sub">Story</h3>
-    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Trạng thái (CTO)</th><th class="n">Ticket</th><th class="n">Đóng</th><th>Bắt đầu</th><th>Xong</th></tr></thead>
-      <tbody>${st.map((s) => `<tr><td class="k">${esc(s.key)}</td><td>${esc(s.title)}</td><td class="nw">${esc(s.status)}</td><td class="n">${s.n}</td><td class="n">${s.d}</td><td class="nw fresh">${s.first ? ddmm(s.first) : "—"}</td><td class="nw fresh">${s.last ? ddmm(s.last) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
+    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Trạng thái</th><th class="n">Ticket</th><th class="n">Đóng</th><th>Bắt đầu</th><th>Xong</th></tr></thead>
+      <tbody>${st.map((s) => `<tr><td class="k">${esc(s.key)}</td><td class="ttl">${esc(s.title)}</td><td class="nw">${storyCell(s, s.kidsT)}</td><td class="n">${s.n}</td><td class="n">${s.d}</td><td class="nw fresh">${s.first ? ddmm(s.first) : "—"}</td><td class="nw fresh">${s.last ? ddmm(s.last) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
 /* ---------- 5. Báo cáo sprint ---------- */
@@ -1591,7 +1614,7 @@ function pageRSprint() {
   const tiles = [["Cam kết đầu sprint", `${r.cp} point`, `${r.committed.length} ticket mở lúc bắt đầu`], ["Thêm giữa sprint", `${r.ap} point`, `${r.added.length} ticket`],
     ["Hoàn thành", `${r.dp} point`, `${r.done.length} ticket · ${pct(r.dp, r.cp + r.ap)} phạm vi`], ["Còn lại", `${r.lp} point`, today > sp.end ? "chuyển sprint sau" : `${r.left.length} ticket`],
     ["Việc không point đã xong", other, "câu hỏi, chia task, test…"], ["Vận tốc TB", vel.length ? Math.round(vel.reduce((a, v) => a + v.dp, 0) / vel.length) + " point" : "—", `${vel.length} sprint đã/đang chạy`]];
-  const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
+  const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="ttl">${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
   COPY.sprint = [`Báo cáo ${sp.name} (${ddmm(sp.start)}–${ddmm(sp.end)}) · Efitco`, `- Mục tiêu: ${sp.goal || "chưa ghi"}`,
     `- Cam kết ${r.cp} point, thêm ${r.ap} point, hoàn thành ${r.dp} point (${pct(r.dp, r.cp + r.ap)}), còn lại ${r.lp} point`,
     `- Hoàn thành: ${r.done.map((t) => t.key).join(", ") || "—"}`, `- Còn lại: ${r.left.map((t) => t.key).join(", ") || "—"}`].join("\n");
@@ -1600,8 +1623,8 @@ function pageRSprint() {
       <span class="fresh">${ddmm(sp.start)} → ${ddmm(sp.end)} · mục tiêu: ${esc(sp.goal || "chưa ghi")}</span>${tools("sprint")}</div>
     ${repTiles(tiles)}
     <div class="rgrid">
-      ${card("Burndown", `<div class="legend"><span><i style="background:var(--series-1)"></i>Point còn lại</span><span><i class="dash"></i>Đường lý tưởng</span></div>
-        <div class="chart" id="bdChart"><svg role="img" aria-label="Burndown ${esc(sp.name)}"></svg><div class="tip" id="bdTip"></div></div>`, "point còn lại mỗi ngày so với đường lý tưởng")}
+      ${card("Burndown", `<div class="legend"><span><i style="background:var(--series-1)"></i>Point còn lại</span><span><i style="background:var(--series-2)"></i>Phạm vi</span><span><i class="dash"></i>Đường lý tưởng</span></div>
+        <div class="chart" id="bdChart"><svg role="img" aria-label="Burndown ${esc(sp.name)}: point còn lại, phạm vi và đường lý tưởng theo ngày"></svg><div class="tip" id="bdTip"></div></div>${burnTable(sprintBurn(sp, T))}`, "phạm vi đi lên = thêm ticket giữa sprint; còn lại = phạm vi − hoàn thành")}
       ${card("Vận tốc theo sprint", barChart("rsVel", past.map((s) => ({ label: s.name, short: s.name.replace("Chuẩn bị (pha 0)", "Pha 0") })),
         [{ name: "Phạm vi (cam kết + thêm)", color: "--series-2", values: vel.map((v) => v.cp + v.ap) }, { name: "Hoàn thành", color: "--series-1", values: vel.map((v) => v.dp) }], { aria: "Point phạm vi và hoàn thành theo sprint", labels: true, lw: 70, unit: " point" }))}
     </div>
@@ -1638,7 +1661,7 @@ function drawActivity(d) {
   const box = $("act"); if (!box) return;
   const G = {}; (d.tickets || []).forEach((t) => (G[classify(t)] ||= []).push(t));
   const win = Number($("actWin").value || 24) * 3600e3, now = Date.now(), t0 = now - win;
-  const runs = actRuns(d), agents = ACT_AGENTS.concat([...new Set(runs.map((r) => r.agent))].filter((a) => a && !ACT_AGENTS.includes(a)));
+  const runs = actRuns(d), agents = ACT_AGENTS.concat([...new Set(runs.map((r) => r.agent))].filter((a) => a && isAgent(a) && !ACT_AGENTS.includes(a)));
   const inWin = runs.filter((r) => (r.en ? r.en.getTime() : r.st.getTime()) >= t0);
   const busyN = runs.filter((r) => r.kind === "run").length;
   const ms = (r) => (r.en ? Math.max(0, Math.min(r.en, now) - Math.max(r.st, t0)) : 0);
@@ -1699,6 +1722,7 @@ function render(d) {
   DATA = d;
   renderMenu();
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
+  document.querySelector(".conn").title = $("fresh").textContent;
   if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
@@ -1737,7 +1761,7 @@ function render(d) {
   if (ROLES) {
     const today = DOW[new Date().getDay()], due = ROLES.rows.filter((r) => r.day === today && r.agent);
     const waitN = (a) => d.tickets.filter((t) => t.agent === a && classify(t) === "review" && (!prOf(t.key) || gateOf(prOf(t.key).checks) === "pass")).length;
-    $("todayRev").innerHTML = `${IC("calendar")}<b>Lịch duyệt hôm nay · ${esc(today)}</b>` + (due.length ? due.map((r) => `<span class="who">${av(r.agent, 22)}<span>${esc(r.role)} — ${esc(r.owner)}</span>${waitN(r.agent) ? status("warning", waitN(r.agent) + " chờ chấm") : status("good", "không có ticket chờ")}</span>`).join("")
+    $("todayRev").innerHTML = `${IC("calendar")}<b>Lịch duyệt hôm nay · ${esc(today)}</b>` + (due.length ? due.map((r) => `<span class="who">${av(r.agent, 22)}<span>${esc(r.role)} — ${ownerHtml(r)}</span>${waitN(r.agent) ? status("warning", waitN(r.agent) + " chờ chấm") : status("good", "không có ticket chờ")}</span>`).join("")
       : `<span class="fresh">Không có vai nào duyệt cố định hôm nay.</span>`) + `<a class="fresh" href="#/roles" style="margin-left:auto">Sửa lịch duyệt →</a>`;
   }
 
@@ -1807,7 +1831,7 @@ function render(d) {
 
   // Hiệu quả theo agent
   const A = {};
-  d.runs.forEach((r) => { const a = (A[r.agent] ||= { n: 0, turns: 0, err: 0, dsum: 0, dn: 0, dat: 0, sua: 0, loai: 0 });
+  d.runs.forEach((r) => { if (!isAgent(r.agent)) return; const a = (A[r.agent] ||= { n: 0, turns: 0, err: 0, dsum: 0, dn: 0, dat: 0, sua: 0, loai: 0 });
     a.n++; a.turns += r.num_turns || 0; if (r.is_error) a.err++; if (r.duration_s != null) { a.dsum += r.duration_s; a.dn++; } });
   d.tickets.forEach((t) => { if (!t.agent || !A[t.agent]) return; const L = t.labels || [];
     if (L.includes("ai-dat")) A[t.agent].dat++; else if (L.includes("ai-sua")) A[t.agent].sua++; else if (L.includes("ai-loai")) A[t.agent].loai++; });
@@ -1819,7 +1843,7 @@ function render(d) {
 
   // PR đã merge gần đây
   const keyOf = (br) => String(br || "").replace("feature/ai-", "");
-  const M = d.merged || [];
+  const M = (d.merged || []).filter(isAgentPR);
   $("merged").innerHTML = M.slice(0, 10).map((p) => `<tr><td><a href="${esc(p.url)}" target="_blank" rel="noopener">#${p.number}</a></td>
     <td title="${esc(p.title)}">${esc(keyOf(p.branch))}</td><td class="fresh">${esc((p.mergedAt || "").slice(5, 16).replace("T", " "))}</td>
     <td class="n">${hrs(p)}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có PR merge.</td></tr>';
@@ -1847,7 +1871,7 @@ function report(d, R, M) {
   const dd = runs.filter((r) => r.duration_s != null).map((r) => r.duration_s);
   const tiles = [
     ["Lượt agent chạy", runs.length, runs.length ? `${Math.round((ok / runs.length) * 100)}% thành công · ${runs.length - ok} lỗi` : "chưa có lượt"],
-    ["PR đã merge", merged.length, lead.length ? `TB mở → merge ${(lead.reduce((a, b) => a + b, 0) / lead.length).toFixed(1)} giờ` : "—"],
+    ["PR agent đã merge", merged.length, lead.length ? `trung vị mở → merge ${fmtH(median(lead))}` : "—"],
     ["Ticket đã chấm", T.length, `đạt ${dat} · sửa ${sua} · loại ${loai}`],
     ["Tỉ lệ đạt", T.length ? Math.round((dat / T.length) * 100) + "%" : "—", T.length ? `trên ${T.length} ticket đã chấm` : "chưa chấm ticket nào"],
     ["Story point xong", pts, `${dat} ticket đạt`],
@@ -1888,7 +1912,7 @@ function drawTp(days, by) {
   const tip = $("tip");
   svg.querySelectorAll("rect[data-i]").forEach((r) => {
     r.onmousemove = (e) => { const k = days[+r.dataset.i], v = by[k]; tip.style.display = "block";
-      tip.innerHTML = `<b>${k}</b><br>Lượt agent chạy: ${v.runs}${v.err ? ` (${v.err} lỗi)` : ""}<br>PR đã merge: ${v.pr}<br>Ticket chấm: ${v.rev}`;
+      tip.innerHTML = `<b>${k}</b><br>Lượt agent chạy: ${v.runs}${v.err ? ` (${v.err} lỗi)` : ""}<br>PR agent đã merge: ${v.pr}<br>Ticket chấm: ${v.rev}`;
       const bx = $("tpChart").getBoundingClientRect(); tip.style.left = Math.min(e.clientX - bx.left + 10, bx.width - 170) + "px"; tip.style.top = e.clientY - bx.top - 70 + "px"; };
     r.onmouseleave = () => (tip.style.display = "none");
   });
@@ -1923,7 +1947,7 @@ setInterval(() => { if (ACT && PAGE === "dashboard") drawActivity(ACT.d); }, 500
 try { const w = localStorage.getItem("efitco-actwin"); if (w) $("actWin").value = w; } catch (e) {}
 $("actWin").onchange = () => { try { localStorage.setItem("efitco-actwin", $("actWin").value); } catch (e) {} if (ACT) drawActivity(ACT.d); };
 let RESZ = 0;
-window.addEventListener("resize", () => { if (ACT && PAGE === "dashboard") drawActivity(ACT.d); if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); clearTimeout(RESZ); if (PAGE.startsWith("r-")) RESZ = setTimeout(renderInfo, 150); });
+window.addEventListener("resize", () => { if (ACT && PAGE === "dashboard") drawActivity(ACT.d); if (TP) drawTp(TP.days, TP.by); clearTimeout(RESZ); if (PAGE.startsWith("r-")) RESZ = setTimeout(renderInfo, 150); });
 </script>
 </body>
 </html>
