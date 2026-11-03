@@ -138,6 +138,16 @@ nav.menu a[aria-current="page"]::before{content:"";position:absolute;left:-7px;t
 nav.menu a[aria-current="page"] .ic{color:var(--accent)}
 nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;background:var(--surface-2);border-radius:999px;padding:0 6px;min-width:20px;text-align:center}
 nav.menu .cnt:empty{display:none}
+nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot.urg{background:var(--critical)}
+.ibx-sec{margin-top:18px} .ibx-sec h3.sub{display:inline-flex;align-items:center;gap:8px;margin:0 0 2px} .ibx-sec h3 .n{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}
+.ibx-sec>p.fresh{margin:0 0 6px} .ibx-sec>summary{cursor:pointer;list-style-position:outside}
+.ibx{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.ibx .ttl{font-weight:500;line-height:1.4} .ibx .ttl a.k{font-family:var(--mono);font-size:12.5px;margin-right:6px}
+.ibx .meta{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.5} .ibx .meta .agtag{vertical-align:-3px}
+.ibx .ac{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:440px}
+.ibx .ac .cmd code{font-family:var(--mono);font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.ibx-empty{padding:10px 0;border-top:1px solid var(--line)}
+@media (max-width:800px){.ibx{grid-template-columns:minmax(0,1fr)} .ibx .ac{justify-content:flex-start;max-width:none} .ibx .ac .cmd code{max-width:240px}}
 /* thu gọn trên màn rộng: chỉ còn icon, tên hiện khi rê chuột (title) */
 .app.collapsed{grid-template-columns:62px minmax(0,1fr)}
 .app.collapsed nav.menu{padding:10px 7px}
@@ -345,6 +355,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
   <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
@@ -522,7 +533,7 @@ const prOf = (key) => ((DATA && DATA.prs) || []).find((p) => p.branch === `featu
 let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
-  ["Tổng quan", [["dashboard", "Dashboard", "dashboard"]]],
+  ["Tổng quan", [["dashboard", "Dashboard", "dashboard"], ["inbox", "Việc chờ tôi", "inbox"]]],
   ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
   ["Báo cáo vận hành", [["r-week", "Báo cáo tuần", "calendar"], ["r-perf", "Hiệu suất", "activity"], ["r-quality", "Chất lượng", "shield"], ["r-results", "Kết quả dự án", "target"], ["r-sprint", "Báo cáo sprint", "flag"]]],
   ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
@@ -580,8 +591,9 @@ function renderMenu() {
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   if (ROLES) cnt.roles = ROLES.rows.length;
+  const IB = inboxSummary(); cnt.inbox = IB.n || "";
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
-    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
+    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt${id === "inbox" && IB.n ? (IB.urgent ? " hot urg" : " hot") : ""}"${id === "inbox" && IB.n ? ` title="${IB.n} việc chờ bạn${IB.urgent ? `, ${IB.urgent} gấp` : ""}"` : ""}>${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
   if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
 }
 
@@ -634,6 +646,7 @@ function renderInfoInner(box) {
   else if (PAGE === "t-detail") { box.innerHTML = pageTDetail(); if (TDETAIL.t) bindTDetail(); else loadTDetail(TDETAIL.key); return; }
   else if (PAGE === "process") box.innerHTML = pageProcess();
   else if (PAGE === "roles") { box.innerHTML = pageRoles(); bindRoles(); return; }
+  else if (PAGE === "inbox") { box.innerHTML = pageInbox(); bindInbox(); return; }
   else if (PAGE === "raci") box.innerHTML = pageRaci();
   else if (PAGE.startsWith("r-")) {
     DRAWS = [];
@@ -657,6 +670,145 @@ function renderInfoInner(box) {
   const live = ["t-list", "t-board", "story"].includes(PAGE);
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
+}
+
+/* ===== Việc chờ tôi (CTO): duyệt, trả lời, quyết định, thiết lập — tính trực tiếp từ ticket, PR, CI, cấu hình; tự hết khi đã xử lý ===== */
+const IB_SECS = [["review", "Duyệt PR và chấm", "check", "PR có check bắt buộc đạt — review rồi /merge-pr (merge, chấm, đóng ticket)"],
+  ["answer", "Trả lời câu hỏi", "send", "agent hỏi khi thiếu thông tin — trả lời bằng comment rồi đóng ticket câu hỏi"],
+  ["decide", "Cần bạn quyết định", "flag", "CI lỗi, ticket cần sửa, ai-review không có PR, PR đã merge mà ticket chưa đóng"],
+  ["ticket", "Thiết lập ticket", "tag", "ticket Orchestrator đang bỏ qua vì thiếu nhãn, agent hoặc loại việc; ticket quá hạn"],
+  ["setup", "Thiết lập dự án và môi trường", "key", "role owner, mục tiêu sprint, trạng thái story, biến môi trường, công cụ"],
+  ["run", "Có thể chạy tiếp", "terminal", "ticket sẵn sàng — giao agent khi bạn muốn"],
+  ["wait", "Đang chờ hệ thống", "activity", "agent đang chạy, CI đang chạy, ticket chờ ticket khác — chưa cần làm gì"]];
+const IB_COUNTED = ["review", "answer", "decide", "ticket", "setup"];
+const IB_OPEN = {};   // trạng thái mở/đóng các khối thu gọn — giữ qua mỗi lần trang tự cập nhật
+let IB_CHECKING = false;
+const IB_PRI = { 3: ["critical", "Gấp"], 2: ["warning", "Cao"], 1: ["none", "Thường"], 0: ["none", "Chờ"] };
+const ageD = (iso) => (iso ? Math.max(0, (Date.now() - new Date(iso)) / 864e5) : 0);
+const ageTxt = (x) => (x < 1 / 24 ? "vừa xong" : x < 1 ? `${Math.round(x * 24)} giờ` : `${Math.floor(x)} ngày`);
+const scoreTpl = (agent) => { const c = ((RUBRICS || {})[agent] || {}).criteria || []; return c.length ? c.map((x) => `${x.id}=2`).join(",") : "tiêu_chí=2"; };
+function inboxItems() {
+  const d = DATA; if (!d) return [];
+  const T = d.tickets || [], items = [], over = d.review_overdue_days || 2, today = DOW[new Date().getDay()], tk = todayKey();
+  const open = T.filter((t) => t.status !== "Closed"), K = tByKey();
+  const add = (it) => items.push(it);
+  const tl = (k) => `<a href="#/t/${esc(k)}">${esc(k)}</a>`;
+  open.forEach((t) => {
+    const g = classify(t), age = ageD(t.updated_at || t.created_at), rr = roleRow(t.agent), base = { key: t.key, title: t.title, agent: t.agent, age };
+    const owner = rr && rr.day ? ` · ${unowned(rr) ? "" : esc(rr.owner) + " "}duyệt ${esc(rr.day)}${rr.day === today ? " (hôm nay)" : ""}` : "";
+    if (g === "running") add({ ...base, sec: "wait", pri: 0, why: `agent ${esc(t.agent)} đang chạy` });
+    else if (g === "review") {
+      const pr = prOf(t.key), mg = (d.merged || []).find((p) => p.branch === `feature/ai-${t.key}`);
+      if (pr) {
+        const gate = gateOf(pr.checks);
+        if (gate === "pass") add({ ...base, sec: "review", pri: age >= over ? 3 : rr && rr.day === today ? 2 : 1,
+          why: `PR #${pr.number} · check bắt buộc đạt · chờ ${ageTxt(age)}${age >= over ? ` (quá ${over} ngày)` : ""}${owner}`,
+          acts: [["cmd", `/review-pr ${pr.number}`], ["cmd", `/merge-pr ${pr.number} dat "${scoreTpl(t.agent)}" "<lý do>"`], ["link", pr.url, `PR #${pr.number}`]] });
+        else if (gate === "fail") add({ ...base, sec: "decide", pri: 2,
+          why: `PR #${pr.number}: check bắt buộc lỗi (${esc(reqChecks().filter((c) => FAILS.includes(String((pr.checks || {})[c] || "").toLowerCase())).join(", ") || "xem PR")}) — lỗi môi trường thì chạy lại CI, lỗi code thì trả ai-sua`,
+          acts: [["link", pr.url + "/checks", "Xem check"], ["cmd", `python3 ops/ticket.py label ${t.key} ai-sua`]] });
+        else add({ ...base, sec: "wait", pri: 0, why: `PR #${pr.number} đang chạy CI`, acts: [["link", pr.url, `PR #${pr.number}`]] });
+      } else if (mg) add({ ...base, sec: "decide", pri: 2, why: `PR #${mg.number} đã merge nhưng ticket chưa chấm, chưa đóng (merge ngoài /merge-pr?)`,
+        acts: [["cmd", `python3 orchestrator/review.py ${t.key} dat --scores "${scoreTpl(t.agent)}" --by cto --reason "<lý do>"`], ["cmd", `python3 ops/ticket.py close ${t.key} "[cto] PR #${mg.number} đã merge"`]] });
+      else add({ ...base, sec: "decide", pri: age >= over ? 2 : 1, why: `nhãn ai-review nhưng không có PR mở hay đã merge · ${ageTxt(age)} — cho agent chạy lại hoặc đóng ticket`,
+        acts: [["cmd", `python3 ops/ticket.py label ${t.key} ai-draft`], ["link", `#/t/${t.key}`, "Mở ticket"]] });
+    } else if (g === "question") {
+      const bl = open.filter((x) => (x.blocked_by || []).includes(t.key)), qa = ageD(t.created_at);
+      add({ ...base, sec: "answer", pri: bl.length ? 3 : qa >= over ? 2 : 1, why: `${bl.length ? `đang chặn ${bl.map((x) => tl(x.key)).join(", ")} · ` : ""}hỏi ${ageTxt(qa)} trước${t.comments_n ? ` · ${t.comments_n} comment` : ""}`,
+        acts: [["link", `#/t/${t.key}`, "Trả lời", "send"]] });
+    } else if (g === "fix") {
+      add({ ...base, sec: "decide", pri: 1, why: `cần sửa${t.review && t.review.reason ? ": " + esc(String(t.review.reason).slice(0, 160)) : ""} — cho agent chạy lại hoặc tự sửa`,
+        acts: [["cmd", `python3 ops/ticket.py label ${t.key} ai-draft`], ["link", `#/t/${t.key}`, "Mở ticket"]] });
+    } else if (g === "other") {
+      const draft = (t.labels || []).includes("ai-draft");
+      add({ ...base, sec: "ticket", pri: 1, why: draft ? "ai-draft nhưng chưa chọn agent — Orchestrator bỏ qua" : "chưa có nhãn quy trình — gắn ai-draft để agent chạy, hoặc đóng nếu là việc người làm",
+        acts: [["link", `#/t/${t.key}`, "Thiết lập"]] });
+    } else if (g === "ready" || g === "blocked") {
+      const tt = taskTypes(t.agent);
+      if (!agentWork(t)) add({ ...base, sec: "ticket", pri: 2, why: `thiếu loại việc (RACI) — Orchestrator bỏ qua; ${esc(t.agent)} nhận: ${esc(tt.join(", ") || "—")}`, acts: [["link", `#/t/${t.key}`, "Đặt loại việc"]] });
+      else if (t.task_type && RACI && tt.length && !tt.includes(t.task_type)) add({ ...base, sec: "ticket", pri: 2, why: `loại việc ${esc(t.task_type)} không có trong RACI của ${esc(t.agent)} (nhận: ${esc(tt.join(", "))})`, acts: [["link", `#/t/${t.key}`, "Sửa loại việc"]] });
+      else if (g === "ready") add({ ...base, sec: "run", pri: 1, why: `${t.points ? t.points + " point · " : ""}${esc(t.task_type || t.side || "")}`, acts: [["cmd", `/run-next ${t.key}`]] });
+      else { const bl = (t.blocked_by || []).filter((b) => K[b] && K[b].status !== "Closed");
+        add({ ...base, sec: "wait", pri: 0, why: `chờ ${bl.map(tl).join(", ")}` }); }
+    }
+    if (t.due_date && String(t.due_date).slice(0, 10) < tk) add({ ...base, sec: "ticket", pri: 2, why: `quá hạn ${ddmm(String(t.due_date).slice(0, 10))}`, acts: [["link", `#/t/${t.key}`, "Mở ticket"]] });
+  });
+  if (d.live && d.live.alive && !open.some((t) => t.key === d.live.ticket && classify(t) === "running"))
+    add({ key: d.live.ticket, title: d.live.title || "", agent: d.live.agent, sec: "wait", pri: 0, why: d.live.phase === "push" ? "Orchestrator đang đẩy code, mở PR" : `agent đang chạy ${dur(d.live.elapsed_s || 0)}` });
+  // CI develop
+  const ci = (d.ci_develop || [])[0];
+  if (ci && ci.jobs) {
+    const req = reqChecks(), bad = Object.entries(ci.jobs).filter(([, v]) => FAILS.includes(String(v).toLowerCase()));
+    const badReq = bad.filter(([k]) => req.includes(k)), badOpt = bad.filter(([k]) => !req.includes(k));
+    if (badReq.length) add({ title: `CI develop lỗi check bắt buộc: ${badReq.map(([k]) => k).join(", ")}`, sec: "decide", pri: 3, age: ageD(ci.createdAt),
+      why: `${esc(ci.displayTitle || "")} — develop đang đỏ; lỗi môi trường (Shopify 502) thì chạy lại job lỗi`,
+      acts: [["link", ci.url, "Xem CI"], ["cmd", `gh run rerun ${ci.databaseId} --failed -R DevBlueskytechco/theme-efitco`]] });
+    if (badOpt.length) {
+      const te2 = (PROJECT && PROJECT.story || []).find((x) => x.key === "TE-2"), te2Done = te2 && storyState(T.filter((t) => t.parent === "TE-2"))[1] === "Xong ticket";
+      add({ title: `${badOpt.map(([k]) => k).join(", ")} lỗi ở CI develop nhưng chưa chặn merge`, sec: "decide", pri: te2Done ? 2 : 1, age: ageD(ci.createdAt),
+        why: `check bắt buộc hiện là ${esc(req.join(", "))}. Quy ước: Lighthouse chưa chặn tới cuối TE-2${te2Done ? " — TE-2 đã xong ticket, tới lúc quyết định: bật chặn hoặc gia hạn" : ""}`,
+        acts: [["link", ci.url, "Xem CI"], ["text", "bật chặn: thêm vào required_checks trong orchestrator/config.yaml"]] });
+    }
+  }
+  // dự án
+  if (ROLES) { const un = ROLES.rows.filter((r) => r.agent && unowned(r));
+    if (un.length) add({ title: `${un.length} vai chưa gán role owner`, sec: "setup", pri: 1, why: esc(un.map((r) => r.role).join(", ")) + " — đang để tên vai trò thay vì tên người", acts: [["link", "#/roles", "Gán ở trang Vai trò"]] }); }
+  const S = PROJECT && PROJECT.scrum;
+  if (S) { const sp = S.sprints.find((x) => x.start <= tk && tk <= x.end), nx = S.sprints.find((x) => x.start > tk);
+    if (sp && !sp.goal) add({ title: `${sp.name} chưa ghi mục tiêu sprint`, sec: "setup", pri: 1, why: `${ddmm(sp.start)} → ${ddmm(sp.end)} — sửa ops/dashboard/project.json mục scrum.sprints`, acts: [["link", "#/scrum", "Agile/Scrum"]] });
+    if (nx && !nx.goal && (new Date(nx.start + "T00:00:00") - Date.now()) / 864e5 <= 3) add({ title: `${nx.name} bắt đầu ${ddmm(nx.start)}, chưa có mục tiêu`, sec: "setup", pri: 1, why: "chốt mục tiêu ở sprint planning", acts: [["link", "#/scrum", "Agile/Scrum"]] }); }
+  if (PROJECT) { const mm = PROJECT.story.filter((x) => { const k = T.filter((t) => t.parent === x.key); return x.status && x.status !== storyState(k)[1]; });
+    if (mm.length) add({ title: `${mm.length} story có trạng thái CTO ghi khác với ticket`, sec: "setup", pri: 1, why: esc(mm.map((x) => `${x.key}: ${x.status} → ${storyState(T.filter((t) => t.parent === x.key))[1]}`).join(" · ")), acts: [["link", "#/story", "Xem Story"]] }); }
+  // môi trường + lỗi hệ thống
+  ((d.setup || {}).items || []).filter((x) => !x.ok).forEach((x) => add({ title: x.text, sec: "setup", pri: x.level === "bad" ? 3 : 1, why: "kiểm môi trường của dashboard", acts: x.fix ? [[/^(npm|gh|git|python3|ops\/|unset)\b/.test(x.fix) ? "cmd" : "text", x.fix]] : [] }));
+  Object.entries(d.errors || {}).forEach(([k, v]) => add({ title: `Lỗi nguồn dữ liệu: ${k}`, sec: "setup", pri: 3, why: esc(v), acts: [] }));
+  return items;
+}
+function inboxSummary() {
+  const it = inboxItems().filter((x) => IB_COUNTED.includes(x.sec));
+  return { n: it.length, urgent: it.filter((x) => x.pri >= 3).length, items: it };
+}
+function pageInbox() {
+  const all = inboxItems(), cnt = (sec) => all.filter((x) => x.sec === sec).length, act = all.filter((x) => IB_COUNTED.includes(x.sec));
+  const setup = (DATA && DATA.setup) || {}, okN = (setup.items || []).filter((x) => x.ok);
+  const tiles = [["Cần bạn làm", act.length, act.length ? `${act.filter((x) => x.pri >= 3).length} gấp · ${act.filter((x) => x.pri === 2).length} cao` : "không có việc chờ"],
+    ["Duyệt PR", cnt("review"), "check bắt buộc đã đạt"], ["Câu hỏi", cnt("answer"), `${all.filter((x) => x.sec === "answer" && x.pri >= 3).length} đang chặn ticket khác`],
+    ["Quyết định", cnt("decide"), "CI, cần sửa, PR lệch"], ["Thiết lập", cnt("ticket") + cnt("setup"), `${cnt("ticket")} ticket · ${cnt("setup")} dự án/môi trường`],
+    ["Có thể chạy", cnt("run"), "ticket sẵn sàng cho agent"]];
+  const actHtml = (a) => a[0] === "cmd" ? `<button type="button" class="btn sm cmd" data-cmd="${esc(a[1])}" title="Chép lệnh: ${esc(a[1])}">${IC("copy")}<code>${esc(a[1])}</code></button>`
+    : a[0] === "link" ? `<a class="btn sm" href="${esc(a[1])}"${/^https?:/.test(a[1]) ? ' target="_blank" rel="noopener"' : ""}>${IC(a[3] || (/^https?:/.test(a[1]) ? "link" : "edit"))}${esc(a[2])}</a>`
+    : `<span class="fresh">${esc(a[1])}</span>`;
+  const row = (x) => `<div class="ibx"><div class="pr">${status(...IB_PRI[x.pri])}</div>
+    <div class="bd"><div class="ttl">${x.key ? `<a class="k" href="#/t/${esc(x.key)}">${esc(x.key)}</a>` : ""}${esc(x.title)}</div>
+      <div class="meta">${x.agent ? agentTag(x.agent, 16) + " · " : ""}${x.why}</div></div>
+    <div class="ac">${(x.acts || []).map(actHtml).join("")}</div></div>`;
+  const sec = ([id, name, icon, sub]) => { const it = all.filter((x) => x.sec === id).sort((a, b) => b.pri - a.pri || b.age - a.age);
+    if (id === "wait" && !it.length) return "";
+    const body = it.length ? it.map(row).join("") : `<div class="ibx-empty">${status("good", "Không có việc")}</div>`;
+    const isOpen = id in IB_OPEN ? IB_OPEN[id] : id === "run" && it.length > 0 && !act.length;
+    return id === "wait" || id === "run"
+      ? `<details class="ibx-sec" data-ib="${id}" ${isOpen ? "open" : ""}><summary><h3 class="sub">${IC(icon)}${esc(name)} <span class="n">${it.length}</span></h3></summary><p class="fresh">${esc(sub)}</p>${body}</details>`
+      : `<div class="ibx-sec"><h3 class="sub">${IC(icon)}${esc(name)} <span class="n">${it.length}</span></h3><p class="fresh">${esc(sub)}</p>${body}</div>`; };
+  return `<div class="page-head"><h2>Việc chờ tôi</h2><span class="fresh">tính trực tiếp từ ticket, PR, CI, cấu hình — việc tự biến mất khi đã xử lý</span><span class="spacer"></span>
+      <button type="button" class="btn" id="ibxRecheck" ${IB_CHECKING ? "disabled" : ""}>${IC("reopen")}${IB_CHECKING ? "Đang kiểm…" : "Kiểm tra lại môi trường"}</button></div>
+    ${repTiles(tiles)}
+    ${IB_SECS.map(sec).join("")}
+    <details class="ibx-sec" data-ib="env" ${IB_OPEN.env ? "open" : ""}><summary class="fresh">Môi trường: ${okN.length}/${(setup.items || []).length} mục đạt${setup.at ? ` · kiểm ${ago(setup.at)}` : " · chưa kiểm"}</summary>
+      <ul class="fresh" style="margin:6px 0 0 18px">${okN.map((x) => `<li>${esc(x.text)}</li>`).join("") || "<li>—</li>"}</ul></details>
+    <p class="note">Lệnh bắt đầu bằng / gõ trong Claude Code ở thư mục ai-team; lệnh python3 chạy trong terminal ai-team. Bấm nút lệnh để chép. Agent không tự qua cổng: merge, chấm, đóng ticket chỉ khi bạn chạy.</p>`;
+}
+function bindInbox() {
+  document.querySelectorAll("#info [data-cmd]").forEach((b) => (b.onclick = async () => {
+    try { await navigator.clipboard.writeText(b.dataset.cmd); toast("Đã chép: " + b.dataset.cmd); }
+    catch (e) { const ta = document.createElement("textarea"); ta.value = b.dataset.cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("Đã chép: " + b.dataset.cmd); } catch (x) { toast("Không chép được, chọn và chép tay", true); } ta.remove(); }
+  }));
+  document.querySelectorAll("#info details[data-ib]").forEach((dt) => (dt.ontoggle = () => (IB_OPEN[dt.dataset.ib] = dt.open)));
+  const r = $("ibxRecheck");
+  if (r) r.onclick = async () => { IB_CHECKING = true; r.disabled = true; r.lastChild.textContent = "Đang kiểm…";
+    try { const res = await fetch("/api/setup/recheck", { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: "{}" });
+      const j = await res.json(); if (!res.ok) throw new Error(j.error || res.status); if (DATA) { DATA.setup = j; renderMenu(); renderInfo(); }
+      IB_CHECKING = false; renderInfo(); toast(`Kiểm xong: ${j.items.filter((x) => x.ok).length}/${j.items.length} mục đạt`); }
+    catch (e) { IB_CHECKING = false; renderInfo(); toast("Kiểm lại lỗi: " + e.message, true); } };
 }
 
 /* ---------- Sơ đồ (SVG viết tay, màu theo token nên đúng cả sáng/tối) ---------- */
@@ -1723,7 +1875,7 @@ function render(d) {
   renderMenu();
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
   document.querySelector(".conn").title = $("fresh").textContent;
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum", "inbox"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
@@ -1762,7 +1914,7 @@ function render(d) {
     const today = DOW[new Date().getDay()], due = ROLES.rows.filter((r) => r.day === today && r.agent);
     const waitN = (a) => d.tickets.filter((t) => t.agent === a && classify(t) === "review" && (!prOf(t.key) || gateOf(prOf(t.key).checks) === "pass")).length;
     $("todayRev").innerHTML = `${IC("calendar")}<b>Lịch duyệt hôm nay · ${esc(today)}</b>` + (due.length ? due.map((r) => `<span class="who">${av(r.agent, 22)}<span>${esc(r.role)} — ${ownerHtml(r)}</span>${waitN(r.agent) ? status("warning", waitN(r.agent) + " chờ chấm") : status("good", "không có ticket chờ")}</span>`).join("")
-      : `<span class="fresh">Không có vai nào duyệt cố định hôm nay.</span>`) + `<a class="fresh" href="#/roles" style="margin-left:auto">Sửa lịch duyệt →</a>`;
+      : `<span class="fresh">Không có vai nào duyệt cố định hôm nay.</span>`) + `<a href="#/inbox" style="margin-left:auto">${IC("inbox")} Việc chờ tôi${inboxSummary().n ? ` (${inboxSummary().n})` : ""} →</a><a class="fresh" href="#/roles">Sửa lịch duyệt →</a>`;
   }
 
   // Live
