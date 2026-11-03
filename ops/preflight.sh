@@ -3,9 +3,10 @@
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
 fail=0; ok(){ echo "OK   $*"; }; bad(){ echo "LỖI $*"; fail=1; }; warn(){ echo "CHÚ Ý $*"; }
-for v in TICKET_BACKEND ZOHO_REFRESH_TOKEN AGENT_GH_TOKEN SHOPIFY_CLI_THEME_TOKEN STORE_PASSWORD FIGMA_TOKEN; do
+for v in AGENT_GH_TOKEN SHOPIFY_CLI_THEME_TOKEN STORE_PASSWORD FIGMA_TOKEN; do
   [ -n "${!v:-}" ] && ok "$v có" || bad "$v thiếu trong ai-team/.env"
 done
+[ -f "$AI_TEAM/data/tickets.db" ] && ok "ticket nội bộ data/tickets.db có" || bad "thiếu ai-team/data/tickets.db (khôi phục từ data/backup/ hoặc python3 ops/ticket.py init)"
 command -v claude >/dev/null && ok "claude $(claude --version 2>/dev/null | head -1)" || bad "chưa cài claude"
 sver=$(shopify version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1); sv=${sver%%.*}
 if [ "${sv:-0}" = 4 ]; then ok "shopify CLI $sver"; [ "$sver" = "4.9.5" ] || warn "nên ghim đúng 4.9.5 như CI: npm i -g @shopify/cli@4.9.5"

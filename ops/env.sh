@@ -1,5 +1,5 @@
 # Nạp môi trường vận hành. Dùng: source ops/env.sh
-# - Nạp ai-team/.env (Zoho, Figma, Shopify, AGENT_GH_TOKEN) cho Orchestrator.
+# - Nạp ai-team/.env (Figma, Shopify, AGENT_GH_TOKEN) cho Orchestrator.
 # - KHÔNG để GH_TOKEN đè gh của CTO: lệnh gh trong ops/ chạy bằng tài khoản CTO.
 OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 export AI_TEAM="$(cd "$OPS_DIR/.." && pwd)"

@@ -231,13 +231,7 @@
      "Ticket",
      "Ticket nội bộ (dashboard)",
      "http://localhost:8787/#/t-list",
-     "Thay Zoho từ 03/11/2026. Dữ liệu ai-team/data/tickets.db, sao lưu data/backup/ mỗi ngày"
-    ],
-    [
-     "Zoho",
-     "Zoho Projects — bản lưu trữ (trước 03/11/2026)",
-     "https://projects.zoho.com",
-     "Chỉ đọc, không ghi nữa: ticket đã chuyển sang ticket nội bộ (dashboard menu Ticket, ai-team/data/tickets.db). Portal 943715743, Project 2727475000000112892"
+     "Nguồn ticket duy nhất. Dữ liệu ai-team/data/tickets.db, sao lưu data/backup/ mỗi ngày"
     ],
     [
      "Figma",
@@ -282,7 +276,7 @@
      "theme-efitco/ và ai-team/ nằm cạnh nhau (bắt buộc)"
     ]
    ],
-   "note": "Link chính của dự án. Link trực tiếp Zoho project: mở project trên trình duyệt rồi dán vào project.json."
+   "note": "Link chính của dự án."
   },
   {
    "id": "accounts",
@@ -295,20 +289,6 @@
     "Ghi chú"
    ],
    "rows": [
-    [
-     "ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET / ZOHO_REFRESH_TOKEN",
-     "Chỉ dùng khi chuyển dữ liệu từ Zoho (ops/ticket_migrate_zoho.py) hoặc quay lại Zoho",
-     "ai-team/.env",
-     "CTO",
-     "Scope ZohoProjects.tasks.ALL, projects.READ, portals.READ"
-    ],
-    [
-     "ZOHO_PORTAL_ID / ZOHO_PROJECT_ID / ZOHO_DC",
-     "Định danh project Zoho",
-     "ai-team/.env",
-     "CTO",
-     "943715743 / 2727475000000112892 / com"
-    ],
     [
      "AGENT_GH_TOKEN",
      "PAT của nextsky-ai-agent: commit, push, mở PR",
@@ -336,13 +316,6 @@
      "ai-team/.env",
      "CTO",
      "Token hạn 90 ngày từ 22/10 → gia hạn trước 20/01/2027. Token đã lộ trong chat: nên thu hồi, tạo lại"
-    ],
-    [
-     "ticket_backend (orchestrator/config.yaml)",
-     "Chọn backend ticket cho Orchestrator, agent, ops/, dashboard",
-     "orchestrator/config.yaml (có commit)",
-     "CTO",
-     "local (từ 03/11/2026). TICKET_BACKEND trong .env không còn tác dụng"
     ],
     [
      "Tài khoản Claude (gói Max)",
@@ -560,7 +533,7 @@
     ],
     [
      "22/10/2026",
-     "Ticket trên Zoho Projects; GitHub org DevBlueskytechco; agent nextsky-ai-agent",
+     "GitHub org DevBlueskytechco; agent nextsky-ai-agent",
      "charter"
     ],
     [
@@ -626,7 +599,7 @@
     [
      "31/10/2026",
      "{% partial %} trong header chấp nhận theo ADR 0002 (ES1-T20)",
-     "Zoho ES1-T20"
+     "ES1-T20"
     ],
     [
      "02/11/2026",
@@ -650,8 +623,8 @@
     ],
     [
      "03/11/2026",
-     "Bỏ phụ thuộc API Zoho: ticket chạy nội bộ (SQLite ai-team/data/tickets.db), quản lý trên dashboard menu Ticket; Zoho giữ làm bản lưu trữ chỉ đọc",
-     "orchestrator/config.yaml ticket_backend, mcp/ticket_local.py"
+     "Ticket nội bộ là nguồn duy nhất (SQLite ai-team/data/tickets.db), quản lý trên dashboard menu Ticket; gỡ toàn bộ tích hợp ticket ngoài",
+     "mcp/ticket_local.py, ops/ticket.py"
     ]
    ],
    "note": ""
@@ -754,7 +727,7 @@
      "Khởi chạy",
      "CTO trong Claude Code",
      "/run-next [ES1-Txx] hoặc /sprint [n]",
-     "preflight đạt: Shopify CLI 4.x, gh, Zoho, theme-efitco không có thay đổi chưa commit",
+     "preflight đạt: Shopify CLI 4.x, gh, ticket nội bộ, theme-efitco không có thay đổi chưa commit",
      "preflight lỗi thì dừng, sửa theo dòng lỗi"
     ],
     [

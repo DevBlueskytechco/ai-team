@@ -18,73 +18,9 @@ def serve(name, tools, handlers):
         elif i is not None:
             send({"jsonrpc":"2.0","id":i,"error":{"code":-32601,"message":"not found"}})
 
-# Ticket MCP. Backend: local (data/tickets.db, mặc định từ 03/11/2026) | zoho | file (tickets.json, thử nghiệm). Adapter cùng giao diện.
-import os, datetime
-_envp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-if os.path.exists(_envp):
-    for _l in open(_envp):
-        if "=" in _l and not _l.strip().startswith("#"): k, v = _l.strip().split("=", 1); os.environ.setdefault(k, v)
-def _backend():
-    """Chọn backend: orchestrator/config.yaml `ticket_backend` (quyết định chung, có commit) > biến TICKET_BACKEND > file.
-    TICKET_BACKEND_OVERRIDE dùng khi thử nghiệm (vd file)."""
-    if os.environ.get("TICKET_BACKEND_OVERRIDE"): return os.environ["TICKET_BACKEND_OVERRIDE"]
-    try:
-        import re as _re
-        m = _re.search(r"^ticket_backend:\s*([a-z]+)", open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "orchestrator", "config.yaml"), encoding="utf-8").read(), _re.M)
-        if m: return m.group(1)
-    except OSError: pass
-    return os.environ.get("TICKET_BACKEND", "file")
-BACKEND = _backend()
-DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tickets.json")
-def _load():
-    if not os.path.exists(DB): return {"tickets": []}
-    return json.load(open(DB, encoding="utf-8"))
-def _save(d): json.dump(d, open(DB, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-def get(id):
-    for t in _load()["tickets"]:
-        if t["id"] == id: return t
-    raise KeyError(id)
-def list(label=None, agent=None, status=None, type=None, sprint=None):
-    out = [t for t in _load()["tickets"] if (not label or label in t.get("labels", [])) and (not agent or t.get("agent") == agent)
-           and (not status or t.get("status") == status) and (not type or t.get("type") == type) and (not sprint or t.get("sprint") == sprint)]
-    return [{k: t.get(k) for k in ("id","title","type","agent","side","status","labels","points","sprint")} for t in out]
-def create(title, type="task", agent=None, side=None, points=None, body="", parent=None, blocked_by=None, labels=None, r_codes=None, task_type=None):
-    d = _load(); n = len(d["tickets"]) + 1; pid = (parent or "TE")
-    tid = f"{pid}-{type[:1].upper()}{n}" if parent else f"TE-{n}"
-    t = {"id": tid, "title": title, "type": type, "agent": agent, "side": side, "points": points, "body": body, "parent": parent,
-         "blocked_by": blocked_by or [], "labels": labels or [], "r_codes": r_codes or [], "status": "Backlog", "task_type": task_type,
-         "comments": [], "created_at": datetime.date.today().isoformat()}
-    d["tickets"].append(t); _save(d); return t
-def set_label(id, label, remove=None, link=None, note=None):
-    d = _load()
-    for t in d["tickets"]:
-        if t["id"] == id:
-            labels = [l for l in t.get("labels", []) if l != remove and not (label.startswith("ai-") and l.startswith("ai-"))]
-            labels.append(label); t["labels"] = labels
-            if link: t["output_link"] = link
-            if note: t["comments"].append({"by": os.environ.get("AI_AGENT", "agent"), "at": datetime.datetime.now().isoformat(timespec="minutes"), "text": note})
-            _save(d); return t
-    raise KeyError(id)
-def comment(id, text):
-    return set_label(id, next(l for l in get(id).get("labels", ["ai-draft"]) if True), note=text)
-def all(): return _load()["tickets"]
-def set_review(id, review, label):
-    d = _load()
-    for t in d["tickets"]:
-        if t["id"] == id:
-            t["labels"] = [l for l in t.get("labels", []) if not l.startswith("ai-")] + [label]; t["review"] = review
-    _save(d); return get(id)
-def set_task_type(id, task_type):
-    d = _load()
-    for t in d["tickets"]:
-        if t["id"] == id: t["task_type"] = task_type
-    _save(d); return get(id)
-
-# --- chọn backend: local (ticket nội bộ SQLite, từ 03/11/2026) | zoho (lưu trữ) | file (thử nghiệm)
-if BACKEND == "local":
-    from ticket_local import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
-elif BACKEND == "zoho":
-    from ticket_zoho import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
+# Ticket MCP: ticket nội bộ (SQLite ai-team/data/tickets.db, mcp/ticket_local.py). Không còn backend ngoài.
+BACKEND = "local"
+from ticket_local import get, list, create, set_label, comment, all, set_review, set_task_type, set_status, is_done, update  # noqa
 TOOLS = [
  {"name":"get","description":"Đọc một ticket đầy đủ","inputSchema":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"]}},
  {"name":"list","description":"Liệt kê ticket theo label/agent/status/type/sprint","inputSchema":{"type":"object","properties":{"label":{"type":"string"},"agent":{"type":"string"},"status":{"type":"string"},"type":{"type":"string"},"sprint":{"type":"integer"}}}},
