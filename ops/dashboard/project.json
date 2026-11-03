@@ -712,5 +712,219 @@
    ],
    "note": ""
   }
- ]
+ ],
+ "process": {
+  "steps": {
+   "title": "Các bước của một ticket",
+   "columns": [
+    "#",
+    "Bước",
+    "Ai làm",
+    "Lệnh / công cụ",
+    "Đầu ra",
+    "Điều kiện qua"
+   ],
+   "rows": [
+    [
+     "1",
+     "Giao việc",
+     "CTO, Tech Lead agent (task_split)",
+     "orchestrator/new_ticket.py, ticket chia task",
+     "Ticket ai-draft trên Zoho: agent, task_type, side, point, blocked_by",
+     "task_type đúng raci.yaml; task FE đi trước BE"
+    ],
+    [
+     "2",
+     "Khởi chạy",
+     "CTO trong Claude Code",
+     "/run-next [ES1-Txx] hoặc /sprint [n]",
+     "preflight đạt: Shopify CLI 4.x, gh, Zoho, theme-efitco không có thay đổi chưa commit",
+     "preflight lỗi thì dừng, sửa theo dòng lỗi"
+    ],
+    [
+     "3",
+     "Chọn ticket",
+     "Orchestrator",
+     "orchestrate.py --once",
+     "Ticket ai-draft key nhỏ nhất, agent có quyền theo RACI, blocked_by đã đóng, bỏ qua ticket [Q]",
+     ""
+    ],
+    [
+     "4",
+     "Làm ticket",
+     "Agent (claude -p --agent)",
+     "Nhánh feature/ai-<key> tạo từ develop",
+     "Sửa file trong phạm vi agent; nháp ở drafts/<agent>/<key>/",
+     "Hook scope-guard, no-live-push; tối đa 90 turn, 60 phút"
+    ],
+    [
+     "5",
+     "Hỏi khi chưa rõ",
+     "Agent",
+     "mcp ticket create",
+     "Ticket [Q] gửi role owner; đầu ra ghi dòng KHÔNG CHẮC",
+     "CTO trả lời và đóng [Q] thì ticket bị chặn chạy tiếp"
+    ],
+    [
+     "6",
+     "Nộp",
+     "Agent + Orchestrator",
+     "set_label ai-review; commit, push bằng nextsky-ai-agent; gh pr create",
+     "Nhãn ai-review; PR vào develop với dev-fe, dev-be, devops; agent khác nộp ở nhánh/drafts",
+     ""
+    ],
+    [
+     "7",
+     "Kiểm tự động",
+     "GitHub Actions",
+     ".github/workflows/ci.yml",
+     "theme-check, preview lên hoa-qua-nhap-khau, e2e; Lighthouse chỉ báo cáo",
+     "3 check bắt buộc pass"
+    ],
+    [
+     "8",
+     "Review",
+     "Claude Code",
+     "/review-pr <số PR>",
+     "Nhận xét theo rubric và quy ước, đề xuất điểm và lệnh /merge-pr",
+     "Không tự merge"
+    ],
+    [
+     "9",
+     "Duyệt và đóng",
+     "CTO",
+     "/merge-pr <số> <nhãn> <scores> \"<lý do>\"",
+     "Approve, squash merge, chấm điểm (review.py), đóng ticket Zoho, kéo develop",
+     "CTO gõ lệnh = đồng ý"
+    ],
+    [
+     "10",
+     "Học từ điểm",
+     "Kỹ sư AI",
+     "evals/raw, .claude/agents, .claude/skills",
+     "Sửa prompt/skill của agent bị sửa/loại; agent_version đổi; chạy lại ticket cũ",
+     "Thứ 5 hằng tuần"
+    ]
+   ]
+  },
+  "rhythm": {
+   "title": "Nhịp tuần",
+   "columns": [
+    "Khi nào",
+    "Việc",
+    "Ai"
+   ],
+   "rows": [
+    [
+     "Thứ 2",
+     "Sprint planning: ưu tiên backlog, tạo ticket ai-draft; duyệt đầu ra PO",
+     "CTO (Mr PO)"
+    ],
+    [
+     "Hằng ngày",
+     "/sprint hoặc /run-next; theo dõi Dashboard; duyệt PR khi CI xanh",
+     "CTO"
+    ],
+    [
+     "Thứ 3",
+     "Duyệt đầu ra BA, Designer, DevOps",
+     "CTO (role owner)"
+    ],
+    [
+     "Thứ 4",
+     "Duyệt đầu ra Dev FE, Dev BE, Writer",
+     "CTO (role owner)"
+    ],
+    [
+     "Thứ 5",
+     "Duyệt Tech Lead, QA; đọc eval sửa/loại, sửa agent và skill, chạy lại 5 ticket cũ",
+     "CTO, kỹ sư AI"
+    ],
+    [
+     "Thứ 6",
+     "Xem Kết quả vận hành (Dashboard, kỳ 7 ngày): lượt chạy, PR merge, tỉ lệ đạt",
+     "CTO, kỹ sư AI"
+    ],
+    [
+     "Cuối sprint",
+     "Checklist Theme Store (mã R), canvas-check trên yum-dev bằng zip, release note",
+     "QA, DevOps, Writer agent; người upload zip"
+    ]
+   ]
+  },
+  "incidents": {
+   "title": "Dừng và xử lý",
+   "columns": [
+    "Tình huống",
+    "Xử lý"
+   ],
+   "rows": [
+    [
+     "preflight lỗi",
+     "Báo dòng lỗi và cách sửa, không chạy agent"
+    ],
+    [
+     "theme-efitco có thay đổi chưa commit",
+     "Orchestrator bỏ qua lượt; dọn hoặc commit rồi chạy lại"
+    ],
+    [
+     "Agent is_error hoặc chạm max_turns",
+     "Tóm tắt kết quả; Tech Lead chia nhỏ ticket rồi chạy lại; 3 lần thì chuyển người"
+    ],
+    [
+     "Hook chặn (exit 2)",
+     "Đúng hành vi; lặp lại cùng lỗi thì sửa prompt agent, không nới hook"
+    ],
+    [
+     "CI lỗi môi trường (Shopify 502, mạng)",
+     "gh run rerun <run> --failed sau khi CTO đồng ý"
+    ],
+    [
+     "CI lỗi thật trên PR",
+     "Không merge; agent sửa trên cùng nhánh hoặc CTO sửa nhẹ rồi chấm sua_nhe"
+    ],
+    [
+     "Gói Claude báo usage limit",
+     "Dừng /sprint, chạy lại sau khi hạn mức reset"
+    ],
+    [
+     "Store dev đầy theme",
+     "Workflow Preview cleanup xoá preview ai-* không còn nhánh; preview tự xoá bản cũ khi ≥ 16 theme"
+    ]
+   ]
+  },
+  "rules": {
+   "title": "Quy tắc cứng",
+   "columns": [
+    "Quy tắc",
+    "Chặn bằng"
+   ],
+   "rows": [
+    [
+     "Không approve/merge PR, đóng ticket, chấm điểm khi CTO chưa gõ /merge-pr hoặc nói rõ merge",
+     "CLAUDE.md ai-team, ruleset code owner"
+    ],
+    [
+     "Không push develop/main, không force push; code chỉ trên feature/ai-<key>",
+     "permissions deny, ruleset GitHub"
+    ],
+    [
+     "Không publish, xoá theme, không push --live; agent chỉ push store hoa-qua-nhap-khau",
+     "hook no-live-push, permissions deny"
+    ],
+    [
+     "Dev FE không viết JS; mỗi agent chỉ ghi thư mục của mình",
+     "hook scope-guard"
+    ],
+    [
+     "Không đọc, in, chép .env; không gh secret",
+     "CLAUDE.md ai-team"
+    ],
+    [
+     "Không bịa setting/màn hình ngoài SRS, Figma; chưa chắc thì ghi KHÔNG CHẮC và hỏi [Q]",
+     "CLAUDE.md theme-efitco, rubric"
+    ]
+   ]
+  }
+ }
 }
