@@ -75,6 +75,26 @@ section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:upp
 .feed{margin-top:10px;max-height:330px;overflow:auto;border-top:1px solid var(--line);font-size:13px}
 .ev{display:grid;grid-template-columns:70px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
 .inflight table{font-size:12.5px} .inflight td{padding:5px 6px;vertical-align:top}
+.act{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);align-items:start;margin-top:4px}
+.act .names{padding-top:22px}
+.act .row{height:38px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:1px;padding-right:12px;border-bottom:1px solid var(--line);min-width:0}
+.act .row .top{display:flex;align-items:center;gap:8px;min-width:0}
+.act .row .nm{font-weight:600;font-size:13px;white-space:nowrap}
+.act .row .sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act .row .status{font-size:11.5px;overflow:hidden;text-overflow:ellipsis}
+.act .row:nth-child(even){background:color-mix(in srgb,var(--surface-2) 50%,transparent)}
+.act .row.busy{background:linear-gradient(90deg,color-mix(in srgb,var(--warning) 14%,transparent),transparent)}
+.act .chart{position:relative;min-width:0}
+.act svg{display:block;width:100%}
+.act .lane{fill:transparent} .act .lane.alt{fill:var(--surface-2);opacity:.5}
+.act .now{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 3}
+.act .nowlb{fill:var(--accent);font-size:10.5px;font-weight:600}
+.act rect.bar{cursor:pointer}
+@keyframes actpulse{0%,100%{opacity:1}50%{opacity:.55}}
+.act rect.run{animation:actpulse 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.act rect.run{animation:none}}
+.legend i.tick{background:none;border-left:3px solid var(--series-1);height:12px;width:3px;vertical-align:-2px}
+@media (max-width:700px){.act{grid-template-columns:150px minmax(0,1fr)} .act .row .sub{display:none}}
 .ev .k{font-family:var(--mono);font-size:11px;color:var(--text-2);padding-top:2px}
 .ev.error .k{color:var(--critical)} .ev.done .k{color:var(--good)}
 .ev .x{overflow-wrap:anywhere;font-family:var(--mono);font-size:12px}
@@ -326,6 +346,17 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <div class="errbox" id="errbox" role="alert"></div>
 
   <div class="span-12 kpis" id="kpis"></div>
+
+  <section class="span-12" aria-labelledby="h-act">
+    <div class="sec-head">
+      <h2 id="h-act">Hoạt động agent · thời gian thực</h2>
+      <span class="fresh" id="actSum"></span>
+      <label class="fresh">Khung <select id="actWin" aria-label="Khung thời gian"><option value="6">6 giờ</option><option value="24">24 giờ</option><option value="168">7 ngày</option></select></label>
+    </div>
+    <div class="legend"><span><i style="background:var(--warning)"></i>Đang chạy</span><span><i style="background:var(--series-1)"></i>Lượt xong</span><span><i style="background:var(--critical)"></i>Lượt lỗi</span><span><i class="tick"></i>Lượt chưa ghi thời lượng</span></div>
+    <div class="act" id="act"></div>
+    <details class="tv"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th>Ticket</th><th>Bắt đầu</th><th class="n">Thời lượng</th><th class="n">Turn</th><th>Kết quả</th></tr></thead><tbody id="actTable"></tbody></table></div></details>
+  </section>
 
   <section class="span-8" aria-labelledby="h-live">
     <h2 id="h-live">Agent đang chạy</h2>
@@ -1498,6 +1529,90 @@ function pageRSprint() {
     ${card(`Thêm giữa sprint (${r.added.length})`, list(r.added))}`;
 }
 
+/* ===== Hoạt động agent theo thời gian thực: làn theo agent, thanh = lượt chạy, vạch "bây giờ" ===== */
+const ACT_AGENTS = ["po", "ba", "designer", "techlead", "dev-fe", "dev-be", "qa", "devops", "writer"];
+function actRuns(d) {
+  const out = (d.runs || []).map((r) => {
+    const st = new Date(r.started_at), en = r.ended_at ? new Date(r.ended_at) : r.duration_s != null ? new Date(st.getTime() + r.duration_s * 1000) : null;
+    return { ...r, st, en, kind: r.is_error ? "err" : "ok" };
+  }).filter((r) => !isNaN(r.st));
+  const lv = d.live;
+  if (lv && lv.alive) out.push({ agent: lv.agent, ticket: lv.ticket, st: new Date(Date.now() - (lv.elapsed_s || 0) * 1000), en: new Date(), kind: "run",
+    num_turns: lv.turns, phase: lv.phase, started_at: lv.started_at, title: lv.title });
+  return out;
+}
+function agentStatus(a, d, G) {
+  const lv = d.live;
+  if (lv && lv.alive && lv.agent === a) return [lv.phase === "push" ? status("warning", `đẩy code ${lv.ticket}`) : status("warning", `đang chạy ${lv.ticket} · ${dur(lv.elapsed_s || 0)}`), true];
+  const mine = (g) => (G[g] || []).filter((t) => t.agent === a).length;
+  const ready = mine("ready"), rev = mine("review"), blk = mine("blocked"), fix = mine("fix");
+  if (ready) return [status("none", `rảnh · ${ready} ticket sẵn sàng`), false];
+  if (rev) return [status("none", `rảnh · ${rev} chờ CTO chấm`), false];
+  if (blk || fix) return [status("none", `rảnh · ${blk ? blk + " bị chặn" : ""}${blk && fix ? ", " : ""}${fix ? fix + " cần sửa" : ""}`), false];
+  return [status("none", "rảnh"), false];
+}
+let ACT = null;
+function drawActivity(d) {
+  const box = $("act"); if (!box) return;
+  const G = {}; (d.tickets || []).forEach((t) => (G[classify(t)] ||= []).push(t));   // trạng thái tính trên mọi ticket, không theo bộ lọc agent
+  const win = Number($("actWin").value || 24) * 3600e3, now = Date.now(), t0 = now - win;
+  const runs = actRuns(d), agents = ACT_AGENTS.concat([...new Set(runs.map((r) => r.agent))].filter((a) => a && !ACT_AGENTS.includes(a)));
+  const inWin = runs.filter((r) => (r.en ? r.en.getTime() : r.st.getTime()) >= t0);
+  const busyN = runs.filter((r) => r.kind === "run").length;
+  const ms = (r) => (r.en ? Math.max(0, Math.min(r.en, now) - Math.max(r.st, t0)) : 0);
+  $("actSum").textContent = `${busyN} đang chạy · ${agents.length - busyN} rảnh · ${inWin.length} lượt trong khung · ${dur(Math.round(inWin.reduce((a, r) => a + ms(r), 0) / 1000))} chạy`;
+  const RH = 38, AX = 22, H = AX + agents.length * RH + 4;
+  const names = agents.map((a) => { const [chip, busy] = agentStatus(a, d, G), rr = inWin.filter((r) => r.agent === a);
+    return `<div class="row ${busy ? "busy" : ""}"><div class="top"><span class="nm">${esc(a)}</span>${chip}</div>
+      <div class="sub">${rr.length ? `${rr.length} lượt · ${dur(Math.round(rr.reduce((x, r) => x + ms(r), 0) / 1000))}${rr.some((r) => r.kind === "err") ? ` · ${rr.filter((r) => r.kind === "err").length} lỗi` : ""}` : "chưa chạy trong khung"}</div></div>`; }).join("");
+  if (!ACT || !box.querySelector(".chart")) {
+    box.innerHTML = `<div class="names" id="actNames"></div><div class="chart" id="actChart"><svg role="img" aria-label="Dòng thời gian lượt chạy của các agent"></svg><div class="tip"></div></div>`;
+  }
+  $("actNames").innerHTML = names;
+  const el = $("actChart"), svg = el.querySelector("svg"), W = svg.clientWidth || 800, pl = 4, pr = 54;
+  const x = (t) => pl + ((W - pl - pr) * (t - t0)) / win;
+  let g = "";
+  agents.forEach((a, i) => (g += `<rect class="lane ${i % 2 ? "alt" : ""}" x="0" y="${AX + i * RH}" width="${W}" height="${RH}"/><line class="grid" x1="0" x2="${W}" y1="${AX + (i + 1) * RH}" y2="${AX + (i + 1) * RH}"/>`));
+  // trục thời gian: mốc theo giờ / ngày
+  const stepH = win <= 6 * 3600e3 ? 1 : win <= 24 * 3600e3 ? 3 : 24, stepMs = stepH * 3600e3;
+  const first = new Date(t0); first.setMinutes(0, 0, 0); if (stepH === 24) first.setHours(0); let tk = first.getTime();
+  while (tk < t0) tk += stepMs;
+  let lastLb = -1e9;
+  for (; tk <= now; tk += stepMs) { const dt = new Date(tk), lb = stepH === 24 ? `${String(dt.getDate()).padStart(2, "0")}/${String(dt.getMonth() + 1).padStart(2, "0")}` : `${String(dt.getHours()).padStart(2, "0")}:00`;
+    g += `<line class="grid" x1="${x(tk)}" x2="${x(tk)}" y1="${AX - 4}" y2="${H}"/>`;
+    if (x(tk) - lastLb >= 44 && x(now) - x(tk) >= 46) { g += `<text class="axis" x="${x(tk)}" y="${AX - 8}" text-anchor="middle">${lb}</text>`; lastLb = x(tk); } }
+  // thanh lượt chạy
+  const items = [];
+  inWin.forEach((r) => {
+    const i = agents.indexOf(r.agent); if (i < 0) return;
+    const y = AX + i * RH + 9, h = RH - 18;
+    const color = r.kind === "run" ? "var(--warning)" : r.kind === "err" ? "var(--critical)" : "var(--series-1)";
+    const idx = items.push(r) - 1;
+    if (!r.en) { const xx = x(r.st.getTime()); g += `<rect class="bar" x="${xx - 1.5}" y="${y}" width="3" height="${h}" rx="1.5" fill="${color}" data-k="${idx}"/>`; return; }
+    const x1 = x(Math.max(r.st.getTime(), t0)), x2 = x(Math.min(r.en.getTime(), now)), w = Math.max(4, x2 - x1);
+    g += `<rect class="bar ${r.kind === "run" ? "run" : ""}" x="${x1}" y="${y}" width="${w}" height="${h}" rx="4" fill="${color}" data-k="${idx}"/>`;
+    if (w > 54) g += `<text x="${x1 + 6}" y="${y + h / 2 + 4}" font-size="10.5" fill="#fff" pointer-events="none">${esc(r.ticket || "")}</text>`;
+  });
+  g += `<line class="now" x1="${x(now)}" x2="${x(now)}" y1="${AX - 4}" y2="${H}"/><text class="nowlb" x="${x(now) + 4}" y="${AX - 8}">bây giờ</text>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.style.height = H + "px"; svg.innerHTML = g;
+  $("actNames").style.paddingTop = AX + "px";
+  const tip = el.querySelector(".tip");
+  svg.querySelectorAll("rect.bar").forEach((b) => {
+    const r = items[+b.dataset.k];
+    b.onmousemove = (e) => { tip.innerHTML = `<b>${esc(r.ticket || "")}</b> · ${esc(r.agent)}<br>Bắt đầu ${esc(r.st.toLocaleString("vi-VN"))}<br>` +
+        (r.kind === "run" ? `Đang chạy ${dur(Math.round((now - r.st) / 1000))}${r.phase === "push" ? " · Orchestrator đẩy code" : ""}` : r.en ? `Thời lượng ${dur(Math.round((r.en - r.st) / 1000))}` : "Chưa ghi thời lượng") +
+        `${r.num_turns != null ? ` · ${r.num_turns} turn` : ""}<br>${r.kind === "err" ? "Kết quả: lỗi" : r.kind === "run" ? "" : "Kết quả: xong"}${r.pr ? " · có PR" : ""}`;
+      tip.style.display = "block"; const bx = el.getBoundingClientRect();
+      tip.style.left = Math.min(e.clientX - bx.left + 12, bx.width - tip.offsetWidth - 4) + "px"; tip.style.top = Math.max(0, e.clientY - bx.top - tip.offsetHeight - 8) + "px"; };
+    b.onmouseleave = () => (tip.style.display = "none");
+    b.onclick = () => r.ticket && (location.hash = `#/t/${r.ticket}`);
+  });
+  ACT = { d };
+  $("actTable").innerHTML = inWin.slice().sort((a, b) => b.st - a.st).map((r) => `<tr><td>${esc(r.agent)}</td><td class="k">${esc(r.ticket || "")}</td><td class="nw fresh">${esc(r.st.toLocaleString("vi-VN"))}</td>
+    <td class="n">${r.kind === "run" ? "đang chạy" : r.en ? dur(Math.round((r.en - r.st) / 1000)) : "—"}</td><td class="n">${r.num_turns ?? "—"}</td>
+    <td>${r.kind === "run" ? status("warning", "đang chạy") : r.kind === "err" ? status("critical", "lỗi") : status("good", "xong")}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Không có lượt chạy trong khung.</td></tr>';
+}
+
 function render(d) {
   DATA = d;
   renderMenu();
@@ -1540,6 +1655,8 @@ function render(d) {
     if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle + (ciInfo ? " · " + ciInfo : "") : "")}">${ci ? `${ciInfo ? esc(ciInfo) + " · " : ""}${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`;
   }).join("");
+
+  drawActivity(d);
 
   // Live
   if (live && live.alive) {
@@ -1720,8 +1837,11 @@ const syncNavTop = () => { const h = document.querySelector("header").offsetHeig
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);
+setInterval(() => { if (ACT && PAGE === "dashboard") drawActivity(ACT.d); }, 5000);
+try { const w = localStorage.getItem("efitco-actwin"); if (w) $("actWin").value = w; } catch (e) {}
+$("actWin").onchange = () => { try { localStorage.setItem("efitco-actwin", $("actWin").value); } catch (e) {} if (ACT) drawActivity(ACT.d); };
 let RESZ = 0;
-window.addEventListener("resize", () => { if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); clearTimeout(RESZ); if (PAGE.startsWith("r-")) RESZ = setTimeout(renderInfo, 150); });
+window.addEventListener("resize", () => { if (ACT && PAGE === "dashboard") drawActivity(ACT.d); if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); clearTimeout(RESZ); if (PAGE.startsWith("r-")) RESZ = setTimeout(renderInfo, 150); });
 </script>
 </body>
 </html>
