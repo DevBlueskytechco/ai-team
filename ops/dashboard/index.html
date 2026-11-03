@@ -249,9 +249,10 @@ let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard"]]],
-  ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"], ["roles", "Vai trò"], ["agents", "Agent"]]],
+  ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"]]],
+  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["commands", "Lệnh"]]],
   ["Tiến độ", [["story", "Story"], ["tickets", "Ticket Zoho"]]],
-  ["Quy ước", [["decisions", "Quyết định"], ["ops", "Vận hành"]]],
+  ["Quy ước", [["decisions", "Quyết định"]]],
 ];
 const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
 
