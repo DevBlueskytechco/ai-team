@@ -162,6 +162,14 @@ h2.ttitle{font-size:19px;margin:8px 0 10px;text-transform:none;letter-spacing:0;
 details.tsec summary{cursor:pointer}
 #toast{position:fixed;right:16px;bottom:16px;z-index:20;background:var(--text);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:13px;display:none;max-width:min(420px,calc(100vw - 32px));box-shadow:0 4px 16px rgba(0,0,0,.2)}
 #toast.bad{background:var(--critical);color:#fff}
+.raci th.rc,.raci td.rc{text-align:center;width:64px}
+.raci tr.grp-top td{border-top:2px solid var(--line)}
+.rA,.rC{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;font-size:12px;font-weight:700}
+.rA{background:var(--accent);color:#fff} .rC{border:1.5px solid var(--accent);color:var(--accent)}
+.legend-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px;margin:0 0 14px;color:var(--text-2)}
+.legend-dl dt{font-weight:600;color:var(--text)} .legend-dl dd{margin:0}
+.legend i.dash{background:none;border-top:2px dashed var(--muted);height:0;width:14px;vertical-align:3px}
+#bdChart svg{display:block;width:100%;height:200px}
 h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
@@ -309,7 +317,7 @@ const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard"]]],
   ["Ticket", [["t-list", "Danh sách"], ["t-board", "Kanban"], ["t-new", "Tạo ticket"]]],
   ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"]]],
-  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["process", "Quy trình"], ["commands", "Lệnh"]]],
+  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["raci", "RACI"], ["process", "Quy trình"], ["scrum", "Agile/Scrum"], ["commands", "Lệnh"]]],
   ["Tiến độ", [["story", "Story"]]],
   ["Quy ước", [["decisions", "Quyết định"]]],
 ];
@@ -319,6 +327,7 @@ function renderMenu() {
   const cnt = { "t-list": DATA ? DATA.tickets.filter((t) => t.status !== "Closed").length : "", story: PROJECT ? PROJECT.story.length : "" };
   (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
+  if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   const html = MENU.map(([grp, items]) => `<div class="grp">${esc(grp)}</div>` + items.map(([id, name]) =>
     `<a href="#/${id}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
   if ($("menu").innerHTML !== html) $("menu").innerHTML = html;
@@ -374,6 +383,8 @@ function renderInfoInner(box) {
   else if (PAGE === "t-new") { box.innerHTML = pageTNew(); bindTNew(); return; }
   else if (PAGE === "t-detail") { box.innerHTML = pageTDetail(); if (TDETAIL.t) bindTDetail(); else loadTDetail(TDETAIL.key); return; }
   else if (PAGE === "process") box.innerHTML = pageProcess();
+  else if (PAGE === "raci") box.innerHTML = pageRaci();
+  else if (PAGE === "scrum") { box.innerHTML = pageScrum(); bindSearch(); drawBurndown(); return; }
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
     if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
@@ -557,7 +568,7 @@ const stageOf = (t) => { const g = classify(t); const [k, l] = STAGE[g] || STAGE
 const lab = (l) => `<span class="chip">${esc(l)}</span>`;
 const fmt = (iso) => (iso ? String(iso).slice(0, 16).replace("T", " ") : "—");
 
-async function loadRaci() { try { RACI = await (await fetch("/api/raci", { cache: "no-store" })).json(); } catch (e) { RACI = {}; } }
+async function loadRaci() { try { RACI = await (await fetch("/api/raci", { cache: "no-store" })).json(); } catch (e) { RACI = {}; } renderMenu(); if (PAGE === "raci") renderInfo(); }
 
 function toast(msg, bad) {
   let el = $("toast");
@@ -814,10 +825,144 @@ function refreshTDetail() {
   }
 }
 
+/* ================= RACI: ma trận loại việc × agent (nguồn orchestrator/raci.yaml) + số ticket thực tế ================= */
+function pageRaci() {
+  const C = PROJECT.raci, T = DATA ? DATA.tickets : [];
+  if (!C || !RACI) return '<div class="empty">Đang tải…</div>';
+  const by = {}; T.forEach((t) => { if (!t.task_type) return; const b = (by[t.task_type] ||= { open: 0, closed: 0 }); t.status === "Closed" ? b.closed++ : b.open++; });
+  const rows = C.order.flatMap((a) => (RACI[a] || []).map((tt) => ({ a, tt })));
+  const shown = rows.filter((r) => match(Q.raci, [r.tt, C.desc[r.tt] || "", C.names[r.a]]));
+  const noType = T.filter((t) => t.agent && !t.task_type && t.status !== "Closed" && classify(t) !== "question").length;
+  const cell = (r, a) => a === r.a ? `<td class="rc"><span class="rA" title="A: ${esc(C.names[a])} nhận">A</span></td>` :
+    ((C.consulted[r.tt] || []).includes(a) ? `<td class="rc"><span class="rC" title="C: hỏi ý kiến ${esc(C.names[a])}">C</span></td>` : '<td class="rc"></td>');
+  return `<div class="page-head"><h2>RACI</h2>${searchBox("raci", "Tìm loại việc")}<span class="fresh">${rows.length} loại việc · ${C.order.length} agent · nguồn orchestrator/raci.yaml</span></div>
+    <dl class="legend-dl">${C.legend.map(([k, v]) => `<dt>${k === "A" ? '<span class="rA">A</span>' : k === "C" ? '<span class="rC">C</span>' : esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    <div class="tablewrap"><table class="info raci"><thead><tr><th>Loại việc</th><th>Việc</th>${C.order.map((a) => `<th class="rc">${esc(C.names[a])}</th>`).join("")}
+      <th class="n">Ticket mở</th><th class="n">Đã đóng</th></tr></thead>
+    <tbody>${shown.map((r, i) => `<tr class="${i && shown[i - 1].a !== r.a ? "grp-top" : ""}"><td class="k">${esc(r.tt)}</td><td>${esc(C.desc[r.tt] || "")}</td>
+      ${C.order.map((a) => cell(r, a)).join("")}<td class="n">${by[r.tt] && by[r.tt].open ? `<a href="#/t-list" onclick="Q.tlist='${esc(r.tt)}';Q.ts='Open'" title="Xem ticket mở loại ${esc(r.tt)}">${by[r.tt].open}</a>` : 0}</td><td class="n">${by[r.tt] ? by[r.tt].closed : 0}</td></tr>`).join("") ||
+      `<tr><td colspan="${C.order.length + 4}" class="empty">Không có loại việc khớp.</td></tr>`}</tbody></table></div>
+    ${noType ? `<p class="note">${status("warning", `${noType} ticket mở có agent nhưng chưa có loại việc`)} Orchestrator tự suy fe_task/be_task từ phía FE/BE; ticket khác cần gán loại việc trước khi chạy.</p>` : ""}`;
+}
+
+/* ================= Agile/Scrum: sprint, burndown, vận tốc, vai trò, sự kiện, DoR/DoD ================= */
+const dOnly = (iso) => (iso ? String(iso).slice(0, 10) : null);
+const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const todayKey = () => dayKey(new Date().toISOString());
+
+function sprintStats(sp, T) {
+  const days = []; for (let d = sp.start; d <= sp.end; d = addDays(d, 1)) days.push(d);
+  const pts = (t) => Number(t.points) || 0;
+  const scope = T.filter((t) => pts(t) > 0 && dOnly(t.created_at) <= sp.end && (t.status !== "Closed" || !t.closed_at || dOnly(t.closed_at) >= sp.start));
+  const remaining = (d) => scope.filter((t) => dOnly(t.created_at) <= d && !(t.status === "Closed" && t.closed_at && dOnly(t.closed_at) <= d)).reduce((a, t) => a + pts(t), 0);
+  const closedIn = T.filter((t) => t.status === "Closed" && t.closed_at && dOnly(t.closed_at) >= sp.start && dOnly(t.closed_at) <= sp.end);
+  const createdIn = T.filter((t) => dOnly(t.created_at) >= sp.start && dOnly(t.created_at) <= sp.end);
+  const today = todayKey();
+  return { days, scope, closedIn, createdIn, today,
+    burn: days.map((d) => ({ d, rem: d <= today ? remaining(d) : null })),
+    start: remaining(addDays(sp.start, -1)) || scope.filter((t) => dOnly(t.created_at) <= sp.start).reduce((a, t) => a + pts(t), 0),
+    donePts: closedIn.reduce((a, t) => a + pts(t), 0) };
+}
+
+function pageScrum() {
+  const S = PROJECT.scrum; if (!S) return '<div class="empty">project.json chưa có mục scrum.</div>';
+  const T = DATA ? DATA.tickets : [], today = todayKey();
+  const cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end);
+  const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1);
+  const sp = S.sprints[idx], st = sprintStats(sp, T);
+  const dayN = today < sp.start ? 0 : today > sp.end ? st.days.length : st.days.indexOf(today) + 1;
+  const open = st.scope.filter((t) => t.status !== "Closed").length;
+  const tiles = [
+    ["Thời gian", `${sp.start.slice(8)}/${sp.start.slice(5, 7)} – ${sp.end.slice(8)}/${sp.end.slice(5, 7)}`, today < sp.start ? "chưa bắt đầu" : today > sp.end ? "đã kết thúc" : `ngày ${dayN}/${st.days.length}`],
+    ["Point trong sprint", st.scope.reduce((a, t) => a + (Number(t.points) || 0), 0), `${st.scope.length} ticket có point`],
+    ["Point đã xong", st.donePts, `${st.closedIn.length} ticket đóng trong sprint`],
+    ["Point còn lại", st.burn.filter((b) => b.rem != null).slice(-1)[0]?.rem ?? st.start, `${open} ticket có point còn mở`],
+    ["Ticket tạo mới", st.createdIn.length, "trong sprint"],
+  ];
+  const vel = S.sprints.map((s) => { const x = sprintStats(s, T); return [s.name, `${s.start} → ${s.end}`, x.donePts, x.closedIn.length, x.createdIn.length, s.goal || "—"]; });
+  return `<div class="page-head"><h2>Agile/Scrum</h2>
+      <select data-sel="sprint" aria-label="Sprint">${S.sprints.map((s, i) => opt(i, idx, `${s.name}${i === cur ? " (hiện tại)" : ""}`)).join("")}</select>
+      <span class="fresh">Mục tiêu: ${esc(sp.goal || "chưa ghi — sửa project.json scrum.sprints")}</span></div>
+    <div class="rep">${tiles.map(([l, v, s]) => `<div class="t"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`).join("")}</div>
+    <h3 class="sub">Burndown (story point)</h3>
+    <div class="legend"><span><i style="background:var(--series-1)"></i>Point còn lại</span><span><i class="dash"></i>Đường lý tưởng</span></div>
+    <div class="chart" id="bdChart"><svg role="img" aria-label="Burndown ${esc(sp.name)}: point còn lại theo ngày so với đường lý tưởng"></svg><div class="tip" id="bdTip"></div></div>
+    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table class="info"><thead><tr><th>Ngày</th><th class="n">Point còn lại</th><th class="n">Lý tưởng</th></tr></thead>
+      <tbody>${st.burn.map((b, i) => `<tr><td>${b.d}</td><td class="n">${b.rem ?? "—"}</td><td class="n">${(st.start - (st.start * i) / Math.max(1, st.days.length - 1)).toFixed(1)}</td></tr>`).join("")}</tbody></table></div></details>
+    <p class="note">Point lấy từ ticket nội bộ (task FE/BE có point). Ticket thêm giữa sprint làm đường còn lại đi lên. ${esc(S.sprint_note)}</p>
+    ${diagramScrum()}
+    <h3 class="sub">Vận tốc theo sprint</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Sprint</th><th>Thời gian</th><th class="n">Point xong</th><th class="n">Ticket đóng</th><th class="n">Ticket tạo</th><th>Mục tiêu</th></tr></thead>
+      <tbody>${vel.map((r) => `<tr>${r.map((c, i) => `<td class="${i >= 2 && i <= 4 ? "n" : i === 1 ? "nw fresh" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    ${["roles", "events", "artifacts", "dor", "dod"].map((k) => tableOf(S[k], "scrum")).join("")}`;
+}
+
+function drawBurndown() {
+  const S = PROJECT && PROJECT.scrum, el = $("bdChart"); if (!S || !el) return;
+  const today = todayKey(), cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end);
+  const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1);
+  const st = sprintStats(S.sprints[idx], DATA ? DATA.tickets : []);
+  const svg = el.querySelector("svg"), W = svg.clientWidth || 900, H = 200, pl = 34, pr = 10, pt = 10, pb = 24, n = st.days.length;
+  const max = Math.max(1, st.start, ...st.burn.map((b) => b.rem || 0)), step = max <= 10 ? 2 : max <= 30 ? 5 : 10, top = Math.ceil(max / step) * step;
+  const x = (i) => pl + ((W - pl - pr) * i) / Math.max(1, n - 1), y = (v) => H - pb - ((H - pb - pt) * v) / top;
+  let g = "";
+  for (let v = 0; v <= top; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
+  st.days.forEach((d, i) => { if (i % 2 === 0 || i === n - 1) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
+  const ti = st.days.indexOf(today);
+  if (ti >= 0) g += `<line x1="${x(ti)}" x2="${x(ti)}" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3"/><text class="axis" x="${x(ti) + 4}" y="${pt + 9}">hôm nay</text>`;
+  g += `<line x1="${x(0)}" y1="${y(st.start)}" x2="${x(n - 1)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  const pts = st.burn.map((b, i) => (b.rem == null ? null : [x(i), y(b.rem)])).filter(Boolean);
+  if (pts.length) {
+    g += `<polyline points="${pts.map((p) => p.join(",")).join(" ")}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach((p) => (g += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--series-1)" stroke="var(--surface)" stroke-width="2"/>`));
+  }
+  st.days.forEach((d, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+  const tip = $("bdTip");
+  svg.querySelectorAll("rect[data-i]").forEach((r) => {
+    r.onmousemove = (e) => { const i = +r.dataset.i, b = st.burn[i], ideal = st.start - (st.start * i) / Math.max(1, n - 1);
+      tip.style.display = "block"; tip.innerHTML = `<b>${b.d}</b><br>Point còn lại: ${b.rem ?? "—"}<br>Lý tưởng: ${ideal.toFixed(1)}`;
+      const bx = el.getBoundingClientRect(); tip.style.left = Math.min(e.clientX - bx.left + 10, bx.width - 150) + "px"; tip.style.top = e.clientY - bx.top - 60 + "px"; };
+    r.onmouseleave = () => (tip.style.display = "none");
+  });
+}
+
+/* Sơ đồ vòng Scrum gắn với công cụ Efitco */
+function diagramScrum() {
+  const id = "dgsc", b = DG.box;
+  let g = DG.defs(id);
+  g += b(20, 70, 170, 64, ["Product backlog", "docs/srs.md · TE-1..14", "PO ưu tiên"]);
+  g += b(250, 70, 170, 64, ["Sprint planning", "Thứ Hai đầu sprint", "Tech Lead chia task"]);
+  g += b(480, 70, 170, 64, ["Sprint backlog", "ticket ai-draft", "point, blocked_by"]);
+  g += `<rect class="band" x="700" y="14" width="300" height="190" rx="10"/>`;
+  g += `<text class="h" x="850" y="36" text-anchor="middle">SPRINT 2 TUẦN · MỖI NGÀY</text>`;
+  g += b(720, 76, 120, 52, ["/sprint", "agent chạy ticket"]);
+  g += b(860, 76, 120, 52, ["PR + CI", "check · preview · e2e"]);
+  g += b(800, 146, 140, 44, ["/merge-pr", "CTO duyệt, chấm"], "hl");
+  g += b(1060, 70, 160, 64, ["Increment", "develop + preview", "zip lên yum-dev"]);
+  g += b(860, 240, 170, 64, ["Sprint review", "canvas_check, R", "release note"]);
+  g += b(560, 240, 190, 64, ["Retrospective", "eval sửa/loại →", "sửa agent, skill"]);
+  g += b(250, 240, 200, 64, ["Backlog refinement", "BA story + AC", "trả lời [Q]"]);
+  const L = (pts, lab, cls) => (g += DG.ln(id, pts, lab, cls));
+  L([[190, 102], [248, 102]], ["chọn story", 219, 94]);
+  L([[420, 102], [478, 102]], ["tạo ticket", 449, 94]);
+  L([[650, 102], [698, 102]], ["/run-next", 674, 94]);
+  L([[840, 102], [858, 102]]);
+  L([[920, 128], [920, 144]]);
+  L([[800, 168], [780, 168], [780, 130]], ["ticket kế", 774, 160, "end"], "dash");
+  L([[940, 168], [1030, 168], [1030, 102], [1058, 102]], ["merge", 985, 160]);
+  L([[1140, 134], [1140, 272], [1032, 272]], ["cuối sprint", 1146, 210, "start"]);
+  L([[860, 272], [752, 272]], ["kết quả", 806, 264]);
+  L([[560, 272], [452, 272]], ["cải tiến", 506, 264]);
+  L([[250, 272], [105, 272], [105, 136]], ["story đủ AC", 112, 210, "start"]);
+  return DG.fig(1240, 320, "Vòng Scrum ở Efitco: product backlog, sprint planning, sprint backlog, vòng hằng ngày /sprint → PR CI → /merge-pr, increment, sprint review, retrospective, backlog refinement quay về backlog", g,
+    "Vòng hằng ngày nằm trong khung nền: agent chạy ticket, CI kiểm, CTO duyệt rồi Orchestrator lấy ticket kế. Cuối sprint đi vòng dưới: review trên yum-dev, retro sửa agent theo eval, refinement chuẩn bị story cho sprint sau.");
+}
+
 function render(d) {
   DATA = d;
   renderMenu();
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const f = $("agentFilter").value;
   const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
   const sel = $("agentFilter");
@@ -1018,7 +1163,7 @@ loadProject(); loadRaci(); route();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (innerWidth > 900) $("menu").style.top = h + "px", $("menu").style.height = `calc(100vh - ${h}px)`; else $("menu").style.top = "0", $("menu").style.height = "auto"; };
 syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);
-window.addEventListener("resize", () => TP && drawTp(TP.days, TP.by));
+window.addEventListener("resize", () => { if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); });
 </script>
 </body>
 </html>
