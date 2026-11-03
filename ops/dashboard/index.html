@@ -173,6 +173,7 @@ const dur = (s) => (s >= 3600 ? `${Math.floor(s / 3600)}h ` : "") + `${Math.floo
 function classify(t) {
   const L = t.labels || [], title = t.title || "", closed = (t.status || "").toLowerCase() === "closed";
   if (closed) return "done";
+  if (DATA.live && DATA.live.alive && DATA.live.ticket === t.key) return "running";
   if (title.startsWith("[Q]") || /^hỏi /i.test(title)) return "question";
   if (L.includes("ai-review")) return "review";
   if (L.includes("ai-sua")) return "fix";
@@ -208,7 +209,7 @@ function render(d) {
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
 
   const T = d.tickets.filter((t) => !f || t.agent === f);
-  const groups = { ready: [], blocked: [], review: [], fix: [], question: [], done: [] };
+  const groups = { running: [], ready: [], blocked: [], review: [], fix: [], question: [], done: [] };
   T.forEach((t) => { const g = classify(t); if (groups[g]) groups[g].push(t); });
 
   // KPIs
@@ -226,7 +227,7 @@ function render(d) {
     ["Chi phí tháng", `$${b.spent.toFixed(0)}`, ""],
   ];
   $("kpis").innerHTML = k.map(([l, v, s], i) => {
-    if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s">${esc(ci ? ci.displayTitle : "")}</div></div>`;
+    if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle : "")}">${ci ? `${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
     if (i === 5) return `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${status(budgetKind, `${pct.toFixed(1)}% của $${b.limit}`)}</div><div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`;
   }).join("");
@@ -236,6 +237,7 @@ function render(d) {
     liveKey = live.ticket;
     $("live").innerHTML = `<div class="live-head"><span class="t">${esc(live.ticket)}</span><span class="chip">${esc(live.agent)}</span>
       ${status("warning", "đang chạy " + dur(live.elapsed_s))}<span class="fresh">${live.turns} lượt · ${live.tools} lần gọi tool</span></div>
+      ${live.source === "ps" ? `<div class="fresh" style="margin-top:4px">Phát hiện qua tiến trình + transcript Claude Code (lượt này chạy bằng Orchestrator bản cũ).</div>` : ""}
       <div style="margin-top:4px">${esc(live.title)}</div>
       <div class="fresh" style="margin-top:6px">Gần nhất: <span style="font-family:var(--mono)">${esc(live.last)}</span></div>`;
   } else {
@@ -245,15 +247,17 @@ function render(d) {
   }
 
   // Board
-  const cols = [["ready", "Sẵn sàng"], ["blocked", "Bị chặn"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["question", "Câu hỏi"], ["done", "Đã xong (gần đây)"]];
+  const cols = [["ready", "Đang chạy · Sẵn sàng"], ["blocked", "Bị chặn"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["question", "Câu hỏi"], ["done", "Đã xong (gần đây)"]];
   $("board").innerHTML = cols.map(([g, name]) => {
     let list = groups[g].sort((a, b2) => num(a.key) - num(b2.key));
+    if (g === "ready") list = groups.running.concat(list);
     if (g === "done") list = list.slice(-8).reverse();
-    return `<div class="col"><h3><span>${name}</span><span>${groups[g].length}</span></h3>${list.map((t) => `
+    return `<div class="col"><h3><span>${name}</span><span>${g === "done" ? groups.done.length : list.length}</span></h3>${list.map((t) => `
       <div class="card"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? `<span class="chip">${esc(t.agent)}</span>` : ""}
       ${t.side ? `<span class="chip">${esc(String(t.side).toUpperCase())}</span>` : ""}${t.points ? `<span class="chip">${t.points} pt</span>` : ""}
       ${t.parent && String(t.parent).startsWith("TE-") ? `<span class="chip">${esc(t.parent)}</span>` : ""}
-      ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}</div>
+      ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}
+      ${groups.running.includes(t) ? status("warning", "đang chạy") : ""}</div>
       <div class="ttl" title="${esc(t.title)}">${esc(t.title)}</div></div>`).join("") || '<div class="empty">—</div>'}</div>`;
   }).join("");
 

@@ -61,8 +61,8 @@ def poll_gh():
                     checks[n] = (c.get("conclusion") or c.get("state") or c.get("status") or "").lower()
                 out.append({"number": p["number"], "title": p["title"], "author": p["author"]["login"], "branch": p["headRefName"],
                             "created": p["createdAt"], "url": p["url"], "checks": checks})
-            runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-L", "5", "--json",
-                                 "databaseId,status,conclusion,displayTitle,createdAt,url,workflowName") or "[]")
+            runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-w", "CI", "-e", "push", "-L", "5", "--json",
+                                 "databaseId,status,conclusion,displayTitle,createdAt,url,workflowName,headSha,event") or "[]")
             with LOCK: STATE["prs"] = out; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
         except Exception as e:
             with LOCK: STATE["errors"]["gh"] = str(e)[:200]
@@ -78,23 +78,80 @@ def read_runs():
             out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "cost_usd", "num_turns", "is_error", "pr", "branch", "model")})
     return out
 
+def _etime(v):
+    """ps etime [[dd-]hh:]mm:ss → giây."""
+    d, _, rest = v.strip().rpartition("-"); parts = [int(x) for x in rest.split(":")]
+    while len(parts) < 3: parts.insert(0, 0)
+    return (int(d) if d else 0) * 86400 + parts[0] * 3600 + parts[1] * 60 + parts[2]
+
+def ps_agent():
+    """Tìm tiến trình `claude -p --agent X ... Ticket ES1-Txx` đang chạy — không phụ thuộc Orchestrator có ghi _live.json hay không."""
+    try: out = subprocess.run(["ps", "-axww", "-o", "pid=,etime=,command="], capture_output=True, text=True, timeout=10).stdout
+    except Exception: return None
+    for line in out.splitlines():
+        m = re.match(r"\s*(\d+)\s+(\S+)\s+(.*)", line)
+        if not m: continue
+        cmd = m.group(3)
+        if " -p " not in cmd or "--agent " not in cmd or "claude" not in cmd.split(" --agent")[0]: continue
+        a = re.search(r"--agent\s+(\S+)", cmd); k = re.search(r"Ticket\s+([A-Z0-9]+-T?\d+)", cmd)
+        if a and k: return {"pid": int(m.group(1)), "agent": a.group(1), "ticket": k.group(1), "elapsed_s": _etime(m.group(2))}
+    return None
+
+def transcript_for(since_epoch):
+    """Transcript Claude Code của lượt agent (ghi liên tục vào ~/.claude/projects/<thư mục theme>/<session>.jsonl)."""
+    import glob
+    base = os.path.expanduser("~/.claude/projects")
+    slug = re.sub(r"[^A-Za-z0-9]", "-", THEME)
+    dirs = [os.path.join(base, slug)] + [d for d in glob.glob(os.path.join(base, "*theme-efitco")) if not d.endswith(slug)]
+    files = [f for d in dirs for f in glob.glob(os.path.join(d, "*.jsonl")) if os.path.getmtime(f) >= since_epoch - 30]
+    return max(files, key=os.path.getmtime) if files else None
+
+def _count(path):
+    """Đếm lượt/tool + hành động gần nhất từ file sự kiện (stream-json hoặc transcript)."""
+    turns, tools, last = set(), 0, ""
+    for line in open(path, encoding="utf-8").readlines()[-2000:]:
+        try: e = json.loads(line)
+        except Exception: continue
+        if e.get("type") != "assistant": continue
+        msg = e.get("message") or {}; turns.add(msg.get("id") or e.get("uuid") or len(turns))
+        for c in msg.get("content") or []:
+            if c.get("type") == "tool_use":
+                tools += 1; i = c.get("input") or {}
+                last = f"{c.get('name')} " + str(i.get("command") or i.get("file_path") or i.get("pattern") or "")[:140]
+            elif c.get("type") == "text" and c.get("text", "").strip():
+                last = c["text"].strip().replace("\n", " ")[:160]
+    return len(turns), tools, last
+
+LIVE_SRC = {}   # ticket → file sự kiện đang dùng cho /api/live
+
 def read_live():
+    """Agent đang chạy. Ưu tiên _live.json (Orchestrator mới); nếu thiếu/cũ thì dò tiến trình + transcript."""
     p = os.path.join(RAW, "_live.json")
-    if not os.path.exists(p): return None
-    try:
-        d = json.load(open(p, encoding="utf-8"))
-        st = datetime.datetime.fromisoformat(d["started_at"]); d["elapsed_s"] = int((datetime.datetime.now() - st).total_seconds())
-        # tiến trình còn sống?
-        try: os.kill(int(d.get("pid") or 0), 0); d["alive"] = True
-        except Exception: d["alive"] = False
-        return d
-    except Exception:
-        return None
+    if os.path.exists(p):
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+            os.kill(int(d.get("pid") or 0), 0)          # còn sống?
+            st = datetime.datetime.fromisoformat(d["started_at"]); d["elapsed_s"] = int((datetime.datetime.now() - st).total_seconds())
+            d.update(alive=True, source="stream"); LIVE_SRC[d["ticket"]] = os.path.join(ROOT, d.get("log") or "")
+            return d
+        except Exception:
+            pass                                         # file sót lại sau khi Orchestrator bị kill → bỏ qua
+    a = ps_agent()
+    if not a: return None
+    with LOCK: t = next((x for x in STATE["tickets"] if x.get("key") == a["ticket"]), {})
+    d = a | {"title": t.get("title", ""), "alive": True, "source": "ps", "turns": 0, "tools": 0, "last": "",
+             "started_at": (datetime.datetime.now() - datetime.timedelta(seconds=a["elapsed_s"])).isoformat(timespec="seconds")}
+    tr = transcript_for(time.time() - a["elapsed_s"])
+    if tr:
+        LIVE_SRC[a["ticket"]] = tr
+        d["turns"], d["tools"], d["last"] = _count(tr)
+    return d
 
 def live_events(key, limit=60):
     """Rút gọn stream-json của 1 ticket thành dòng sự kiện đọc được."""
-    p = os.path.join(RAW, "live", f"{key}.jsonl")
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", key or "") or not os.path.exists(p): return []
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", key or ""): return []
+    p = LIVE_SRC.get(key) or os.path.join(RAW, "live", f"{key}.jsonl")
+    if not os.path.exists(p): return []
     ev = []
     for line in open(p, encoding="utf-8").readlines()[-400:]:
         try: e = json.loads(line)
