@@ -37,6 +37,54 @@ else:
     print("CẢNH BÁO: thiếu AGENT_GH_TOKEN — PR sẽ đứng tên tài khoản đang đăng nhập, CTO không tự duyệt được")
     AGENT_GIT, AGENT_GH_ENV = [], dict(os.environ)
 
+LIVE_DIR = os.path.join(ROOT, "evals/raw/live")
+
+def _live_write(state):
+    """evals/raw/_live.json: agent đang chạy (dashboard đọc). state=None → xoá."""
+    p = os.path.join(ROOT, "evals/raw/_live.json")
+    if state is None:
+        if os.path.exists(p): os.remove(p)
+        return
+    tmp = p + ".tmp"; json.dump(state, open(tmp, "w", encoding="utf-8"), ensure_ascii=False); os.replace(tmp, p)
+
+def stream_agent(cmd, env, key, agent, t, started):
+    """Chạy claude -p ở stream-json: ghi từng sự kiện vào evals/raw/live/<key>.jsonl để dashboard xem thời gian thực.
+    Trả về object giống --output-format json (lấy từ sự kiện type=result)."""
+    os.makedirs(LIVE_DIR, exist_ok=True)
+    log = os.path.join(LIVE_DIR, f"{key}.jsonl")
+    state = {"ticket": key, "agent": agent, "title": t.get("title"), "started_at": started, "pid": None,
+             "turns": 0, "tools": 0, "last": "", "log": os.path.relpath(log, ROOT)}
+    out, err_tail = None, []
+    with open(log, "w", encoding="utf-8") as fh:
+        p = subprocess.Popen(cmd, cwd=THEME, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        state["pid"] = p.pid; _live_write(state)
+        deadline = time.time() + 3600
+        for line in p.stdout:
+            fh.write(line); fh.flush()
+            try: ev = json.loads(line)
+            except Exception: continue
+            typ = ev.get("type")
+            if typ == "assistant":
+                state["turns"] += 1
+                for c in (ev.get("message") or {}).get("content") or []:
+                    if c.get("type") == "tool_use":
+                        state["tools"] += 1
+                        inp = c.get("input") or {}
+                        state["last"] = f"{c.get('name')} " + str(inp.get("command") or inp.get("file_path") or inp.get("pattern") or "")[:140]
+                    elif c.get("type") == "text" and c.get("text"):
+                        state["last"] = c["text"].strip().replace("\n", " ")[:160]
+                _live_write(state)
+            elif typ == "result":
+                out = ev
+            if time.time() > deadline:
+                p.kill(); break
+        p.wait()
+        err_tail = (p.stderr.read() or "")[-2000:]
+    _live_write(None)
+    if out is None:
+        out = {"result": "không có sự kiện result (agent lỗi hoặc quá 60 phút)", "stderr": err_tail, "is_error": True}
+    return out
+
 def run_agent(t):
     agent, tid = t["agent"], t["id"]; key = t.get("key") or tid
     if t.get("task_type") not in RACI.get(agent, []):
@@ -54,14 +102,12 @@ def run_agent(t):
     prompt = (f"Ticket {key} (id {tid}): {t['title']}. Đọc ticket bằng mcp__ticket__get với id {tid}. Đặt tên file đầu ra theo key {key} "
               f"(vd drafts/{agent}/{key}/, tests/e2e/{key}.spec.ts). Làm theo skill của bạn, KHÔNG git commit/push (Orchestrator làm), "
               f"rồi set_label ai-review kèm tóm tắt tự kiểm tra.")
-    cmd = [CFG["claude_bin"], "-p", "--agent", agent, "--permission-mode", CFG["permission_mode"], "--output-format", "json",
+    cmd = [CFG["claude_bin"], "-p", "--agent", agent, "--permission-mode", CFG["permission_mode"], "--output-format", "stream-json", "--verbose",
            "--max-turns", str(t.get("max_turns") or CFG["max_turns_default"])]
     if CFG.get("model_override", {}).get(agent): cmd += ["--model", CFG["model_override"][agent]]
     cmd.append(prompt)
     started = datetime.datetime.now().isoformat(timespec="seconds")
-    r = subprocess.run(cmd, cwd=THEME, env=env, capture_output=True, text=True, timeout=3600)
-    try: out = json.loads(r.stdout)
-    except Exception: out = {"result": r.stdout[-2000:], "stderr": r.stderr[-2000:], "is_error": True}
+    out = stream_agent(cmd, env, key, agent, t, started)
     rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
            "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Efitco Agent Ops</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f5f4; --surface:#fcfcfb; --surface-2:#f0f1ef; --line:#dcdedb;
+  --text:#0b0b0b; --text-2:#52514e; --muted:#77766f;
+  --accent:#2a78d6; --series-1:#2a78d6;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --chip:#e9ecf3;
+  --font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --chip:#25303f;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
+  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --chip:#25303f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--font)}
+header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--good)} .dot.off{background:var(--critical)}
+.fresh{font-size:12px;color:var(--muted)}
+.spacer{flex:1}
+select,button{font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer}
+main{padding:16px 20px 40px;display:grid;gap:16px;grid-template-columns:repeat(12,minmax(0,1fr))}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
+@media (max-width:1100px){.span-8,.span-6,.span-4{grid-column:span 12}}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px 16px 32px}header{padding:10px 16px}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .l{font-size:12px;color:var(--text-2)} .kpi .v{font-size:26px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--series-1)}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text);white-space:nowrap}
+.status b{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;color:#fff;font-size:10px;line-height:1}
+.s-good b{background:var(--good)} .s-warning b{background:var(--warning);color:#111} .s-serious b{background:var(--serious)} .s-critical b{background:var(--critical)} .s-none b{background:var(--muted)}
+.live-head{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline}
+.live-head .t{font-size:18px;font-weight:700}
+.feed{margin-top:10px;max-height:330px;overflow:auto;border-top:1px solid var(--line);font-size:13px}
+.ev{display:grid;grid-template-columns:70px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.ev .k{font-family:var(--mono);font-size:11px;color:var(--text-2);padding-top:2px}
+.ev.error .k{color:var(--critical)} .ev.done .k{color:var(--good)}
+.ev .x{overflow-wrap:anywhere;font-family:var(--mono);font-size:12px}
+.ev.say .x{font-family:var(--font);font-size:13px}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.board{display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:10px;overflow-x:auto;align-items:start}
+.col{background:var(--surface-2);border-radius:8px;padding:8px;min-height:80px}
+.col h3{font-size:12px;margin:2px 4px 8px;color:var(--text-2);display:flex;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 9px;margin-bottom:7px}
+.card .top{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px}
+.card .key{font-family:var(--mono);font-weight:600;font-size:12px}
+.card .ttl{font-size:12.5px;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.chip{background:var(--chip);color:var(--text);border-radius:999px;padding:1px 7px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+.story{display:grid;grid-template-columns:52px 1fr 96px;gap:8px;align-items:center;padding:5px 0;font-size:13px}
+.story .bar{margin-top:0}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:180px}
+.chart .axis{fill:var(--muted);font-size:10px}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
+.errbox{grid-column:span 12;border:1px solid var(--critical);color:var(--text);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;display:none}
+.tablewrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>Efitco · Agent Ops</h1>
+  <span class="conn"><span class="dot" id="dot"></span><span id="connText">đang kết nối…</span></span>
+  <span class="fresh" id="fresh"></span>
+  <span class="spacer"></span>
+  <label class="fresh" for="agentFilter">Agent</label>
+  <select id="agentFilter"><option value="">Tất cả</option></select>
+  <button id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">Sáng/Tối</button>
+</header>
+
+<main>
+  <div class="errbox" id="errbox" role="alert"></div>
+
+  <div class="span-12 kpis" id="kpis"></div>
+
+  <section class="span-8" aria-labelledby="h-live">
+    <h2 id="h-live">Agent đang chạy</h2>
+    <div id="live"></div>
+    <div class="feed" id="feed" aria-live="polite"></div>
+  </section>
+
+  <section class="span-4" aria-labelledby="h-story">
+    <h2 id="h-story">Tiến độ story (ticket con đã đóng)</h2>
+    <div id="stories"></div>
+  </section>
+
+  <section class="span-12" aria-labelledby="h-board">
+    <h2 id="h-board">Bảng ticket</h2>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-pr">
+    <h2 id="h-pr">Pull request đang mở</h2>
+    <div class="tablewrap"><table><thead><tr><th>PR</th><th>Ticket</th><th>Tác giả</th><th>CI</th></tr></thead><tbody id="prs"></tbody></table></div>
+    <h2 style="margin-top:14px">CI develop gần nhất</h2>
+    <div class="tablewrap"><table><tbody id="ci"></tbody></table></div>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-cost">
+    <h2 id="h-cost">Chi phí ước tính theo ngày (USD, 14 ngày)</h2>
+    <div class="chart" id="costChart"><svg role="img" aria-label="Biểu đồ chi phí theo ngày"></svg><div class="tip" id="tip"></div></div>
+    <details style="margin-top:6px"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table><tbody id="costTable"></tbody></table></div></details>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-agents">
+    <h2 id="h-agents">Hiệu quả theo agent</h2>
+    <div class="tablewrap"><table><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">TB lượt</th><th class="n">TB USD</th><th class="n">Lỗi</th><th class="n">Đạt</th><th class="n">Sửa</th><th class="n">Loại</th></tr></thead><tbody id="agents"></tbody></table></div>
+  </section>
+
+  <section class="span-6" aria-labelledby="h-runs">
+    <h2 id="h-runs">Lượt chạy gần đây</h2>
+    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Lượt</th><th class="n">USD</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ICON = { good: "✓", warning: "!", serious: "!", critical: "✕", none: "•" };
+const status = (kind, label) => `<span class="status s-${kind}"><b aria-hidden="true">${ICON[kind]}</b>${esc(label)}</span>`;
+const num = (k) => parseInt(String(k || "").split("-T").pop(), 10) || 0;
+let DATA = null, liveKey = null;
+
+/* Theme toggle: per-viewer convenience only */
+(function () {
+  try { const t = localStorage.getItem("efitco-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $("themeBtn").onclick = () => {
+    const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("efitco-theme", next); } catch (e) {}
+    if (DATA) render(DATA);
+  };
+  $("agentFilter").onchange = () => DATA && render(DATA);
+})();
+
+function ago(iso) {
+  if (!iso) return "chưa có";
+  const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+  return s < 60 ? `${s}s trước` : s < 3600 ? `${Math.round(s / 60)} phút trước` : `${Math.round(s / 3600)} giờ trước`;
+}
+const dur = (s) => (s >= 3600 ? `${Math.floor(s / 3600)}h ` : "") + `${Math.floor((s % 3600) / 60)}m ${s % 60}s`;
+
+function classify(t) {
+  const L = t.labels || [], title = t.title || "", closed = (t.status || "").toLowerCase() === "closed";
+  if (closed) return "done";
+  if (title.startsWith("[Q]") || /^hỏi /i.test(title)) return "question";
+  if (L.includes("ai-review")) return "review";
+  if (L.includes("ai-sua")) return "fix";
+  if (L.includes("ai-draft") && t.agent) {
+    const ids = Object.fromEntries((DATA.tickets || []).map((x) => [x.id, x]));
+    const open = (t.blocked_by || []).filter((b) => (ids[b]?.status || "").toLowerCase() !== "closed");
+    return open.length ? "blocked" : "ready";
+  }
+  return "other";
+}
+
+function ciOf(checks) {
+  const want = ["theme-check", "preview", "e2e", "lighthouse"];
+  return want.filter((n) => n in checks).map((n) => {
+    const v = checks[n];
+    const kind = v === "success" ? "good" : ["failure", "error", "cancelled", "timed_out"].includes(v) ? "critical" : v === "skipped" ? "none" : "warning";
+    const lbl = v === "success" ? "đạt" : kind === "critical" ? "lỗi" : v === "skipped" ? "bỏ qua" : "đang chạy";
+    return status(kind, `${n} ${lbl}`);
+  }).join(" ") || '<span class="fresh">chưa có CI</span>';
+}
+
+function render(d) {
+  DATA = d;
+  const f = $("agentFilter").value;
+  const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
+  const sel = $("agentFilter");
+  if (sel.options.length - 1 !== agents.length) {
+    sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
+  }
+  $("fresh").textContent = `Zoho: ${ago(d.zoho_at)} · GitHub: ${ago(d.gh_at)}`;
+  const errs = Object.entries(d.errors || {});
+  $("errbox").style.display = errs.length ? "block" : "none";
+  $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
+
+  const T = d.tickets.filter((t) => !f || t.agent === f);
+  const groups = { ready: [], blocked: [], review: [], fix: [], question: [], done: [] };
+  T.forEach((t) => { const g = classify(t); if (groups[g]) groups[g].push(t); });
+
+  // KPIs
+  const live = d.live, b = d.budget, pct = b.limit ? (b.spent / b.limit) * 100 : 0;
+  const ci = (d.ci_develop || [])[0];
+  const ciKind = !ci ? "none" : ci.status !== "completed" ? "warning" : ci.conclusion === "success" ? "good" : "critical";
+  const ciLbl = !ci ? "chưa có" : ci.status !== "completed" ? "đang chạy" : ci.conclusion === "success" ? "đạt" : "lỗi";
+  const budgetKind = pct >= 100 ? "critical" : pct >= b.warn_pct ? "warning" : "good";
+  const k = [
+    ["Đang chạy", live && live.alive ? live.ticket : "—", live && live.alive ? `${live.agent} · ${dur(live.elapsed_s)}` : "không có agent nào"],
+    ["Sẵn sàng chạy", groups.ready.length, `${groups.blocked.length} đang bị chặn`],
+    ["Chờ CTO", groups.review.length + groups.question.length, `${groups.review.length} chấm · ${groups.question.length} câu hỏi`],
+    ["PR mở", d.prs.length, d.prs.filter((p) => Object.values(p.checks).some((v) => ["failure", "error"].includes(v))).length + " PR có CI lỗi"],
+    ["CI develop", "", ""],
+    ["Chi phí tháng", `$${b.spent.toFixed(0)}`, ""],
+  ];
+  $("kpis").innerHTML = k.map(([l, v, s], i) => {
+    if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s">${esc(ci ? ci.displayTitle : "")}</div></div>`;
+    if (i === 5) return `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${status(budgetKind, `${pct.toFixed(1)}% của $${b.limit}`)}</div><div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div></div>`;
+    return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s">${esc(s)}</div></div>`;
+  }).join("");
+
+  // Live
+  if (live && live.alive) {
+    liveKey = live.ticket;
+    $("live").innerHTML = `<div class="live-head"><span class="t">${esc(live.ticket)}</span><span class="chip">${esc(live.agent)}</span>
+      ${status("warning", "đang chạy " + dur(live.elapsed_s))}<span class="fresh">${live.turns} lượt · ${live.tools} lần gọi tool</span></div>
+      <div style="margin-top:4px">${esc(live.title)}</div>
+      <div class="fresh" style="margin-top:6px">Gần nhất: <span style="font-family:var(--mono)">${esc(live.last)}</span></div>`;
+  } else {
+    const last = d.runs[d.runs.length - 1];
+    liveKey = last ? last.ticket : null;
+    $("live").innerHTML = `<div class="empty">Không có agent nào đang chạy. ${last ? `Lượt gần nhất: <b>${esc(last.ticket)}</b> (${esc(last.agent)}) lúc ${esc((last.started_at || "").replace("T", " "))}` : ""}</div>`;
+  }
+
+  // Board
+  const cols = [["ready", "Sẵn sàng"], ["blocked", "Bị chặn"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["question", "Câu hỏi"], ["done", "Đã xong (gần đây)"]];
+  $("board").innerHTML = cols.map(([g, name]) => {
+    let list = groups[g].sort((a, b2) => num(a.key) - num(b2.key));
+    if (g === "done") list = list.slice(-8).reverse();
+    return `<div class="col"><h3><span>${name}</span><span>${groups[g].length}</span></h3>${list.map((t) => `
+      <div class="card"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? `<span class="chip">${esc(t.agent)}</span>` : ""}
+      ${t.side ? `<span class="chip">${esc(String(t.side).toUpperCase())}</span>` : ""}${t.points ? `<span class="chip">${t.points} pt</span>` : ""}
+      ${t.parent && String(t.parent).startsWith("TE-") ? `<span class="chip">${esc(t.parent)}</span>` : ""}
+      ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}</div>
+      <div class="ttl" title="${esc(t.title)}">${esc(t.title)}</div></div>`).join("") || '<div class="empty">—</div>'}</div>`;
+  }).join("");
+
+  // Stories
+  const st = {};
+  d.tickets.forEach((t) => { if (t.parent && String(t.parent).startsWith("TE-")) { const s = (st[t.parent] ||= { all: 0, done: 0 }); s.all++; if ((t.status || "").toLowerCase() === "closed") s.done++; } });
+  $("stories").innerHTML = Object.keys(st).sort((a, b2) => parseInt(a.slice(3)) - parseInt(b2.slice(3))).map((s) => {
+    const p = st[s].all ? Math.round((st[s].done / st[s].all) * 100) : 0;
+    return `<div class="story"><b>${s}</b><div class="bar" title="${st[s].done}/${st[s].all} ticket"><i style="width:${p}%"></i></div><span class="fresh">${st[s].done}/${st[s].all} · ${p}%</span></div>`;
+  }).join("") || '<div class="empty">Chưa có ticket gắn story.</div>';
+
+  // PRs + CI
+  $("prs").innerHTML = d.prs.map((p) => `<tr><td><a href="${esc(p.url)}" target="_blank" rel="noopener">#${p.number}</a></td>
+    <td>${esc(p.branch.replace("feature/ai-", ""))}</td><td>${esc(p.author)}</td><td>${ciOf(p.checks)}</td></tr>`).join("") ||
+    '<tr><td colspan="4" class="empty">Không có PR mở.</td></tr>';
+  $("ci").innerHTML = (d.ci_develop || []).map((r) => {
+    const kind = r.status !== "completed" ? "warning" : r.conclusion === "success" ? "good" : r.conclusion === "skipped" ? "none" : "critical";
+    const lbl = r.status !== "completed" ? "đang chạy" : r.conclusion === "success" ? "đạt" : r.conclusion || "lỗi";
+    return `<tr><td>${status(kind, lbl)}</td><td><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.workflowName)}</a> · ${esc(r.displayTitle)}</td><td class="n fresh">${ago(r.createdAt)}</td></tr>`;
+  }).join("") || '<tr><td class="empty">Chưa lấy được CI.</td></tr>';
+
+  // Runs
+  const R = d.runs.filter((r) => !f || r.agent === f);
+  $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
+    <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${esc(r.agent)}</td>
+    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.cost_usd != null ? Number(r.cost_usd).toFixed(2) : "—"}</td>
+    <td>${r.is_error ? status("critical", "lỗi") : status("good", "xong")}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Chưa có lượt chạy.</td></tr>';
+
+  // Agent stats
+  const A = {};
+  d.runs.forEach((r) => { const a = (A[r.agent] ||= { n: 0, turns: 0, cost: 0, err: 0, dat: 0, sua: 0, loai: 0 }); a.n++; a.turns += r.num_turns || 0; a.cost += Number(r.cost_usd || 0); if (r.is_error) a.err++; });
+  d.tickets.forEach((t) => { if (!t.agent || !A[t.agent]) return; const L = t.labels || [];
+    if (L.includes("ai-dat")) A[t.agent].dat++; else if (L.includes("ai-sua")) A[t.agent].sua++; else if (L.includes("ai-loai")) A[t.agent].loai++; });
+  $("agents").innerHTML = Object.entries(A).sort().map(([a, s]) => `<tr><td>${esc(a)}</td><td class="n">${s.n}</td><td class="n">${(s.turns / s.n).toFixed(0)}</td>
+    <td class="n">${(s.cost / s.n).toFixed(2)}</td><td class="n">${s.err}</td><td class="n">${s.dat}</td><td class="n">${s.sua}</td><td class="n">${s.loai}</td></tr>`).join("") ||
+    '<tr><td colspan="8" class="empty">Chưa có dữ liệu.</td></tr>';
+
+  drawCost(d.runs);
+}
+
+function drawCost(runs) {
+  const days = [], byDay = {};
+  for (let i = 13; i >= 0; i--) { const dt = new Date(Date.now() - i * 864e5); const k = dt.toISOString().slice(0, 10); days.push(k); byDay[k] = 0; }
+  runs.forEach((r) => { const k = (r.started_at || "").slice(0, 10); if (k in byDay) byDay[k] += Number(r.cost_usd || 0); });
+  const svg = $("costChart").querySelector("svg"), W = svg.clientWidth || 600, H = 180, pl = 34, pb = 22, pt = 8;
+  const max = Math.max(1, ...Object.values(byDay)), nice = Math.ceil(max / 5) * 5 || 5;
+  const bw = (W - pl - 8) / days.length, gap = 2;
+  let g = "";
+  for (let i = 0; i <= 2; i++) { const v = (nice / 2) * i, y = H - pb - ((H - pb - pt) * v) / nice;
+    g += `<line class="grid" x1="${pl}" x2="${W - 4}" y1="${y}" y2="${y}"/><text class="axis" x="${pl - 6}" y="${y + 3}" text-anchor="end">${v}</text>`; }
+  days.forEach((k, i) => {
+    const v = byDay[k], h = ((H - pb - pt) * v) / nice, x = pl + i * bw + gap / 2, y = H - pb - h, w = Math.max(2, bw - gap);
+    if (v > 0) g += `<path d="M${x},${H - pb} V${y + Math.min(4, h)} q0,-4 4,-4 H${x + w - 4} q4,0 4,4 V${H - pb} Z" fill="var(--series-1)"/>`;
+    g += `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pb - pt}" fill="transparent" data-k="${k}" data-v="${v.toFixed(2)}"/>`;
+    if (i % 2 === 0) g += `<text class="axis" x="${x + w / 2}" y="${H - 6}" text-anchor="middle">${k.slice(8)}/${k.slice(5, 7)}</text>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+  const tip = $("tip");
+  svg.querySelectorAll("rect[data-k]").forEach((r) => {
+    r.onmousemove = (e) => { tip.style.display = "block"; tip.textContent = `${r.dataset.k}: $${r.dataset.v}`;
+      const bx = $("costChart").getBoundingClientRect(); tip.style.left = e.clientX - bx.left + 10 + "px"; tip.style.top = e.clientY - bx.top - 28 + "px"; };
+    r.onmouseleave = () => (tip.style.display = "none");
+  });
+  $("costTable").innerHTML = days.map((k) => `<tr><td>${k}</td><td class="n">$${byDay[k].toFixed(2)}</td></tr>`).join("");
+}
+
+async function pollFeed() {
+  if (!liveKey) { $("feed").innerHTML = ""; return; }
+  try {
+    const ev = await (await fetch(`/api/live?key=${encodeURIComponent(liveKey)}`)).json();
+    const atBottom = $("feed").scrollTop + $("feed").clientHeight >= $("feed").scrollHeight - 20;
+    $("feed").innerHTML = ev.map((e) => `<div class="ev ${e.kind}"><span class="k">${e.kind === "tool" ? esc(e.name) : e.kind === "say" ? "agent" : e.kind === "error" ? "lỗi tool" : "kết thúc"}</span><span class="x">${esc(e.text)}</span></div>`).join("") ||
+      '<div class="empty">Chưa có nhật ký chạy cho ticket này.</div>';
+    if (atBottom) $("feed").scrollTop = $("feed").scrollHeight;
+  } catch (e) {}
+}
+
+function connect() {
+  const es = new EventSource("/events");
+  es.onopen = () => { $("dot").className = "dot on"; $("connText").textContent = "trực tiếp"; };
+  es.onmessage = (m) => { try { render(JSON.parse(m.data)); } catch (e) { console.error(e); } };
+  es.onerror = () => { $("dot").className = "dot off"; $("connText").textContent = "mất kết nối, đang thử lại…"; };
+}
+connect();
+setInterval(pollFeed, 3000);
+setInterval(() => DATA && render(DATA), 1000 * 15);
+window.addEventListener("resize", () => DATA && drawCost(DATA.runs));
+</script>
+</body>
+</html>
