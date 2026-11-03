@@ -72,8 +72,26 @@ def backup_daily():
             with LOCK: STATE["errors"]["backup"] = str(e)[:200]
         time.sleep(3600)
 
+def required_checks():
+    try:
+        m = re.search(r"^required_checks:\s*\[(.*?)\]", open(os.path.join(ROOT, "orchestrator", "config.yaml"), encoding="utf-8").read(), re.M)
+        if m: return [x.strip() for x in m.group(1).split(",") if x.strip()]
+    except OSError: pass
+    return ["theme-check", "preview", "e2e"]
+
+JOBS = {}   # run id → {job: kết luận}; run đã xong thì giữ, không gọi lại
+def run_jobs(r):
+    rid = r.get("databaseId")
+    if rid in JOBS: return JOBS[rid]
+    jobs = {j["name"]: (j.get("conclusion") or j.get("status") or "").lower()
+            for j in json.loads(sh("gh", "run", "view", str(rid), "-R", REPO, "--json", "jobs") or "{}").get("jobs", [])}
+    if r.get("status") == "completed": JOBS[rid] = jobs
+    return jobs
+
+PENDING = ("queued", "in_progress", "pending", "waiting", "requested", "expected", "")
 def poll_gh():
     while True:
+        busy = False
         try:
             prs = json.loads(sh("gh", "pr", "list", "-R", REPO, "--json", "number,title,author,headRefName,createdAt,statusCheckRollup,url") or "[]")
             out = []
@@ -86,6 +104,10 @@ def poll_gh():
                             "created": p["createdAt"], "url": p["url"], "checks": checks})
             runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-w", "CI", "-e", "push", "-L", "5", "--json",
                                  "databaseId,status,conclusion,displayTitle,createdAt,url,workflowName,headSha,event") or "[]")
+            for r in runs[:3]:
+                try: r["jobs"] = run_jobs(r)
+                except Exception: r["jobs"] = {}
+            busy = any(v in PENDING for p in out for v in p["checks"].values()) or any(r.get("status") != "completed" for r in runs[:1])
             merged = json.loads(sh("gh", "pr", "list", "-R", REPO, "--state", "merged", "-L", "100", "--json",
                                    "number,title,headRefName,createdAt,mergedAt,url") or "[]")
             merged = [{"number": p["number"], "title": p["title"], "branch": p["headRefName"], "createdAt": p["createdAt"],
@@ -93,7 +115,7 @@ def poll_gh():
             with LOCK: STATE["prs"] = out; STATE["merged"] = merged; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
         except Exception as e:
             with LOCK: STATE["errors"]["gh"] = str(e)[:200]
-        time.sleep(60)
+        time.sleep(20 if busy else 60)   # CI đang chạy thì cập nhật nhanh hơn
 
 # ---------- nguồn nhanh (file local) ----------
 def read_runs():
@@ -226,7 +248,7 @@ def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
-    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count()})
+    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks()})
     return s
 
 def ticker():
