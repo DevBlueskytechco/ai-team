@@ -69,7 +69,7 @@ section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:upp
 .card .top{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px}
 .card .key{font-family:var(--mono);font-weight:600;font-size:12px}
 .card .ttl{font-size:12.5px;margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.chip{background:var(--chip);color:var(--text);border-radius:999px;padding:1px 7px;font-size:11px}
+.chip{background:var(--chip);color:var(--text);border-radius:999px;padding:1px 7px;font-size:11px;white-space:nowrap}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -84,6 +84,27 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
 .errbox{grid-column:span 12;border:1px solid var(--critical);color:var(--text);background:var(--surface);border-radius:8px;padding:8px 12px;font-size:13px;display:none}
 .tablewrap{overflow-x:auto}
+.app{display:grid;grid-template-columns:208px minmax(0,1fr);align-items:start}
+nav.menu{position:sticky;top:53px;height:calc(100vh - 53px);overflow:auto;padding:14px 10px;border-right:1px solid var(--line);background:var(--surface)}
+nav.menu a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;color:var(--text-2);font-size:13.5px}
+nav.menu a:hover{background:var(--surface-2);text-decoration:none}
+nav.menu a[aria-current="page"]{background:var(--chip);color:var(--text);font-weight:600}
+nav.menu .grp{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 10px 4px}
+nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (max-width:900px){.app{grid-template-columns:minmax(0,1fr)}
+  nav.menu{position:sticky;top:0;z-index:4;height:auto;display:flex;gap:4px;overflow-x:auto;padding:8px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  nav.menu a{white-space:nowrap;flex:none} nav.menu .grp{display:none} nav.menu .cnt{display:none}}
+.page-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:12px}
+.page-head h2{margin:0;font-size:16px;text-transform:none;letter-spacing:0;color:var(--text)}
+.page-head input,.page-head select{font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+.page-head input{min-width:220px}
+.info td{overflow-wrap:anywhere}
+.info td.k{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.info td.nw{white-space:nowrap}
+.info td.k.wrap{white-space:normal}
+.note{font-size:12.5px;color:var(--text-2);margin:10px 0 0}
+tfoot td{font-weight:600}
+main[hidden]{display:none}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
 .rep{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
@@ -107,7 +128,10 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
   <button id="themeBtn" type="button" aria-label="Đổi giao diện sáng/tối">Sáng/Tối</button>
 </header>
 
-<main>
+<div class="app">
+<nav class="menu" id="menu" aria-label="Menu dashboard"></nav>
+<div>
+<main id="page-dashboard">
   <div class="errbox" id="errbox" role="alert"></div>
 
   <div class="span-12 kpis" id="kpis"></div>
@@ -161,6 +185,9 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
     <div class="board" id="board"></div>
   </section>
 </main>
+<main id="page-info" hidden><section class="span-12" id="info"></section></main>
+</div>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -217,8 +244,130 @@ function ciOf(checks) {
   }).join(" ") || '<span class="fresh">chưa có CI</span>';
 }
 
+/* ---------- Menu: Dashboard (mặc định) + các trang chuyển từ Efitco-thong-tin-du-an.xlsx ---------- */
+let PAGE = "dashboard", PROJECT = null;
+const Q = {};   // ô tìm/lọc của từng trang
+const MENU = [
+  ["Tổng quan", [["dashboard", "Dashboard"]]],
+  ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"], ["roles", "Vai trò"], ["agents", "Agent"]]],
+  ["Tiến độ", [["story", "Story"], ["tickets", "Ticket Zoho"]]],
+  ["Quy ước", [["decisions", "Quyết định"], ["ops", "Vận hành"]]],
+];
+const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
+
+function renderMenu() {
+  const cnt = { tickets: DATA ? DATA.tickets.length : "", story: PROJECT ? PROJECT.story.length : "" };
+  (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
+  const html = MENU.map(([grp, items]) => `<div class="grp">${esc(grp)}</div>` + items.map(([id, name]) =>
+    `<a href="#/${id}" ${id === PAGE ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
+  if ($("menu").innerHTML !== html) $("menu").innerHTML = html;
+}
+
+function route() {
+  const id = (location.hash.replace(/^#\/?/, "") || "dashboard");
+  PAGE = PAGE_IDS.includes(id) ? id : "dashboard";
+  $("page-dashboard").hidden = PAGE !== "dashboard";
+  $("page-info").hidden = PAGE === "dashboard";
+  const showAgent = PAGE === "dashboard" || PAGE === "tickets";
+  $("agentFilter").hidden = !showAgent; document.querySelector('label[for="agentFilter"]').hidden = !showAgent;
+  document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
+  window.scrollTo(0, 0);
+  if (DATA && PAGE === "dashboard") render(DATA); else { renderMenu(); renderInfo(); }
+}
+window.addEventListener("hashchange", route);
+
+async function loadProject() {
+  try { PROJECT = await (await fetch("/api/project", { cache: "no-store" })).json(); } catch (e) { PROJECT = { pages: [], story: [], error: String(e) }; }
+  renderMenu(); if (PAGE !== "dashboard") renderInfo();
+}
+
+const linkify = (v) => {
+  const t = String(v ?? "");
+  return /^https?:\/\//.test(t) ? `<a href="${esc(t)}" target="_blank" rel="noopener">${esc(t.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>` : esc(t);
+};
+const match = (q, cells) => !q || cells.join(" ").toLowerCase().includes(q.toLowerCase());
+const searchBox = (id, ph) => `<input type="search" data-q="${id}" placeholder="${esc(ph)}" value="${esc(Q[id] || "")}" aria-label="${esc(ph)}">`;
+
+function bindSearch() {
+  document.querySelectorAll("#info [data-q]").forEach((el) => {
+    el.oninput = () => { Q[el.dataset.q] = el.value; renderInfo(); };
+  });
+  document.querySelectorAll("#info [data-sel]").forEach((el) => { el.onchange = () => { Q[el.dataset.sel] = el.value; renderInfo(); }; });
+}
+
+function renderInfo() {
+  if (PAGE === "dashboard") return;
+  const box = $("info"), a = document.activeElement, fq = a && a.dataset && a.dataset.q, pos = fq ? a.selectionStart : 0;
+  renderInfoInner(box);
+  if (fq) { const n = box.querySelector(`[data-q="${fq}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+}
+
+function renderInfoInner(box) {
+  if (!PROJECT) { box.innerHTML = '<div class="empty">Đang tải…</div>'; return; }
+  if (PAGE === "story") box.innerHTML = pageStory();
+  else if (PAGE === "tickets") box.innerHTML = pageTickets();
+  else {
+    const pg = PROJECT.pages.find((x) => x.id === PAGE);
+    if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
+    const rows = pg.rows.filter((r) => match(Q[PAGE], r));
+    box.innerHTML = `<div class="page-head"><h2>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
+      <div class="tablewrap"><table class="info"><thead><tr>${pg.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map((r) => `<tr>${r.map((c, i) => i === pg.group_col ? `<td><span class="chip">${esc(c)}</span></td>` :
+        `<td class="${i === 0 && pg.group_col == null && /^(\/|[A-Z0-9_ \/]+$)/.test(c) ? (c.length < 30 ? "k" : "k wrap") : ""}">${linkify(c)}</td>`).join("")}</tr>`).join("") ||
+        `<tr><td colspan="${pg.columns.length}" class="empty">Không có dòng khớp.</td></tr>`}</tbody></table></div>
+      ${pg.note ? `<p class="note">${esc(pg.note)}</p>` : ""}`;
+  }
+  box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${PAGE === "tickets" || PAGE === "story" ? "Zoho trực tiếp (" + ago(DATA && DATA.zoho_at) + ") + " : ""}ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.</p>`);
+  bindSearch();
+}
+
+function pageStory() {
+  const T = DATA ? DATA.tickets : [];
+  const rows = PROJECT.story.map((s) => {
+    const kids = T.filter((t) => t.parent === s.key), done = kids.filter((t) => (t.status || "").toLowerCase() === "closed").length;
+    const pts = kids.filter((t) => (t.labels || []).includes("ai-dat")).reduce((a, t) => a + (Number(t.points) || 0), 0);
+    return { ...s, kids: kids.length, done, pts, pct: kids.length ? Math.round((done / kids.length) * 100) : 0 };
+  });
+  const sum = (k) => rows.reduce((a, r) => a + (r[k] || 0), 0);
+  const tk = sum("kids"), td = sum("done"), xong = rows.filter((r) => r.status === "Xong").reduce((a, r) => a + r.points, 0);
+  const st = (v) => status(v === "Xong" ? "good" : v === "Chưa làm" ? "none" : "warning", v);
+  return `<div class="page-head"><h2>Story</h2><span class="fresh">${rows.length} story · ${sum("points")} point sơ bộ</span></div>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Phía</th><th class="n">Point</th><th>Trạng thái (CTO)</th>
+      <th class="n">Ticket con</th><th class="n">Đã đóng</th><th style="min-width:140px">% ticket đóng</th><th class="n">Point task đạt</th></tr></thead>
+    <tbody>${rows.map((r) => `<tr><td class="k">${esc(r.key)}</td><td>${esc(r.title)}</td><td class="nw">${esc(r.side)}</td><td class="n">${r.points}</td><td class="nw">${st(r.status)}</td>
+      <td class="n">${r.kids}</td><td class="n">${r.done}</td><td><div class="story" style="grid-template-columns:1fr 40px;padding:0"><div class="bar"><i style="width:${r.pct}%"></i></div><span class="fresh">${r.pct}%</span></div></td>
+      <td class="n">${r.pts}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td colspan="3">Tổng</td><td class="n">${sum("points")}</td><td class="nw">Story xong: ${xong} point</td><td class="n">${tk}</td><td class="n">${td}</td>
+      <td>${tk ? Math.round((td / tk) * 100) : 0}%</td><td class="n">${sum("pts")}</td></tr></tfoot></table></div>
+    <p class="note">Trạng thái story do CTO cập nhật trong project.json; số ticket con, đã đóng và point task đạt tính trực tiếp từ Zoho.</p>`;
+}
+
+function pageTickets() {
+  const T = (DATA ? DATA.tickets : []).slice().sort((a, b) => num(b.key) - num(a.key));
+  const f = $("agentFilter").value, st = Q.t_status || "", sy = Q.t_story || "";
+  const stories = [...new Set(T.map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
+  const rows = T.filter((t) => (!f || t.agent === f) && (!st || (t.status || "") === st) && (!sy || t.parent === sy) &&
+    match(Q.tickets, [t.key, t.title, t.agent, t.task_type, (t.labels || []).join(" ")]));
+  const open = T.filter((t) => (t.status || "").toLowerCase() !== "closed").length;
+  const opt = (id, cur, list, all) => `<select data-sel="${id}" aria-label="${all}"><option value="">${all}</option>${list.map((v) => `<option ${v === cur ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>`;
+  return `<div class="page-head"><h2>Ticket Zoho</h2>${searchBox("tickets", "Tìm key, tên, nhãn")}
+      ${opt("t_status", st, ["Open", "Closed"], "Mọi trạng thái")}${opt("t_story", sy, stories, "Mọi story")}
+      <span class="fresh">${rows.length} hiển thị · ${T.length} ticket · ${open} mở · ${T.length - open} đóng</span></div>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Key</th><th>Trạng thái</th><th>Agent</th><th>Loại</th><th>Phía</th><th class="n">Point</th>
+      <th>Nhãn</th><th>Story</th><th>Tên ticket</th><th>Ngày tạo</th><th>Đầu ra</th></tr></thead>
+    <tbody>${rows.map((t) => { const closed = (t.status || "").toLowerCase() === "closed", out = String(t.output_link || "");
+      const lnk = (out.match(/https?:\/\/\S+/) || [])[0];
+      return `<tr><td class="k">${esc(t.key)}</td><td class="nw">${status(closed ? "good" : "warning", t.status || "—")}</td><td class="nw">${esc(t.agent || "")}</td>
+      <td class="nw">${esc(t.task_type || "")}</td><td class="nw">${esc(String(t.side || "").toUpperCase())}</td><td class="n">${t.points ?? ""}</td><td class="nw">${(t.labels || []).map((l) => `<span class="chip">${esc(l)}</span>`).join(" ")}</td>
+      <td class="nw">${esc(t.parent || "")}</td><td style="min-width:280px">${esc(t.title)}</td><td class="fresh nw">${esc(t.created_at || "")}</td>
+      <td class="nw">${lnk ? `<a href="${esc(lnk)}" target="_blank" rel="noopener">${esc(lnk.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out.replace(/^branch /, ""))}</td></tr>`; }).join("") ||
+      '<tr><td colspan="11" class="empty">Không có ticket khớp.</td></tr>'}</tbody></table></div>`;
+}
+
 function render(d) {
   DATA = d;
+  renderMenu();
+  if (PAGE !== "dashboard") { if (PAGE === "tickets" || PAGE === "story") renderInfo(); return; }
   const f = $("agentFilter").value;
   const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
   const sel = $("agentFilter");
@@ -396,6 +545,7 @@ function drawTp(days, by) {
 }
 
 async function pollFeed() {
+  if (PAGE !== "dashboard") return;
   if (!liveKey) { $("feed").innerHTML = ""; return; }
   try {
     const ev = await (await fetch(`/api/live?key=${encodeURIComponent(liveKey)}`)).json();
@@ -414,6 +564,9 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
+loadProject(); route();
+const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (innerWidth > 900) $("menu").style.top = h + "px", $("menu").style.height = `calc(100vh - ${h}px)`; else $("menu").style.top = "0", $("menu").style.height = "auto"; };
+syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);
 window.addEventListener("resize", () => TP && drawTp(TP.days, TP.by));
 </script>

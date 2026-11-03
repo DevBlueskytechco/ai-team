@@ -1,0 +1,716 @@
+{
+ "_doc": "Nội dung các menu thông tin của dashboard (chuyển từ Efitco-thong-tin-du-an.xlsx). Sửa file này, tải lại trang là thấy. Không ghi giá trị bí mật.",
+ "updated": "2026-11-03",
+ "story": [
+  {
+   "key": "TE-1",
+   "title": "Khung theme và design token",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Đang QA"
+  },
+  {
+   "key": "TE-2",
+   "title": "Block slideshow (hero) và rich text",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Đang làm"
+  },
+  {
+   "key": "TE-3",
+   "title": "Block featured collection và product card",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Đang làm"
+  },
+  {
+   "key": "TE-4",
+   "title": "Trang sản phẩm",
+   "side": "FE+BE",
+   "points": 13,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-5",
+   "title": "Cart drawer và cart page",
+   "side": "FE+BE",
+   "points": 10,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-6",
+   "title": "Trang collection: lọc, sắp xếp, phân trang",
+   "side": "FE+BE",
+   "points": 10,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-7",
+   "title": "Block nội dung: testimonials, FAQ, image with text, multicolumn",
+   "side": "FE",
+   "points": 8,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-8",
+   "title": "Tìm kiếm predictive và trang kết quả",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-9",
+   "title": "Preset mặc định, trang phụ và nội dung demo",
+   "side": "FE",
+   "points": 5,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-10",
+   "title": "Chuẩn chất lượng và sẵn sàng Canvas",
+   "side": "FE+BE+QA",
+   "points": 8,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-11",
+   "title": "Block product finder quiz",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-12",
+   "title": "Block bundle builder và shop the look",
+   "side": "FE+BE",
+   "points": 13,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-13",
+   "title": "Block featured product có countdown và video demo carousel",
+   "side": "FE+BE",
+   "points": 8,
+   "status": "Chưa làm"
+  },
+  {
+   "key": "TE-14",
+   "title": "Sẵn sàng cho Sidekick, Canvas và agent (Editions Fall '26)",
+   "side": "FE",
+   "points": 5,
+   "status": "Chưa làm"
+  }
+ ],
+ "pages": [
+  {
+   "id": "links",
+   "title": "Links",
+   "group_col": 0,
+   "columns": [
+    "Nhóm",
+    "Tên",
+    "Link",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "GitHub",
+     "Tổ chức DevBlueskytechco",
+     "https://github.com/DevBlueskytechco",
+     "Org chứa 2 repo dự án"
+    ],
+    [
+     "GitHub",
+     "Repo theme-efitco (theme)",
+     "https://github.com/DevBlueskytechco/theme-efitco",
+     "Nhánh develop (làm việc) + main. Skeleton block-first, .claude/ chứa 10 agent"
+    ],
+    [
+     "GitHub",
+     "theme-efitco: Pull requests",
+     "https://github.com/DevBlueskytechco/theme-efitco/pulls",
+     "PR agent đứng tên nextsky-ai-agent, CTO duyệt"
+    ],
+    [
+     "GitHub",
+     "theme-efitco: CI (Actions)",
+     "https://github.com/DevBlueskytechco/theme-efitco/actions",
+     "theme-check, preview, lighthouse, e2e"
+    ],
+    [
+     "GitHub",
+     "theme-efitco: Rulesets",
+     "https://github.com/DevBlueskytechco/theme-efitco/settings/rules",
+     "Required checks: theme-check, preview, e2e. Bypass Repository admin (chỉ PR)"
+    ],
+    [
+     "GitHub",
+     "theme-efitco: Secrets",
+     "https://github.com/DevBlueskytechco/theme-efitco/settings/secrets/actions",
+     "SHOPIFY_CLI_THEME_TOKEN, STORE_PASSWORD"
+    ],
+    [
+     "GitHub",
+     "theme-efitco: Variables",
+     "https://github.com/DevBlueskytechco/theme-efitco/settings/variables/actions",
+     "BENCH_PRODUCT, BENCH_COLLECTION (Lighthouse)"
+    ],
+    [
+     "GitHub",
+     "Repo ai-team (Orchestrator, rubric, eval, ops)",
+     "https://github.com/DevBlueskytechco/ai-team",
+     "Chỉ có nhánh main. Mở Claude Code tại đây để dùng /status, /run-next..."
+    ],
+    [
+     "GitHub",
+     "Teams của org",
+     "https://github.com/orgs/DevBlueskytechco/teams",
+     "tech-lead, dev-fe, dev-be, ai-engineers (CODEOWNERS)"
+    ],
+    [
+     "GitHub",
+     "Tài khoản agent nextsky-ai-agent",
+     "https://github.com/nextsky-ai-agent",
+     "Quyền Write; commit/push/PR của agent"
+    ],
+    [
+     "Shopify",
+     "Store agent + CI: hoa-qua-nhap-khau (admin)",
+     "https://admin.shopify.com/store/hoa-qua-nhap-khau",
+     "Store duy nhất agent và CI được push theme (unpublished). Tên cũ trong tài liệu: efitco-ai-dev"
+    ],
+    [
+     "Shopify",
+     "Store agent + CI: storefront",
+     "https://hoa-qua-nhap-khau.myshopify.com",
+     "Có password storefront (STORE_PASSWORD). Preview: ?preview_theme_id=<id>&pb=0"
+    ],
+    [
+     "Shopify",
+     "hoa-qua-nhap-khau: Themes",
+     "https://admin.shopify.com/store/hoa-qua-nhap-khau/themes",
+     "Theme preview ai-<nhánh> do CI tạo, dùng lại theo tên"
+    ],
+    [
+     "Shopify",
+     "hoa-qua-nhap-khau: Navigation (menu)",
+     "https://admin.shopify.com/store/hoa-qua-nhap-khau/content/menus",
+     "Main menu 2 cấp + Footer menu cho test header/footer"
+    ],
+    [
+     "Shopify",
+     "Store người + Canvas: yum-dev (admin)",
+     "https://admin.shopify.com/store/yum-dev",
+     "Đã bật Canvas. Upload zip tay cuối sprint để kiểm Canvas. Agent không đụng"
+    ],
+    [
+     "Shopify",
+     "Store người: storefront",
+     "https://yum-dev.myshopify.com",
+     ""
+    ],
+    [
+     "Shopify",
+     "Skeleton Theme (nguồn gốc)",
+     "https://github.com/Shopify/skeleton-theme",
+     "Commit a7a655e79b21e68316c228dc7e437b0b32550888"
+    ],
+    [
+     "Shopify",
+     "Theme Store requirements (chuẩn nội bộ)",
+     "https://shopify.dev/docs/storefronts/themes/store/requirements",
+     "Mã R trong docs/requirements-map.md"
+    ],
+    [
+     "Shopify",
+     "Danh sách font Shopify",
+     "https://shopify.dev/docs/storefronts/themes/architecture/settings/fonts",
+     "Sofia Sans Condensed có trong thư viện (CTO kiểm 27/10)"
+    ],
+    [
+     "Zoho",
+     "Zoho Projects — project Efitco Shopify Theme",
+     "https://projects.zoho.com",
+     "Portal ID 943715743, Project ID 2727475000000112892, DC com. Điền link trực tiếp vào cột Ghi chú khi mở project trên trình duyệt"
+    ],
+    [
+     "Figma",
+     "Figma gốc Efitco T10 — trang chủ",
+     "https://www.figma.com/design/XKbUtekvrV7t0IhhG6ox6g/Efitco-T10?node-id=1-359",
+     "File gốc của Designer"
+    ],
+    [
+     "Figma",
+     "Figma bản copy (agent đọc) — trang chủ",
+     "https://www.figma.com/design/ky78ISZjTmrnNxmYsF76Dm/Efitco-T10--Copy-?node-id=1-359",
+     "FIGMA_FILE_KEY = ky78ISZjTmrnNxmYsF76Dm; frame Homepage 1:359; có 16 Color styles + 5 Text styles"
+    ],
+    [
+     "Figma",
+     "Figma copy — page AI drafts",
+     "https://www.figma.com/design/ky78ISZjTmrnNxmYsF76Dm/Efitco-T10--Copy-?node-id=2001-360",
+     "Đề xuất của Designer Agent (dạng comment)"
+    ],
+    [
+     "Figma",
+     "Figma: tạo/thu hồi Personal access token",
+     "https://www.figma.com/settings",
+     "Tab Security; token efitco-ai-agent hạn 90 ngày"
+    ],
+    [
+     "Claude",
+     "Claude Code (cài trên máy Orchestrator)",
+     "https://docs.claude.com/en/docs/claude-code/overview",
+     "Chạy bằng gói Max của CTO ở pha 0–1; claude_version ghim trong ai-team/orchestrator/config.yaml"
+    ],
+    [
+     "Claude",
+     "Anthropic Console (khi chuyển sang API key)",
+     "https://console.anthropic.com",
+     "Key efitco-orchestrator, giới hạn 2.000 USD/tháng — chưa dùng"
+    ],
+    [
+     "Máy CTO",
+     "Thư mục làm việc",
+     "~/Documents/CLAUDE/Shopify_Canvas/",
+     "theme-efitco/ và ai-team/ nằm cạnh nhau (bắt buộc)"
+    ]
+   ],
+   "note": "Link chính của dự án. Link trực tiếp Zoho project: mở project trên trình duyệt rồi dán vào project.json."
+  },
+  {
+   "id": "accounts",
+   "title": "Tài khoản & biến",
+   "columns": [
+    "Biến / tài khoản",
+    "Dùng cho",
+    "Nơi lưu",
+    "Người giữ",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET / ZOHO_REFRESH_TOKEN",
+     "Orchestrator đọc/ghi ticket Zoho",
+     "ai-team/.env",
+     "CTO",
+     "Scope ZohoProjects.tasks.ALL, projects.READ, portals.READ"
+    ],
+    [
+     "ZOHO_PORTAL_ID / ZOHO_PROJECT_ID / ZOHO_DC",
+     "Định danh project Zoho",
+     "ai-team/.env",
+     "CTO",
+     "943715743 / 2727475000000112892 / com"
+    ],
+    [
+     "AGENT_GH_TOKEN",
+     "PAT của nextsky-ai-agent: commit, push, mở PR",
+     "ai-team/.env",
+     "CTO",
+     "Không đặt tên GH_TOKEN (sẽ đè gh của CTO)"
+    ],
+    [
+     "SHOPIFY_CLI_THEME_TOKEN",
+     "Theme Access token store hoa-qua-nhap-khau (push preview)",
+     "ai-team/.env + GitHub Secret",
+     "CTO",
+     "Tạo lại 30/10 (app Theme Access, tên efitco-ci). Hiện 1 lần"
+    ],
+    [
+     "STORE_PASSWORD",
+     "Mật khẩu storefront hoa-qua-nhap-khau (e2e, Lighthouse)",
+     "ai-team/.env + GitHub Secret",
+     "CTO",
+     "Nên đổi chuỗi dài hơn để log CI không bị che"
+    ],
+    [
+     "FIGMA_TOKEN / FIGMA_FILE_KEY",
+     "MCP figma: agent đọc node, xuất ảnh, comment",
+     "ai-team/.env",
+     "CTO",
+     "Token hạn 90 ngày từ 22/10 → gia hạn trước 20/01/2027. Token đã lộ trong chat: nên thu hồi, tạo lại"
+    ],
+    [
+     "TICKET_BACKEND",
+     "Chọn backend ticket",
+     "ai-team/.env",
+     "CTO",
+     "zoho"
+    ],
+    [
+     "Tài khoản Claude (gói Max)",
+     "claude -p của Orchestrator",
+     "claude login trên máy CTO",
+     "CTO",
+     "Chạm usage limit thường xuyên → chuyển API key riêng"
+    ],
+    [
+     "GitHub CTO: TonyPhamCTO",
+     "Duyệt, merge PR; chạy ops/",
+     "gh auth trên máy CTO",
+     "CTO",
+     "Admin repo; bypass PR"
+    ],
+    [
+     "GitHub agent: nextsky-ai-agent",
+     "Tác giả PR agent",
+     "PAT trong AGENT_GH_TOKEN",
+     "CTO",
+     "Không thuộc team nào → không tự duyệt được"
+    ]
+   ],
+   "note": "Không ghi giá trị bí mật vào file này. Giá trị thật chỉ nằm trong ai-team/.env (không commit) và GitHub Secrets."
+  },
+  {
+   "id": "roles",
+   "title": "Vai trò",
+   "columns": [
+    "Vai trò",
+    "Role owner",
+    "Ngày duyệt cố định",
+    "Agent",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "PO",
+     "Mr PO",
+     "Thứ 2",
+     "po",
+     "CTO kiêm"
+    ],
+    [
+     "BA",
+     "Mr BA",
+     "Thứ 3",
+     "ba",
+     "CTO kiêm"
+    ],
+    [
+     "Tech Lead",
+     "Mr Tech Lead",
+     "Thứ 5",
+     "techlead",
+     "CTO kiêm"
+    ],
+    [
+     "Designer",
+     "Mr Designer",
+     "Thứ 3",
+     "designer",
+     "CTO kiêm"
+    ],
+    [
+     "Dev FE",
+     "Mr Dev FE",
+     "Thứ 4",
+     "dev-fe",
+     "CTO kiêm"
+    ],
+    [
+     "Dev BE",
+     "Mr Dev BE",
+     "Thứ 4",
+     "dev-be",
+     "CTO kiêm"
+    ],
+    [
+     "QA",
+     "Mr QA",
+     "Thứ 5",
+     "qa",
+     "CTO kiêm"
+    ],
+    [
+     "DevOps",
+     "Mr DevOps",
+     "Thứ 3",
+     "devops",
+     "CTO kiêm"
+    ],
+    [
+     "Tech Writer / Support",
+     "Mr Writer",
+     "Thứ 4",
+     "writer",
+     "CTO kiêm"
+    ],
+    [
+     "Kỹ sư AI (lead)",
+     "Mr Trưởng Lead",
+     "",
+     "—",
+     "Vận hành agent, rubric, eval"
+    ],
+    [
+     "Kỹ sư AI",
+     "Mr Khiêm",
+     "",
+     "—",
+     ""
+    ],
+    [
+     "Gate reviewer",
+     "—",
+     "",
+     "gate-reviewer",
+     "Agent chỉ đọc, chấm rubric"
+    ]
+   ],
+   "note": "9 vai tạm thời CTO kiêm (quyết định 30/10/2026)."
+  },
+  {
+   "id": "agents",
+   "title": "Agent",
+   "columns": [
+    "Agent",
+    "Được ghi (hook scope-guard)",
+    "Loại ticket nhận (raci.yaml)",
+    "Rubric"
+   ],
+   "rows": [
+    [
+     "po",
+     "drafts/po/",
+     "charter, prd, backlog_prioritize, change_request",
+     "rubrics/po.yaml"
+    ],
+    [
+     "ba",
+     "docs/srs-draft/, drafts/ba/",
+     "questionnaire, srs, user_story, traceability",
+     "rubrics/ba.yaml"
+    ],
+    [
+     "techlead",
+     "docs/adr/, docs/architecture.md, CONVENTION.md, drafts/techlead/",
+     "pr_review, adr, task_split, estimate",
+     "rubrics/techlead.yaml"
+    ],
+    [
+     "designer",
+     "docs/ui-spec/, tokens.json, drafts/designer/",
+     "ui_spec, design_token, ui_diff",
+     "rubrics/designer.yaml"
+    ],
+    [
+     "dev-fe",
+     "blocks/, snippets/, templates/, layout/, assets/*.css, config/, locales/",
+     "fe_task (không viết JS)",
+     "rubrics/dev-fe.yaml"
+    ],
+    [
+     "dev-be",
+     "assets/*.js, snippets/, blocks/, templates/, tests/",
+     "be_task",
+     "rubrics/dev-be.yaml"
+    ],
+    [
+     "qa",
+     "tests/, drafts/qa/",
+     "test_case_from_story, e2e_from_story, bug_report, theme_store_checklist, canvas_check, regression",
+     "rubrics/qa.yaml"
+    ],
+    [
+     "devops",
+     ".github/, scripts/, docs/runbook, lighthouserc, playwright.config",
+     "pipeline, preview, zip, runbook, rollback_test",
+     "rubrics/devops.yaml"
+    ],
+    [
+     "writer",
+     "docs/merchant/, drafts/writer/",
+     "release_note, merchant_guide, ticket_triage, canvas_guide",
+     "rubrics/writer.yaml"
+    ],
+    [
+     "gate-reviewer",
+     "(chỉ đọc)",
+     "chấm rubric tại cổng",
+     "—"
+    ]
+   ],
+   "note": "Phạm vi ghi do hook scope-guard chặn; loại ticket theo orchestrator/raci.yaml."
+  },
+  {
+   "id": "decisions",
+   "title": "Quyết định",
+   "columns": [
+    "Ngày",
+    "Quyết định của CTO",
+    "Ghi ở đâu"
+   ],
+   "rows": [
+    [
+     "22/10/2026",
+     "Tên theme Efitco; kiến trúc Skeleton block-first (không sections, {% partial %}); dev store chạy Canvas",
+     "docs/charter.md, ADR 0002, 0004"
+    ],
+    [
+     "22/10/2026",
+     "Ngân sách token 2.000 USD/tháng, cảnh báo 80%, chỉ CTO nới",
+     "charter, orchestrator/config.yaml"
+    ],
+    [
+     "22/10/2026",
+     "Ticket trên Zoho Projects; GitHub org DevBlueskytechco; agent nextsky-ai-agent",
+     "charter"
+    ],
+    [
+     "22/10/2026",
+     "Pha 0–1 không dùng store thật; agent chỉ push hoa-qua-nhap-khau; người kiểm Canvas trên yum-dev",
+     "charter"
+    ],
+    [
+     "27/10/2026",
+     "Giữ 16 block trang chủ như Figma (thêm TE-11, TE-12, TE-13)",
+     "docs/figma-inventory.md, srs"
+    ],
+    [
+     "27/10/2026",
+     "Figma chỉ có desktop: Dev FE tự suy mobile",
+     "token-compliance"
+    ],
+    [
+     "27/10/2026",
+     "Font heading Sofia Sans Condensed (có trong thư viện Shopify), body Inter",
+     "tokens.json, TE-1 AC8"
+    ],
+    [
+     "27/10/2026",
+     "Xám chữ phụ nền sáng #6B6B6B (AA); #999999 chỉ trên nền tối",
+     "tokens.json"
+    ],
+    [
+     "27/10/2026",
+     "Hết hàng hiện badge Sold out; cart dạng drawer; collection mobile 2 cột",
+     "srs §3"
+    ],
+    [
+     "30/10/2026",
+     "Figma giữ nguyên màu/font; code theo tokens.json",
+     "token-compliance"
+    ],
+    [
+     "30/10/2026",
+     "Ký G1 — đóng pha 0; Sprint 1 từ 02/11/2026",
+     "charter"
+    ],
+    [
+     "30/10/2026",
+     "9 vai tạm thời CTO kiêm; giữ bypass admin cho PR; PR agent duyệt thật",
+     "VIEC-CUA-BAN mục 15"
+    ],
+    [
+     "30/10/2026",
+     "Accent đổi #D94610 → #C8400E để đạt AA với chữ trắng",
+     "tokens.json, settings_schema"
+    ],
+    [
+     "31/10/2026",
+     "Lighthouse chưa chặn merge tới cuối TE-2; required checks: theme-check, preview, e2e",
+     "ruleset, CLAUDE.md ai-team"
+    ],
+    [
+     "31/10/2026",
+     "TE-2 làm slideshow như Figma (AC6–AC9)",
+     "srs TE-2"
+    ],
+    [
+     "31/10/2026",
+     "{% partial %} trong header chấp nhận theo ADR 0002 (ES1-T20)",
+     "Zoho ES1-T20"
+    ],
+    [
+     "02/11/2026",
+     "Áp checklist Shopify Editions Fall '26: thêm TE-14 (AGENTS.md, DESIGN.md, RTL-ready), thêm AC vào TE-3/4/5/9/10",
+     "docs/srs.md, CONVENTION.md"
+    ],
+    [
+     "02/11/2026",
+     "Ghim Shopify CLI 4.9.5 ở CI và máy agent; chặn CLI 5.0 tới khi xong ES1-T32",
+     "ci.yml, ops/preflight.sh"
+    ],
+    [
+     "02/11/2026",
+     "Figma MCP đọc snapshot trong repo (gói Starter giới hạn API); gọi API chỉ khi FIGMA_ALLOW_API=1",
+     "docs/figma/, mcp/figma_server.py"
+    ],
+    [
+     "03/11/2026",
+     "Dashboard vận hành local bỏ chi phí, chỉ theo dõi vận hành và kết quả",
+     "ai-team/ops/dashboard"
+    ]
+   ],
+   "note": ""
+  },
+  {
+   "id": "ops",
+   "title": "Vận hành",
+   "columns": [
+    "Lệnh / quy tắc",
+    "Việc",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "Mở bàn điều khiển",
+     "cd ~/Documents/CLAUDE/Shopify_Canvas/ai-team && claude",
+     "Lần đầu chọn Trust"
+    ],
+    [
+     "/status",
+     "Ticket Zoho, PR mở, CI develop, preflight",
+     "Bắt đầu mỗi phiên"
+    ],
+    [
+     "/run-next [ES1-Txx]",
+     "Agent làm 1 ticket → PR → chờ CI → review sơ bộ",
+     "3–20 phút, chạy nền"
+    ],
+    [
+     "/review-pr <số PR>",
+     "Review theo rubric + quy ước, đề xuất điểm và lệnh merge",
+     "Không tự merge"
+    ],
+    [
+     "/merge-pr <số> <nhãn> <scores> \"<lý do>\"",
+     "Duyệt, merge, chấm điểm, đóng ticket",
+     "CTO gõ = đồng ý"
+    ],
+    [
+     "/apply-patch <file> <theme|aiteam|pr:n> \"<tiêu đề>\"",
+     "Áp patch Claude gửi trong chat",
+     ""
+    ],
+    [
+     "/sprint [n]",
+     "Chạy liên tiếp tối đa n ticket, dừng ở mỗi PR",
+     ""
+    ],
+    [
+     "/dashboard",
+     "Mở dashboard vận hành http://localhost:8787",
+     "Hoặc chạy ops/dashboard.sh ở terminal riêng"
+    ],
+    [
+     "Ngưỡng Lighthouse",
+     "Performance ≥ 96 desktop, ≥ 90 mobile; Accessibility ≥ 98",
+     "Nghiệm thu cuối TE-2 / TE-10"
+    ],
+    [
+     "Theme check",
+     "shopify theme check — 0 lỗi, không override .theme-check.yml",
+     "Shopify CLI 4.x mọi máy và CI"
+    ],
+    [
+     "Giới hạn PR",
+     "≤ 400 dòng (vượt phải ghi lý do)",
+     "skill pr-description"
+    ]
+   ],
+   "note": ""
+  }
+ ]
+}
