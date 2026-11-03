@@ -108,10 +108,12 @@ def run_agent(t):
     cmd.append(prompt)
     started = datetime.datetime.now().isoformat(timespec="seconds")
     out = stream_agent(cmd, env, key, agent, t, started)
+    ended = datetime.datetime.now()
     rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
            "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),
-           "started_at": started, "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
+           "started_at": started, "ended_at": ended.isoformat(timespec="seconds"),
+           "duration_s": int((ended - datetime.datetime.fromisoformat(started)).total_seconds()), "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
     d = os.path.join(ROOT, "evals/raw", agent); os.makedirs(d, exist_ok=True)
     json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
