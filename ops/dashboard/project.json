@@ -646,8 +646,8 @@
    "note": ""
   },
   {
-   "id": "ops",
-   "title": "Vận hành",
+   "id": "commands",
+   "title": "Lệnh",
    "columns": [
     "Lệnh / quy tắc",
     "Việc",
