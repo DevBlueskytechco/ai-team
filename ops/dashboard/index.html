@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Efitco Agent Ops</title>
+<title>Efitco Agent Ops · NextSky</title>
+<link rel="icon" type="image/png" href="/static/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap">
@@ -12,9 +13,10 @@
   color-scheme: light;
   --bg:#f4f5f4; --surface:#fcfcfb; --surface-2:#f0f1ef; --line:#dcdedb;
   --text:#0b0b0b; --text-2:#52514e; --muted:#77766f;
-  --accent:#2a78d6; --series-1:#2a78d6; --series-2:#eb6834;
+  --brand:#2b4cd9; --brand-2:#2579e7; --brand-3:#1b3ac2; --on-brand:#fff; --btn:#2b4cd9; --btn-hover:#1b3ac2;
+  --accent:#2b4cd9; --series-1:#2b4cd9; --series-2:#eb6834; --series-3:#1baf7a; --series-4:#eda100;
   --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
-  --chip:#e9ecf3;
+  --chip:#e8edfc;
   --font: "Roboto", ui-sans-serif, -apple-system, "Segoe UI", Arial, sans-serif;
   --mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -22,16 +24,28 @@
   :root:where(:not([data-theme="light"])){
     color-scheme: dark;
     --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
-    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --series-2:#d95926; --chip:#25303f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#7c9cf3; --btn:#3a5be0; --btn-hover:#2b4cd9; --series-1:#4f75ec; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500; --chip:#232b45;
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
   --bg:#121211; --surface:#1a1a19; --surface-2:#222220; --line:#33332f;
-  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --series-1:#3987e5; --series-2:#d95926; --chip:#25303f;
+  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --accent:#7c9cf3; --btn:#3a5be0; --btn-hover:#2b4cd9; --series-1:#4f75ec; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500; --chip:#232b45;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--font)}
+header::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--brand-3),var(--brand),var(--brand-2))}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.brand:hover{text-decoration:none}
+.brand img{height:26px;width:auto;display:block}
+.brand .sep{width:1px;height:22px;background:var(--line)}
+.brand h1{font-size:15px;font-weight:600;color:var(--text-2)} .brand h1 b{color:var(--text);font-weight:700}
+:root[data-theme="dark"] .brand img{background:#f4f6ff;border-radius:6px;padding:3px 6px}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) .brand img{background:#f4f6ff;border-radius:6px;padding:3px 6px}}
+.brandfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:14px 20px 22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:8px}
+.brandfoot img{height:16px;vertical-align:-3px;margin-right:6px}
+.navfoot{margin:8px 4px 0;font-size:11px;color:var(--muted);line-height:1.4}
+.app.collapsed .navfoot{display:none}
 header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
 header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em}
 .conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
@@ -114,7 +128,7 @@ nav.menu .cnt:empty{display:none}
 .app.collapsed nav.menu a[aria-current="page"]::before{left:-5px}
 .navback{display:none}
 .navhead{display:none}
-@media (max-width:600px){#fresh,label[for="agentFilter"],#themeBtn span,#connText{display:none} header{gap:8px 12px} header h1{font-size:15px}}
+@media (max-width:600px){#fresh,label[for="agentFilter"],#themeBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
 /* màn hẹp: menu là ngăn kéo trượt từ trái, có nền mờ */
 @media (max-width:900px){
   .app,.app.collapsed{grid-template-columns:minmax(0,1fr)}
@@ -157,7 +171,9 @@ main[hidden]{display:none}
 .dg .band{fill:var(--surface-2);opacity:.55}
 .btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:5px 11px;cursor:pointer;text-decoration:none;white-space:nowrap}
 .btn:hover{text-decoration:none;border-color:var(--muted)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary{background:var(--btn);border-color:var(--btn);color:var(--on-brand)}
+.btn.primary:hover{background:var(--btn-hover);border-color:var(--btn-hover)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn.sm{padding:2px 8px;font-size:12px}
 .btn[disabled]{opacity:.5;cursor:default}
 a.plain{color:var(--text)}
@@ -198,7 +214,7 @@ details.tsec summary{cursor:pointer}
 .raci th.rc,.raci td.rc{text-align:center;width:64px}
 .raci tr.grp-top td{border-top:2px solid var(--line)}
 .rA,.rC{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;font-size:12px;font-weight:700}
-.rA{background:var(--accent);color:#fff} .rC{border:1.5px solid var(--accent);color:var(--accent)}
+.rA{background:var(--btn);color:#fff} .rC{border:1.5px solid var(--accent);color:var(--accent)}
 .legend-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px;margin:0 0 14px;color:var(--text-2)}
 .legend-dl dt{font-weight:600;color:var(--text)} .legend-dl dd{margin:0}
 .legend i.dash{background:none;border-top:2px dashed var(--muted);height:0;width:14px;vertical-align:3px}
@@ -210,12 +226,37 @@ details.tsec summary{cursor:pointer}
 .rcard dl{display:grid;grid-template-columns:44px 1fr;gap:7px 8px;margin:0;font-size:12.8px;line-height:1.45}
 .rcard dd{margin:0;overflow-wrap:anywhere} .rcard dd.no{color:var(--text-2)}
 .rL{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 4px;border-radius:5px;font-size:11.5px;font-weight:700}
-.rL.R{background:var(--chip);color:var(--text)} .rL.A{background:var(--accent);color:#fff}
+.rL.R{background:var(--chip);color:var(--text)} .rL.A{background:var(--btn);color:#fff}
 .rL.C{border:1.5px solid var(--accent);color:var(--accent)} .rL.I{border:1.5px solid var(--muted);color:var(--text-2)}
 .rL.N{font-weight:600;color:var(--critical);font-size:11px}
 .rextra{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
 .rextra div{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.8px} .rextra b{display:block;margin-bottom:3px}
 .flow td.who{white-space:nowrap;font-weight:600}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+@media (max-width:1100px){.rgrid{grid-template-columns:minmax(0,1fr)}}
+.rcardx{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface);min-width:0;margin-bottom:14px}
+.rgrid .rcardx{margin-bottom:0}
+.rcardx h3{font-size:12px;margin:0 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em}
+.rcardx .chart svg{display:block;width:100%}
+.chart .vl{fill:var(--text-2);font-size:10.5px}
+details.tv{margin-top:4px} details.tv summary{cursor:pointer}
+.hbars{display:grid;gap:7px}
+.hb{display:grid;grid-template-columns:minmax(90px,160px) 1fr auto;gap:10px;align-items:center;font-size:12.8px}
+.hb .hl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2)}
+.hb .bar{position:relative;height:12px;margin:0;border-radius:4px;overflow:visible;background:var(--surface-2)}
+.hb .bar i{display:block;height:100%;border-radius:4px;background:var(--series-1)}
+.hb .mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.55}
+.hb .hv{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+.page-head .spacer{flex:1}
+.print-only{display:none}
+@media print{
+  :root,:root[data-theme="dark"]{color-scheme:light;--bg:#fff;--surface:#fff;--surface-2:#f2f3f5;--line:#d9dbe0;--text:#000;--text-2:#333;--muted:#555;--chip:#e8edfc}
+  header,nav.menu,.navback,.page-head select,.page-head input,.page-head .btn,.btn,details.tv,#toast{display:none!important}
+  .app{display:block} main{padding:0} section{border:0;padding:0}
+  .rcardx,.rep .t,tr{break-inside:avoid} .rgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .print-only{display:block} a{color:#000;text-decoration:none}
+  .brandfoot{border-top:1px solid #ccc}
+}
 h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
@@ -256,11 +297,18 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></symbol>
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+  <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
 </defs></svg>
 <header>
   <button id="navToggle" type="button" aria-controls="menu" aria-expanded="true" aria-label="Ẩn/hiện menu" title="Ẩn/hiện menu"><svg class="ic" aria-hidden="true"><use href="#i-panel"/></svg></button>
-  <h1>Efitco · Agent Ops</h1>
+  <a class="brand" href="#/dashboard" aria-label="NextSky · Efitco Agent Ops — về Dashboard"><img src="/static/nextsky-logo.png" alt="NextSky" width="113" height="26"><span class="sep" aria-hidden="true"></span><h1><b>Efitco</b> · Agent Ops</h1></a>
   <span class="conn"><span class="dot" id="dot"></span><span id="connText">đang kết nối…</span></span>
   <span class="fresh" id="fresh"></span>
   <span class="spacer"></span>
@@ -328,6 +376,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   </section>
 </main>
 <main id="page-info" hidden><section class="span-12" id="info"></section></main>
+<footer class="brandfoot"><span><img src="/static/nextsky-logo.png" alt="" width="69" height="16">© 2026 NextSky Ecom. Bản quyền thuộc NextSky Ecom — mọi quyền được bảo lưu.</span><span>NextSky® là nhãn hiệu của NextSky Ecom · Efitco Agent Ops</span></footer>
 </div>
 </div>
 
@@ -397,6 +446,7 @@ const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard", "dashboard"]]],
   ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
+  ["Báo cáo vận hành", [["r-week", "Báo cáo tuần", "calendar"], ["r-perf", "Hiệu suất", "activity"], ["r-quality", "Chất lượng", "shield"], ["r-results", "Kết quả dự án", "target"], ["r-sprint", "Báo cáo sprint", "flag"]]],
   ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
   ["Vận hành", [["roles", "Vai trò", "users"], ["agents", "Agent", "bot"], ["raci", "RACI", "grid"], ["process", "Quy trình", "workflow"], ["scrum", "Agile/Scrum", "cycle"], ["commands", "Lệnh", "terminal"]]],
   ["Tiến độ", [["story", "Story", "chart"]]],
@@ -420,7 +470,7 @@ function applyNav() {
 $("navToggle").onclick = () => {
   if (isNarrow()) NAV.open = !NAV.open;
   else { NAV.collapsed = !NAV.collapsed; try { localStorage.setItem("efitco-nav", NAV.collapsed ? "collapsed" : "open"); } catch (e) {} }
-  applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE === "scrum") setTimeout(drawBurndown, 220);
+  applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE === "scrum") setTimeout(drawBurndown, 220); if (PAGE.startsWith("r-")) setTimeout(renderInfo, 220);
 };
 $("navBack").onclick = () => { NAV.open = false; applyNav(); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && NAV.open) { NAV.open = false; applyNav(); $("navToggle").focus(); } });
@@ -434,7 +484,7 @@ function renderMenu() {
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
-    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
+    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("") + `<div class="navfoot">© 2026 NextSky Ecom<br>NextSky® · Efitco Agent Ops</div>`;
   if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
 }
 
@@ -489,6 +539,12 @@ function renderInfoInner(box) {
   else if (PAGE === "t-detail") { box.innerHTML = pageTDetail(); if (TDETAIL.t) bindTDetail(); else loadTDetail(TDETAIL.key); return; }
   else if (PAGE === "process") box.innerHTML = pageProcess();
   else if (PAGE === "raci") box.innerHTML = pageRaci();
+  else if (PAGE.startsWith("r-")) {
+    DRAWS = [];
+    box.innerHTML = { "r-week": pageRWeek, "r-perf": pageRPerf, "r-quality": pageRQuality, "r-results": pageRResults, "r-sprint": pageRSprint }[PAGE]() +
+      `<p class="note fresh print-only">In lúc ${new Date().toLocaleString("vi-VN")} · dữ liệu ticket nội bộ, GitHub, lượt chạy agent · © 2026 NextSky Ecom</p>`;
+    bindSearch(); bindCopy(COPY); runDraws(); if (PAGE === "r-sprint") drawBurndown(); return;
+  }
   else if (PAGE === "scrum") { box.innerHTML = pageScrum(); bindSearch(); drawBurndown(); return; }
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
@@ -1044,7 +1100,7 @@ function drawBurndown() {
   let g = "";
   for (let v = 0; v <= top; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
   const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W - pl - pr) / 46))));
-  st.days.forEach((d, i) => { if (i % every === 0 || (i === n - 1 && (n - 1) % every >= every / 2)) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="${i === n - 1 ? "end" : "middle"}">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
+  st.days.forEach((d, i) => { if (i % every === 0 || (i === n - 1 && (n - 1) % every === 0)) g += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="${i === n - 1 ? "end" : "middle"}">${d.slice(8)}/${d.slice(5, 7)}</text>`; });
   const ti = st.days.indexOf(today);
   if (ti >= 0) g += `<line x1="${x(ti)}" x2="${x(ti)}" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3"/><text class="axis" x="${x(ti) + 4}" y="${pt + 9}">hôm nay</text>`;
   g += `<line x1="${x(0)}" y1="${y(st.start)}" x2="${x(n - 1)}" y2="${y(0)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
@@ -1096,6 +1152,327 @@ function diagramScrum() {
     "Vòng hằng ngày nằm trong khung nền: agent chạy ticket, CI kiểm, CTO duyệt rồi Orchestrator lấy ticket kế. Cuối sprint đi vòng dưới: review trên yum-dev, retro sửa agent theo eval, refinement chuẩn bị story cho sprint sau.");
 }
 
+/* ================= Báo cáo vận hành: tuần, hiệu suất, chất lượng, kết quả dự án, sprint ================= */
+let RUBRICS = null;
+async function loadRubrics() { try { RUBRICS = await (await fetch("/api/rubrics", { cache: "no-store" })).json(); } catch (e) { RUBRICS = {}; } if (PAGE === "r-quality") renderInfo(); }
+const median = (a) => { const s = a.filter((x) => x != null && isFinite(x)).sort((x, y) => x - y); if (!s.length) return null; const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const hoursBetween = (a, b) => (new Date(b) - new Date(a)) / 36e5;
+const fmtH = (h) => (h == null ? "—" : h < 1 ? `${Math.round(h * 60)} phút` : h < 24 ? `${h.toFixed(1)} giờ` : `${(h / 24).toFixed(1)} ngày`);
+const pct = (a, b) => (b ? Math.round((a / b) * 100) + "%" : "—");
+const isQ = (t) => t.type === "question" || /^\[Q\]/.test(t.title || "") || /(^|\s)hỏi[\s:(]/i.test((t.title || "").slice(0, 40));
+const isWork = (t) => !isQ(t);
+const pts = (t) => Number(t.points) || 0;
+const inRange = (d, from, to) => d && d >= from && d <= to;
+const closedIn = (t, from, to) => t.status === "Closed" && inRange(dOnly(t.closed_at), from, to);
+const createdIn = (t, from, to) => inRange(dOnly(t.created_at), from, to);
+const ddmm = (d) => `${d.slice(8)}/${d.slice(5, 7)}`;
+const daysOf = (from, to) => { const a = []; for (let d = from; d <= to; d = addDays(d, 1)) a.push(d); return a; };
+const weekStart = (d) => addDays(d, -((new Date(d + "T12:00:00").getDay() + 6) % 7));
+const delta = (cur, prev, unit = "") => { if (prev == null) return ""; const d = cur - prev; return d === 0 ? "bằng kỳ trước" : `${d > 0 ? "▲" : "▼"} ${Math.abs(Math.round(d * 10) / 10)}${unit} so với kỳ trước`; };
+const firstDay = () => (DATA ? DATA.tickets : []).reduce((m, t) => (dOnly(t.created_at) && dOnly(t.created_at) < m ? dOnly(t.created_at) : m), todayKey());
+function askerOf(t, K) {
+  const p = t.parent && K[t.parent] ? t.parent : ((t.title || "").match(/ES1-T\d+/g) || []).find((k) => k !== t.key && K[k]);
+  return p ? K[p].agent : null;
+}
+function periodRange(n) { const to = todayKey(); return { from: n ? addDays(to, -(n - 1)) : firstDay(), to }; }
+const periodSel = (key, cur) => `<select data-sel="${key}" aria-label="Kỳ báo cáo">${[[7, "7 ngày"], [14, "14 ngày"], [30, "30 ngày"], [0, "Toàn dự án"]].map(([v, l]) => opt(v, cur, l)).join("")}</select>`;
+const repTiles = (tiles) => `<div class="rep">${tiles.map(([l, v, s2]) => `<div class="t"><div class="l">${esc(l)}</div><div class="v">${esc(v)}</div><div class="s">${esc(s2 || "")}</div></div>`).join("")}</div>`;
+const tools = (copyFn) => `<span class="spacer"></span><button class="btn" type="button" onclick="window.print()">${IC("printer")}In / lưu PDF</button>${copyFn ? `<button class="btn" type="button" data-copy="${copyFn}">${IC("copy")}Sao chép tóm tắt</button>` : ""}`;
+const tkey = (t) => `<a href="#/t/${esc(t.key)}">${esc(t.key)}</a>`;
+const sevChip = (s) => (s ? status({ dat: "good", sua_nhe: "warning", sua_nang: "serious", loai: "critical" }[s] || "none", { dat: "đạt", sua_nhe: "sửa nhẹ", sua_nang: "sửa nặng", loai: "loại" }[s] || s) : "");
+
+/* ---- biểu đồ dùng chung (SVG, màu theo token, có tooltip + bảng số) ---- */
+let DRAWS = [];
+const later = (fn) => DRAWS.push(fn);
+function runDraws() { const d = DRAWS; DRAWS = []; d.forEach((f) => { try { f(); } catch (e) { console.error(e); } }); }
+const niceStep = (m) => { const p = Math.pow(10, Math.floor(Math.log10(Math.max(m, 1e-9)))); const f = m / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; };
+const legendOf = (series) => (series.length > 1 ? `<div class="legend">${series.map((s) => `<span><i class="${s.dash ? "dash" : ""}" style="${s.dash ? "" : `background:var(${s.color})`}"></i>${esc(s.name)}</span>`).join("")}</div>` : "");
+const fmtV = (v, u) => (v == null ? "—" : (Number.isInteger(v) ? v : Math.round(v * 10) / 10) + (u || ""));
+function tableView(cats, series, unit) {
+  return `<details class="tv"><summary class="fresh">Xem dạng bảng</summary><div class="tablewrap"><table class="info"><thead><tr><th></th>${series.map((s) => `<th class="n">${esc(s.name)}</th>`).join("")}</tr></thead>
+    <tbody>${cats.map((c, i) => `<tr><td>${esc(c.label)}</td>${series.map((s) => `<td class="n">${fmtV(s.values[i], unit)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></details>`;
+}
+/* Cột (đơn hoặc nhóm), một trục */
+function barChart(id, cats, series, o = {}) {
+  later(() => {
+    const el = $(id); if (!el) return;
+    const svg = el.querySelector("svg"), W = svg.clientWidth || 700, H = o.h || 200, pl = 36, pr = 8, pt = 10, pb = 26;
+    const max = Math.max(o.min || 1, ...series.flatMap((s) => s.values.map((v) => v || 0))), step = niceStep(max / 4), top = Math.ceil(max / step) * step;
+    const gw = (W - pl - pr) / Math.max(1, cats.length), ns = series.length, bw = Math.max(3, Math.min(o.bw || 26, (gw - 10 - (ns - 1) * 2) / ns));
+    const y = (v) => H - pb - ((H - pb - pt) * v) / top;
+    let g = "";
+    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${fmtV(v)}</text>`;
+    const every = Math.max(1, Math.ceil(cats.length / Math.max(2, Math.floor((W - pl - pr) / (o.lw || 56)))));
+    cats.forEach((c, i) => {
+      const cx = pl + i * gw + gw / 2, x0 = cx - (ns * bw + (ns - 1) * 2) / 2;
+      series.forEach((s, j) => { const v = s.values[i] || 0; if (!v) return; const yy = y(v), h = H - pb - yy, r = Math.min(4, h, bw / 2), x = x0 + j * (bw + 2);
+        g += `<path d="M${x},${H - pb} V${yy + r} q0,-${r} ${r},-${r} H${x + bw - r} q${r},0 ${r},${r} V${H - pb} Z" fill="var(${s.color})"/>`; });
+      if (o.labels) series.forEach((s, j) => { const v = s.values[i]; if (v) g += `<text class="axis vl" x="${x0 + j * (bw + 2) + bw / 2}" y="${y(v) - 4}" text-anchor="middle">${fmtV(v)}</text>`; });
+      g += `<rect x="${pl + i * gw}" y="${pt}" width="${gw}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`;
+      if (i % every === 0) g += `<text class="axis" x="${cx}" y="${H - 8}" text-anchor="middle">${esc(c.short || c.label)}</text>`;
+    });
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+    hoverTip(el, svg, (i) => `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${fmtV(s.values[i], o.unit)}`).join(""));
+  });
+  return `${legendOf(series)}<div class="chart" id="${id}"><svg role="img" aria-label="${esc(o.aria || "")}" style="height:${o.h || 200}px"></svg><div class="tip"></div></div>${tableView(cats, series, o.unit)}`;
+}
+/* Đường (1+ series), đường nét đứt cho mốc/lý tưởng */
+function lineChart(id, cats, series, o = {}) {
+  later(() => {
+    const el = $(id); if (!el) return;
+    const svg = el.querySelector("svg"), W = svg.clientWidth || 700, H = o.h || 220, pl = 36, pr = 44, pt = 12, pb = 26, n = cats.length;
+    const max = Math.max(1, ...series.flatMap((s) => s.values.filter((v) => v != null))), step = niceStep(max / 4), top = Math.ceil(max / step) * step;
+    const x = (i) => pl + ((W - pl - pr) * i) / Math.max(1, n - 1), y = (v) => H - pb - ((H - pb - pt) * v) / top;
+    let g = "";
+    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${fmtV(v)}</text>`;
+    const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W - pl - pr) / 52))));
+    cats.forEach((c, i) => { if (i % every === 0) g += `<text class="axis" x="${x(i)}" y="${H - 8}" text-anchor="middle">${esc(c.short || c.label)}</text>`; });
+    series.forEach((s) => {
+      const p = s.values.map((v, i) => (v == null ? null : [x(i), y(v)])).filter(Boolean); if (!p.length) return;
+      g += `<polyline points="${p.map((q) => q.join(",")).join(" ")}" fill="none" stroke="var(${s.color})" stroke-width="${s.dash ? 1.5 : 2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""} stroke-linejoin="round"/>`;
+      const last = p[p.length - 1], lv = s.values.filter((v) => v != null).slice(-1)[0];
+      if (!s.dash) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${last[0] + 7}" y="${last[1] + 4}">${fmtV(lv)}</text>`;
+    });
+    g += `<line class="cross" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3" style="display:none"/>`;
+    cats.forEach((c, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+    const cross = svg.querySelector(".cross");
+    hoverTip(el, svg, (i) => { cross.style.display = ""; cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+      return `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${fmtV(s.values[i], o.unit)}`).join(""); }, () => (cross.style.display = "none"));
+  });
+  return `${legendOf(series)}<div class="chart" id="${id}"><svg role="img" aria-label="${esc(o.aria || "")}" style="height:${o.h || 220}px"></svg><div class="tip"></div></div>${tableView(cats, series, o.unit)}`;
+}
+function hoverTip(el, svg, html, leave) {
+  const tip = el.querySelector(".tip");
+  svg.querySelectorAll("rect[data-i]").forEach((r) => {
+    r.onmousemove = (e) => { tip.innerHTML = html(+r.dataset.i); tip.style.display = "block"; const bx = el.getBoundingClientRect();
+      tip.style.left = Math.min(e.clientX - bx.left + 12, bx.width - tip.offsetWidth - 4) + "px"; tip.style.top = Math.max(0, e.clientY - bx.top - tip.offsetHeight - 8) + "px"; };
+    r.onmouseleave = () => { tip.style.display = "none"; if (leave) leave(); };
+  });
+}
+/* Thanh ngang (HTML): xếp hạng một chỉ số theo nhóm */
+const hbars = (rows, o = {}) => { const max = o.max || Math.max(1e-9, ...rows.map((r) => r.v || 0));
+  return `<div class="hbars" role="list">${rows.map((r) => `<div class="hb" role="listitem"><span class="hl" title="${esc(r.title || r.label)}">${esc(r.label)}</span>
+    <span class="bar"><i style="width:${Math.max(0, Math.min(100, ((r.v || 0) / max) * 100))}%;${r.color ? `background:var(${r.color})` : ""}"></i>${o.mark != null ? `<b class="mark" style="left:${(o.mark / max) * 100}%" title="${esc(o.markLabel || "")}"></b>` : ""}</span>
+    <span class="hv">${esc(r.text ?? fmtV(r.v))}</span></div>`).join("") || '<div class="empty">Chưa có dữ liệu.</div>'}</div>`; };
+const card = (title, body, sub) => `<div class="rcardx"><h3>${esc(title)}</h3>${sub ? `<p class="fresh" style="margin:-4px 0 8px">${esc(sub)}</p>` : ""}${body}</div>`;
+function bindCopy(texts) {
+  document.querySelectorAll("#info [data-copy]").forEach((b) => (b.onclick = async () => {
+    const t = texts[b.dataset.copy] || "";
+    try { await navigator.clipboard.writeText(t); toast("Đã chép tóm tắt"); }
+    catch (e) { const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); toast("Đã chép tóm tắt"); } catch (e2) { toast("Không chép được — bôi đen thủ công", true); } a.remove(); }
+  }));
+}
+const COPY = {};
+
+/* ---------- 1. Báo cáo tuần ---------- */
+function weekStats(from, to) {
+  const T = DATA ? DATA.tickets : [], R = DATA ? DATA.runs : [], M = DATA ? DATA.merged || [] : [];
+  const done = T.filter((t) => isWork(t) && closedIn(t, from, to)), created = T.filter((t) => isWork(t) && createdIn(t, from, to));
+  const qs = T.filter((t) => isQ(t) && createdIn(t, from, to)), runs = R.filter((r) => inRange(dayKey(r.started_at), from, to));
+  const merged = M.filter((p) => inRange(dayKey(p.mergedAt), from, to)), rev = T.filter((t) => t.review && inRange(String(t.review.at || "").slice(0, 10), from, to));
+  const lead = median(merged.map((p) => hoursBetween(p.createdAt, p.mergedAt)));
+  return { done, created, qs, runs, merged, rev, lead, donePts: done.reduce((a, t) => a + pts(t), 0), ok: runs.filter((r) => !r.is_error).length,
+    dat: rev.filter((t) => t.review.severity === "dat").length };
+}
+function pageRWeek() {
+  const today = todayKey(), first = weekStart(firstDay()), weeks = [];
+  for (let w = weekStart(today); w >= first; w = addDays(w, -7)) weeks.push(w);
+  const wi = Math.min(Number(Q.rweek || 0), weeks.length - 1), from = weeks[wi], to = addDays(from, 6), pf = addDays(from, -7), pt2 = addDays(from, -1);
+  const S = weekStats(from, to), P = weekStats(pf, pt2), T = DATA ? DATA.tickets : [];
+  const waiting = T.filter((t) => ["review", "question"].includes(classify(t))).map((t) => ({ t, age: (Date.now() - new Date(t.updated_at || t.created_at)) / 864e5 })).sort((a, b) => b.age - a.age);
+  const blocked = T.filter((t) => classify(t) === "blocked"), K = tByKey();
+  const days = daysOf(from, to).map((d) => ({ label: d, short: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"][daysOf(from, to).indexOf(d)] + " " + ddmm(d) }));
+  const tiles = [
+    ["Ticket hoàn thành", S.done.length, delta(S.done.length, P.done.length)], ["Point hoàn thành", S.donePts, delta(S.donePts, P.donePts)],
+    ["Ticket mới", S.created.length, `${S.qs.length} câu hỏi mới`], ["Lượt agent", S.runs.length, S.runs.length ? `${pct(S.ok, S.runs.length)} thành công` : "—"],
+    ["PR merge", S.merged.length, S.lead != null ? `trung vị mở → merge ${fmtH(S.lead)}` : "—"], ["Tỉ lệ đạt", pct(S.dat, S.rev.length), `${S.rev.length} ticket chấm trong tuần`],
+  ];
+  COPY.week = [`Báo cáo tuần ${ddmm(from)}–${ddmm(to)} · Efitco`,
+    `- Hoàn thành: ${S.done.length} ticket, ${S.donePts} point (tuần trước ${P.done.length} ticket, ${P.donePts} point)`,
+    `- Ticket mới: ${S.created.length}; câu hỏi mới: ${S.qs.length}`,
+    `- Agent: ${S.runs.length} lượt, ${pct(S.ok, S.runs.length)} thành công; PR merge: ${S.merged.length}${S.lead != null ? ` (trung vị mở → merge ${fmtH(S.lead)})` : ""}`,
+    `- Chấm: ${S.rev.length} ticket, tỉ lệ đạt ${pct(S.dat, S.rev.length)}`,
+    `- Chờ CTO: ${waiting.length}${waiting.length ? " (" + waiting.slice(0, 8).map((x) => x.t.key).join(", ") + ")" : ""}`,
+    `- Bị chặn: ${blocked.length}${blocked.length ? " (" + blocked.map((t) => `${t.key} chờ ${(t.blocked_by || []).join("/")}`).join(", ") + ")" : ""}`].join("\n");
+  const cmp = [{ label: "Ticket hoàn thành", short: "Hoàn thành" }, { label: "Ticket mới", short: "Mới" }, { label: "Câu hỏi mới", short: "Câu hỏi" }, { label: "Lượt agent", short: "Lượt agent" }, { label: "PR merge", short: "PR merge" }, { label: "Ticket chấm", short: "Đã chấm" }];
+  return `<div class="page-head"><h2>Báo cáo tuần</h2>
+      <select data-sel="rweek" aria-label="Tuần">${weeks.map((w, i) => opt(i, wi, `${i === 0 ? "Tuần này" : i === 1 ? "Tuần trước" : "Tuần"} · ${ddmm(w)}–${ddmm(addDays(w, 6))}`)).join("")}</select>${tools("week")}</div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      ${card("Ticket hoàn thành theo ngày", barChart("rwDays", days, [{ name: "Ticket hoàn thành", color: "--series-1", values: days.map((d) => S.done.filter((t) => dOnly(t.closed_at) === d.label).length) },
+        { name: "Point hoàn thành", color: "--series-2", values: days.map((d) => S.done.filter((t) => dOnly(t.closed_at) === d.label).reduce((a, t) => a + pts(t), 0)) }], { aria: "Ticket và point hoàn thành theo ngày trong tuần", labels: true }), "ticket và point đóng mỗi ngày")}
+      ${card("So với tuần trước", barChart("rwCmp", cmp, [{ name: "Tuần trước", color: "--series-2", values: [P.done.length, P.created.length, P.qs.length, P.runs.length, P.merged.length, P.rev.length] },
+        { name: "Tuần này", color: "--series-1", values: [S.done.length, S.created.length, S.qs.length, S.runs.length, S.merged.length, S.rev.length] }], { aria: "So sánh số lượng tuần này với tuần trước", labels: true, lw: 60 }), "cùng đơn vị: số lượng")}
+    </div>
+    <div class="rgrid">
+      ${card(`Đã hoàn thành (${S.done.length})`, `<div class="tablewrap"><table class="info"><tbody>${S.done.sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at))).map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${esc(t.agent || "")}</td><td class="n">${t.points ?? ""}</td><td class="nw">${sevChip(t.review && t.review.severity)}</td></tr>`).join("") || '<tr><td class="empty">Chưa có ticket đóng trong tuần.</td></tr>'}</tbody></table></div>`)}
+      ${card(`Cần CTO xử lý (${waiting.length})`, `<div class="tablewrap"><table class="info"><tbody>${waiting.map(({ t, age }) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${stageOf(t)}</td><td class="n nw">${age >= 2 ? status("warning", Math.floor(age) + " ngày") : Math.floor(age) + " ngày"}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`, "đang chờ chấm hoặc chờ trả lời, cũ nhất lên đầu; ≥ 2 ngày có cảnh báo")}
+    </div>
+    ${card(`Bị chặn (${blocked.length})`, `<div class="tablewrap"><table class="info"><tbody>${blocked.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">chờ ${(t.blocked_by || []).map((b) => K[b] ? `<a href="#/t/${esc(b)}">${esc(b)}</a>` : esc(b)).join(", ")}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`)}`;
+}
+
+/* ---------- 2. Hiệu suất ---------- */
+function pageRPerf() {
+  const n = Number(Q.rper ?? 14), { from, to } = periodRange(n), T = DATA ? DATA.tickets : [], R = (DATA ? DATA.runs : []).filter((r) => inRange(dayKey(r.started_at), from, to));
+  const M = (DATA ? DATA.merged || [] : []).filter((p) => inRange(dayKey(p.mergedAt), from, to)), K = tByKey();
+  const done = T.filter((t) => isWork(t) && closedIn(t, from, to)), qs = T.filter((t) => isQ(t) && createdIn(t, from, to));
+  const cyc = done.map((t) => hoursBetween(t.created_at, t.closed_at)).filter((h) => h >= 0);
+  const span = daysOf(from, to), weeks = Math.max(1, span.length / 7);
+  const dd = R.filter((r) => r.duration_s != null).map((r) => r.duration_s / 3600);
+  const tiles = [
+    ["Ticket hoàn thành", done.length, `${(done.length / weeks).toFixed(1)} ticket/tuần · ${done.reduce((a, t) => a + pts(t), 0)} point`],
+    ["Cycle time trung vị", fmtH(median(cyc)), "tạo ticket → đóng"],
+    ["PR: mở → merge", fmtH(median(M.map((p) => hoursBetween(p.createdAt, p.mergedAt)))), `trung vị ${M.length} PR`],
+    ["Lượt agent", R.length, R.length ? `${pct(R.filter((r) => !r.is_error).length, R.length)} thành công` : "—"],
+    ["Thời gian một lượt", fmtH(median(dd)), dd.length ? `trung vị · TB ${Math.round(R.reduce((a, r) => a + (r.num_turns || 0), 0) / Math.max(1, R.length))} turn` : "chưa ghi thời lượng"],
+    ["Câu hỏi / ticket xong", done.length ? (qs.length / done.length).toFixed(2) : "—", `${qs.length} câu hỏi phát sinh`],
+  ];
+  const agents = AGENTS.filter((a) => T.some((t) => t.agent === a) || R.some((r) => r.agent === a));
+  const st = agents.map((a) => { const r = R.filter((x) => x.agent === a), d = done.filter((t) => t.agent === a), du = r.filter((x) => x.duration_s != null);
+    return { a, runs: r.length, ok: r.filter((x) => !x.is_error).length, err: r.filter((x) => x.is_error).length, dur: median(du.map((x) => x.duration_s / 3600)), turns: r.length ? r.reduce((s, x) => s + (x.num_turns || 0), 0) / r.length : null,
+      done: d.length, pts: d.reduce((s, t) => s + pts(t), 0), cyc: median(d.map((t) => hoursBetween(t.created_at, t.closed_at))), asked: qs.filter((q) => askerOf(q, K) === a).length }; });
+  const span2 = n && n <= 30 ? span.map((d) => ({ label: d, short: ddmm(d) })) : (() => { const w = []; for (let x = weekStart(from); x <= to; x = addDays(x, 7)) w.push({ label: `Tuần ${ddmm(x)}`, short: ddmm(x), from: x, to: addDays(x, 6) }); return w; })();
+  const inC = (d, c) => (c.from ? inRange(d, c.from, c.to) : d === c.label);
+  const bins = [["< 4 giờ", 0, 4], ["4–12 giờ", 4, 12], ["12–24 giờ", 12, 24], ["1–2 ngày", 24, 48], ["2–4 ngày", 48, 96], ["> 4 ngày", 96, 1e9]];
+  return `<div class="page-head"><h2>Hiệu suất</h2>${periodSel("rper", n)}<span class="fresh">${ddmm(from)} → ${ddmm(to)}</span>${tools()}</div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      ${card("Thông lượng", barChart("rpThr", span2, [{ name: "Ticket hoàn thành", color: "--series-1", values: span2.map((c) => done.filter((t) => inC(dOnly(t.closed_at), c)).length) }], { aria: "Số ticket hoàn thành theo thời gian", labels: true }), n && n <= 30 ? "ticket đóng mỗi ngày" : "ticket đóng mỗi tuần")}
+      ${card("Phân bố cycle time", barChart("rpCyc", bins.map(([l]) => ({ label: l })), [{ name: "Số ticket", color: "--series-1", values: bins.map(([, lo, hi]) => cyc.filter((h) => h >= lo && h < hi).length) }], { aria: "Phân bố thời gian từ tạo đến đóng ticket", labels: true, lw: 70 }), "thời gian từ tạo đến đóng của ticket hoàn thành")}
+    </div>
+    <div class="rgrid">
+      ${card("Lượt chạy theo agent", barChart("rpRuns", st.map((x) => ({ label: x.a })), [{ name: "Thành công", color: "--series-1", values: st.map((x) => x.ok) }, { name: "Lỗi", color: "--series-2", values: st.map((x) => x.err) }], { aria: "Lượt chạy thành công và lỗi theo agent", labels: true, lw: 60 }))}
+      ${card("Point hoàn thành theo agent", hbars(st.filter((x) => x.pts).sort((a, b) => b.pts - a.pts).map((x) => ({ label: x.a, v: x.pts, text: `${x.pts} point · ${x.done} ticket` }))))}
+    </div>
+    ${card("Cycle time trung vị theo agent", hbars(st.filter((x) => x.cyc != null).sort((a, b) => b.cyc - a.cyc).map((x) => ({ label: x.a, v: x.cyc, text: fmtH(x.cyc) })), {}), "càng ngắn càng tốt; tính trên ticket đóng trong kỳ")}
+    <h3 class="sub">Bảng chỉ số theo agent</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Thành công</th><th class="n">Thời gian/lượt</th><th class="n">TB turn</th><th class="n">Ticket xong</th><th class="n">Point</th><th class="n">Cycle time</th><th class="n" title="Câu hỏi agent tạo ra khi thiếu thông tin">Câu hỏi đã tạo</th></tr></thead>
+      <tbody>${st.map((x) => `<tr><td class="nw">${esc(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
+        <td class="n">${x.done}</td><td class="n">${x.pts}</td><td class="n">${fmtH(x.cyc)}</td><td class="n">${x.asked}</td></tr>`).join("")}</tbody></table></div>
+    <p class="note">Cycle time = ngày đóng − ngày tạo ticket (ticket chuyển từ Zoho giữ ngày gốc). Câu hỏi gán cho agent của ticket được nhắc trong tên câu hỏi. Lượt chạy trước 03/11 chưa ghi thời lượng.</p>`;
+}
+
+/* ---------- 3. Chất lượng ---------- */
+function pageRQuality() {
+  const n = Number(Q.rper ?? 0), { from, to } = periodRange(n), T = DATA ? DATA.tickets : [];
+  const rev = T.filter((t) => t.review && t.review.severity && inRange(String(t.review.at || "").slice(0, 10), from, to));
+  const cnt = (s) => rev.filter((t) => t.review.severity === s).length;
+  const scorePct = (t) => { const v = Object.values(t.review.scores || {}); return v.length ? v.reduce((a, b) => a + b, 0) / (2 * v.length) : null; };
+  const bugs = T.filter((t) => t.type === "bug" || /^bug\b/i.test(t.title || "")), bugOpen = bugs.filter((t) => t.status !== "Closed");
+  const avgAll = median(rev.map(scorePct));
+  const tiles = [["Ticket đã chấm", rev.length, `${ddmm(from)} → ${ddmm(to)}`], ["Tỉ lệ đạt", pct(cnt("dat"), rev.length), "đạt ngay, không phải sửa"],
+    ["Sửa nhẹ", cnt("sua_nhe"), "CTO sửa rồi merge"], ["Sửa nặng", cnt("sua_nang"), "chạy lại / chia nhỏ"], ["Loại", cnt("loai"), "bỏ đầu ra"],
+    ["Điểm rubric trung vị", avgAll == null ? "—" : Math.round(avgAll * 100) + "%", `bug mở: ${bugOpen.length}/${bugs.length}`]];
+  const agents = [...new Set(rev.map((t) => t.agent).filter(Boolean))].sort();
+  const SEV = [["dat", "Đạt", "--good"], ["sua_nhe", "Sửa nhẹ", "--warning"], ["sua_nang", "Sửa nặng", "--serious"], ["loai", "Loại", "--critical"]];
+  // tiêu chí rubric: trung bình 0–2 theo agent × tiêu chí
+  const crit = [];
+  agents.forEach((a) => { const rs = rev.filter((t) => t.agent === a), ids = [...new Set(rs.flatMap((t) => Object.keys(t.review.scores || {})))];
+    ids.forEach((id) => { const v = rs.map((t) => (t.review.scores || {})[id]).filter((x) => x != null);
+      const meta = ((RUBRICS || {})[a] || { criteria: [] }).criteria.find((c) => c.id === id);
+      crit.push({ a, id, text: meta ? meta.text : id, n: v.length, avg: v.reduce((s, x) => s + x, 0) / v.length, d0: v.filter((x) => x === 0).length, d1: v.filter((x) => x === 1).length, d2: v.filter((x) => x === 2).length }); }); });
+  crit.sort((x, y) => x.avg - y.avg || y.n - x.n);
+  const weeks = []; for (let w = weekStart(from); w <= to; w = addDays(w, 7)) weeks.push({ label: `Tuần ${ddmm(w)}`, short: ddmm(w), from: w, to: addDays(w, 6) });
+  const wr = (w) => rev.filter((t) => inRange(String(t.review.at).slice(0, 10), w.from, w.to));
+  const lessons = rev.filter((t) => t.review.severity !== "dat" && t.review.reason).sort((a, b) => String(b.review.at).localeCompare(String(a.review.at)));
+  return `<div class="page-head"><h2>Chất lượng</h2>${periodSel("rper", n)}${tools()}</div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      ${card("Kết quả chấm theo agent", `<div class="legend">${SEV.map(([, l, c]) => `<span><i style="background:var(${c})"></i>${l}</span>`).join("")}</div>` +
+        barChart("rqSev", agents.map((a) => ({ label: a })), SEV.map(([k, l, c]) => ({ name: l, color: c, values: agents.map((a) => rev.filter((t) => t.agent === a && t.review.severity === k).length) })), { aria: "Số ticket đạt, sửa nhẹ, sửa nặng, loại theo agent", labels: true, lw: 60 }).replace(/^<div class="legend">.*?<\/div>/, ""), "mỗi cột có nhãn số; màu theo mức, kèm chú thích chữ")}
+      ${card("Tỉ lệ đạt theo tuần", lineChart("rqTrend", weeks, [{ name: "Tỉ lệ đạt (%)", color: "--series-1", values: weeks.map((w) => { const r = wr(w); return r.length ? Math.round((r.filter((t) => t.review.severity === "dat").length / r.length) * 100) : null; }) }], { aria: "Tỉ lệ đạt theo tuần", unit: "%" }), "phần trăm ticket chấm đạt trong tuần")}
+    </div>
+    ${card("Tiêu chí rubric yếu nhất", hbars(crit.slice(0, 10).map((c) => ({ label: `${c.a} · ${c.id}`, title: c.text, v: c.avg, text: `${c.avg.toFixed(2)} / 2 · ${c.n} lần`, color: c.avg < 1.5 ? "--warning" : "--series-1" })), { max: 2, mark: 1.6, markLabel: "ngưỡng 80% (1,6/2)" }), "trung bình điểm 0–2 mỗi tiêu chí; vạch dọc = ngưỡng đạt 80% của rubric; tiêu chí dưới 1,5 tô màu cảnh báo — ưu tiên sửa prompt/skill")}
+    <h3 class="sub">Điểm theo tiêu chí rubric</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th>Tiêu chí</th><th>Nội dung</th><th class="n">Lần chấm</th><th class="n">TB (0–2)</th><th class="n">0</th><th class="n">1</th><th class="n">2</th><th>Đánh giá</th></tr></thead>
+      <tbody>${crit.map((c) => `<tr><td class="nw">${esc(c.a)}</td><td class="k">${esc(c.id)}</td><td>${esc(c.text)}</td><td class="n">${c.n}</td><td class="n">${c.avg.toFixed(2)}</td><td class="n">${c.d0}</td><td class="n">${c.d1}</td><td class="n">${c.d2}</td>
+        <td class="nw">${c.avg >= 1.6 ? status("good", "đạt ngưỡng") : c.avg >= 1.5 ? status("warning", "sát ngưỡng") : status("serious", "cần cải thiện")}</td></tr>`).join("") || '<tr><td colspan="9" class="empty">Chưa có điểm rubric trong kỳ.</td></tr>'}</tbody></table></div>
+    <h3 class="sub">Bài học từ ticket phải sửa / loại</h3>
+    <div class="tablewrap"><table class="info"><tbody>${lessons.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="nw">${esc(t.agent || "")}</td><td class="nw">${sevChip(t.review.severity)}</td><td>${esc(t.review.reason)}</td><td class="fresh nw">${esc(t.review.at || "")}</td></tr>`).join("") || '<tr><td class="empty">Chưa có lý do ghi khi chấm sửa/loại.</td></tr>'}</tbody></table></div>`;
+}
+
+/* ---------- 4. Kết quả dự án ---------- */
+function pageRResults() {
+  const T = DATA ? DATA.tickets : [], start = firstDay(), today = todayKey(), days = daysOf(start, today);
+  const work = T.filter(isWork), withPts = work.filter((t) => pts(t) > 0), S = PROJECT.story || [];
+  const st = S.map((s) => { const k = T.filter((t) => t.parent === s.key), d = k.filter((t) => t.status === "Closed");
+    return { ...s, n: k.length, d: d.length, pct: k.length ? d.length / k.length : 0, first: k.map((t) => dOnly(t.created_at)).sort()[0], last: k.length && d.length === k.length ? d.map((t) => dOnly(t.closed_at)).sort().slice(-1)[0] : null }; });
+  const storyDone = st.filter((s) => s.n && s.d === s.n).length, evN = DATA ? DATA.evals_n || 0 : 0, evReviewed = T.filter((t) => t.review && t.review.severity).length;
+  const totalPts = withPts.reduce((a, t) => a + pts(t), 0), donePts = withPts.filter((t) => t.status === "Closed").reduce((a, t) => a + pts(t), 0);
+  const sp = ((PROJECT.scrum || {}).sprints || []).find((s) => s.start <= today && today <= s.end);
+  const tiles = [["Story hoàn tất", `${storyDone}/${S.length}`, `${st.filter((s) => s.n && s.d < s.n).length} story đang làm`],
+    ["Ticket đã đóng", `${work.filter((t) => t.status === "Closed").length}/${work.length}`, "không tính câu hỏi"],
+    ["Point hoàn thành", `${donePts}/${totalPts}`, pct(donePts, totalPts) + " point đã ước lượng"],
+    ["Bản ghi eval", `${evN}/300`, `${evReviewed} ticket đã chấm · mục tiêu tuần 12`],
+    ["Ngày dự án", days.length, `từ ${ddmm(start)}`], ["Sprint hiện tại", sp ? sp.name : "—", sp ? `${ddmm(sp.start)} → ${ddmm(sp.end)}` : ""]];
+  const cats = days.map((d) => ({ label: d, short: ddmm(d) }));
+  const scopeV = days.map((d) => withPts.filter((t) => dOnly(t.created_at) <= d).reduce((a, t) => a + pts(t), 0));
+  const doneV = days.map((d) => withPts.filter((t) => t.status === "Closed" && dOnly(t.closed_at) <= d).reduce((a, t) => a + pts(t), 0));
+  const tc = days.map((d) => work.filter((t) => dOnly(t.created_at) <= d).length), td = days.map((d) => work.filter((t) => t.status === "Closed" && dOnly(t.closed_at) <= d).length);
+  const goals = [
+    ["Theme mở, sửa, publish được trong Canvas trên store thật ở tuần 11; 10 yêu cầu Sidekick mẫu cho theme check 0 lỗi",
+      (() => { const k = T.filter((t) => ["TE-10", "TE-14"].includes(t.parent)); const d = k.filter((t) => t.status === "Closed").length; return [k.length ? (d === k.length ? "good" : "warning") : "none", k.length ? `TE-10, TE-14: ${d}/${k.length} ticket đóng` : "chưa có ticket TE-10/TE-14"]; })()],
+    ["Lighthouse home/product/collection: performance ≥ 96 desktop, ≥ 90 mobile; accessibility ≥ 98; bug P1/P2 = 0 khi lên Canvas",
+      ["none", `Điểm Lighthouse đo ở CI (chưa chặn tới cuối TE-2); bug P1/P2 đang mở: ${T.filter((t) => t.status !== "Closed" && (t.labels || []).some((l) => /^P[12]$/.test(l))).length}`]],
+    ["9 vai có agent chạy nháp, ≥ 300 bản ghi eval đến tuần 12", [evN >= 300 ? "good" : "warning", `${evN}/300 bản ghi eval (${Math.round((evN / 300) * 100)}%) · ${new Set(T.filter((t) => t.review && t.review.severity).map((t) => t.agent)).size}/9 vai đã có ticket chấm`]],
+  ];
+  const ms = [["Ký G1, đóng pha 0", "30/10/2026", "good", "đã ký"], ...((PROJECT.scrum || {}).sprints || []).filter((s) => /^Sprint/.test(s.name)).map((s) => [s.name, `${ddmm(s.start)} → ${ddmm(s.end)}`, today > s.end ? "good" : today >= s.start ? "warning" : "none", today > s.end ? "đã qua" : today >= s.start ? "đang chạy" : "sắp tới"]),
+    ["Lên Canvas store thật", "charter: tuần 11 (sau Sprint 4)", "none", "sắp tới"], ["Eval, ký G5", "charter: tuần 13–14", "none", "sắp tới"]];
+  return `<div class="page-head"><h2>Kết quả dự án</h2><span class="fresh">từ ${ddmm(start)} tới hôm nay</span>${tools()}</div>
+    ${repTiles(tiles)}
+    ${card("Mục tiêu đo được (charter)", `<div class="tablewrap"><table class="info"><tbody>${goals.map(([g, [k, ev]], i) => `<tr><td class="n">${i + 1}</td><td>${esc(g)}</td><td class="nw">${status(k, k === "good" ? "đạt" : k === "warning" ? "đang làm" : "chưa đo")}</td><td>${esc(ev)}</td></tr>`).join("")}</tbody></table></div>
+      <div style="margin-top:10px">${hbars([{ label: "Bản ghi eval", v: evN, text: `${evN} / 300` }], { max: 300 })}</div>`)}
+    <div class="rgrid">
+      ${card("Burn-up point", lineChart("rrBurn", cats, [{ name: "Phạm vi (point đã ước lượng)", color: "--series-2", values: scopeV }, { name: "Đã hoàn thành", color: "--series-1", values: doneV }], { aria: "Burn-up: point phạm vi và point hoàn thành tích luỹ theo ngày" }), "khoảng cách giữa 2 đường = point còn lại")}
+      ${card("Ticket tạo và đóng tích luỹ", lineChart("rrCum", cats, [{ name: "Ticket tạo", color: "--series-2", values: tc }, { name: "Ticket đóng", color: "--series-1", values: td }], { aria: "Số ticket tạo và đóng tích luỹ theo ngày" }), "không tính câu hỏi")}
+    </div>
+    ${card("Hoàn thành theo story", hbars(st.filter((s) => s.n).map((s) => ({ label: s.key, title: s.title, v: s.pct * 100, text: `${s.d}/${s.n} · ${Math.round(s.pct * 100)}%`, color: s.d === s.n ? "--good" : "--series-1" })), { max: 100 }), "% ticket con đã đóng; story chưa có ticket không hiện")}
+    <h3 class="sub">Mốc</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Mốc</th><th>Thời gian</th><th>Trạng thái</th></tr></thead><tbody>${ms.map(([a, b, k, l]) => `<tr><td>${esc(a)}</td><td class="nw">${esc(b)}</td><td>${status(k, l)}</td></tr>`).join("")}</tbody></table></div>
+    <h3 class="sub">Story</h3>
+    <div class="tablewrap"><table class="info"><thead><tr><th>Mã</th><th>Story</th><th>Trạng thái (CTO)</th><th class="n">Ticket</th><th class="n">Đóng</th><th>Bắt đầu</th><th>Xong</th></tr></thead>
+      <tbody>${st.map((s) => `<tr><td class="k">${esc(s.key)}</td><td>${esc(s.title)}</td><td class="nw">${esc(s.status)}</td><td class="n">${s.n}</td><td class="n">${s.d}</td><td class="nw fresh">${s.first ? ddmm(s.first) : "—"}</td><td class="nw fresh">${s.last ? ddmm(s.last) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+/* ---------- 5. Báo cáo sprint ---------- */
+function sprintReport(sp, T) {
+  const today = todayKey(), end = today < sp.end ? today : sp.end, W = T.filter((t) => isWork(t) && pts(t) > 0);
+  const committed = W.filter((t) => dOnly(t.created_at) < sp.start && !(t.status === "Closed" && dOnly(t.closed_at) < sp.start));
+  const added = W.filter((t) => createdIn(t, sp.start, sp.end)), scope = committed.concat(added);
+  const done = scope.filter((t) => closedIn(t, sp.start, sp.end)), left = scope.filter((t) => !(t.status === "Closed" && dOnly(t.closed_at) <= end));
+  const P = (a) => a.reduce((s, t) => s + pts(t), 0);
+  return { committed, added, scope, done, left, cp: P(committed), ap: P(added), dp: P(done), lp: P(left) };
+}
+function pageRSprint() {
+  const S = PROJECT.scrum; if (!S) return '<div class="empty">project.json chưa có mục scrum.</div>';
+  const T = DATA ? DATA.tickets : [], today = todayKey(), cur = S.sprints.findIndex((s) => s.start <= today && today <= s.end);
+  const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1), sp = S.sprints[idx], r = sprintReport(sp, T);
+  const past = S.sprints.filter((s) => s.start <= today), vel = past.map((s) => sprintReport(s, T));
+  const other = T.filter((t) => closedIn(t, sp.start, sp.end) && (isQ(t) || !pts(t))).length;
+  const tiles = [["Cam kết đầu sprint", `${r.cp} point`, `${r.committed.length} ticket mở lúc bắt đầu`], ["Thêm giữa sprint", `${r.ap} point`, `${r.added.length} ticket`],
+    ["Hoàn thành", `${r.dp} point`, `${r.done.length} ticket · ${pct(r.dp, r.cp + r.ap)} phạm vi`], ["Còn lại", `${r.lp} point`, today > sp.end ? "chuyển sprint sau" : `${r.left.length} ticket`],
+    ["Việc không point đã xong", other, "câu hỏi, chia task, test…"], ["Vận tốc TB", vel.length ? Math.round(vel.reduce((a, v) => a + v.dp, 0) / vel.length) + " point" : "—", `${vel.length} sprint đã/đang chạy`]];
+  const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${esc(t.agent || "")}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
+  COPY.sprint = [`Báo cáo ${sp.name} (${ddmm(sp.start)}–${ddmm(sp.end)}) · Efitco`, `- Mục tiêu: ${sp.goal || "chưa ghi"}`,
+    `- Cam kết ${r.cp} point, thêm ${r.ap} point, hoàn thành ${r.dp} point (${pct(r.dp, r.cp + r.ap)}), còn lại ${r.lp} point`,
+    `- Hoàn thành: ${r.done.map((t) => t.key).join(", ") || "—"}`, `- Còn lại: ${r.left.map((t) => t.key).join(", ") || "—"}`].join("\n");
+  return `<div class="page-head"><h2>Báo cáo sprint</h2>
+      <select data-sel="sprint" aria-label="Sprint">${S.sprints.map((s, i) => opt(i, idx, `${s.name}${i === cur ? " (hiện tại)" : ""}`)).join("")}</select>
+      <span class="fresh">${ddmm(sp.start)} → ${ddmm(sp.end)} · mục tiêu: ${esc(sp.goal || "chưa ghi")}</span>${tools("sprint")}</div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      ${card("Burndown", `<div class="legend"><span><i style="background:var(--series-1)"></i>Point còn lại</span><span><i class="dash"></i>Đường lý tưởng</span></div>
+        <div class="chart" id="bdChart"><svg role="img" aria-label="Burndown ${esc(sp.name)}"></svg><div class="tip" id="bdTip"></div></div>`, "point còn lại mỗi ngày so với đường lý tưởng")}
+      ${card("Vận tốc theo sprint", barChart("rsVel", past.map((s) => ({ label: s.name, short: s.name.replace("Chuẩn bị (pha 0)", "Pha 0") })),
+        [{ name: "Phạm vi (cam kết + thêm)", color: "--series-2", values: vel.map((v) => v.cp + v.ap) }, { name: "Hoàn thành", color: "--series-1", values: vel.map((v) => v.dp) }], { aria: "Point phạm vi và hoàn thành theo sprint", labels: true, lw: 70, unit: " point" }))}
+    </div>
+    ${card("Cơ cấu phạm vi sprint", hbars([{ label: "Cam kết đầu sprint", v: r.cp, text: `${r.cp} point` }, { label: "Thêm giữa sprint", v: r.ap, text: `${r.ap} point`, color: "--series-2" },
+      { label: "Hoàn thành", v: r.dp, text: `${r.dp} point`, color: "--good" }, { label: "Còn lại", v: r.lp, text: `${r.lp} point`, color: "--warning" }]), "thêm giữa sprint lớn = phạm vi chưa chốt lúc planning")}
+    <div class="rgrid">${card(`Hoàn thành (${r.done.length})`, list(r.done))}${card(`Còn lại (${r.left.length})`, list(r.left))}</div>
+    ${card(`Thêm giữa sprint (${r.added.length})`, list(r.added))}`;
+}
+
 function render(d) {
   DATA = d;
   renderMenu();
@@ -1106,7 +1483,7 @@ function render(d) {
     sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
   }
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-")) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
@@ -1296,12 +1673,13 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); loadRaci(); route();
+loadProject(); loadRaci(); loadRubrics(); route();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);
 setInterval(() => DATA && render(DATA), 1000 * 15);
-window.addEventListener("resize", () => { if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); });
+let RESZ = 0;
+window.addEventListener("resize", () => { if (TP) drawTp(TP.days, TP.by); if (PAGE === "scrum") drawBurndown(); clearTimeout(RESZ); if (PAGE.startsWith("r-")) RESZ = setTimeout(renderInfo, 150); });
 </script>
 </body>
 </html>
