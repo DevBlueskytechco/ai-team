@@ -77,7 +77,7 @@ section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:upp
 .inflight table{font-size:12.5px} .inflight td{padding:5px 6px;vertical-align:top}
 .act{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);align-items:start;margin-top:4px}
 .act .names{padding-top:22px}
-.act .row{height:38px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:1px;padding-right:12px;border-bottom:1px solid var(--line);min-width:0}
+.act .row{height:46px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:1px;padding-right:12px;border-bottom:1px solid var(--line);min-width:0}
 .act .row .top{display:flex;align-items:center;gap:8px;min-width:0}
 .act .row .nm{font-weight:600;font-size:13px;white-space:nowrap}
 .act .row .sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -278,6 +278,26 @@ details.tv{margin-top:4px} details.tv summary{cursor:pointer}
   .print-only{display:block} a{color:#000;text-decoration:none}
   .brandfoot{border-top:1px solid #ccc}
 }
+.av{border-radius:50%;flex:none;display:inline-block;vertical-align:middle;background:var(--surface-2)}
+.agtag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;vertical-align:middle}
+.chip.agchip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px 1px 2px}
+.raci th.rc .av{display:block;margin:0 auto 3px}
+.todayrev{grid-column:span 12;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:9px 14px;font-size:13px}
+.todayrev .who{display:inline-flex;align-items:center;gap:6px}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:6px}
+.pcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;grid-template-columns:64px 1fr;gap:4px 12px;align-items:start}
+.pcard .av{grid-row:span 4}
+.pcard .nm{font-weight:700;font-size:15px} .pcard .rl{font-size:12.5px;color:var(--text-2)}
+.pcard .own{font-size:12.5px} .pcard .st{font-size:12px;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:6px}
+@media (max-width:800px){.week{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.week .day{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);min-height:90px}
+.week .day.today{border-color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.week .day h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2)}
+.week .who{display:flex;align-items:center;gap:7px;margin:5px 0;font-size:12.8px}
+.rtable input,.rtable select{font:inherit;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;width:100%;min-width:120px}
+.rtable tr.dirty td{background:color-mix(in srgb,var(--warning) 10%,transparent)}
+.rbar{display:flex;gap:8px;align-items:center;margin:10px 0}
 h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
@@ -346,6 +366,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <div class="errbox" id="errbox" role="alert"></div>
 
   <div class="span-12 kpis" id="kpis"></div>
+  <div class="todayrev" id="todayRev" aria-live="polite"></div>
 
   <section class="span-12" aria-labelledby="h-act">
     <div class="sec-head">
@@ -502,6 +523,21 @@ const MENU = [
   ["Tiến độ", [["story", "Story", "chart"]]],
   ["Quy ước", [["decisions", "Quyết định", "bookmark"]]],
 ];
+/* Ảnh profile agent (static/agent-<id>.svg) + tên agent; dùng ở mọi nơi hiển thị agent */
+const AGENT_IDS = ["po", "ba", "designer", "techlead", "dev-fe", "dev-be", "qa", "devops", "writer", "gate-reviewer"];
+const isAgent = (id) => AGENT_IDS.includes(id);
+const agentRole = (id) => { const a = PROJECT && PROJECT.raci && (PROJECT.raci.agents || []).find((x) => x.id === id);
+  const r = roleRow(id); return (a ? `${a.name} · ${a.role}` : id === "gate-reviewer" ? "Gate reviewer · chấm rubric độc lập" : id) + (r && r.owner && r.owner !== "—" ? ` · role owner ${r.owner}${r.day ? ", duyệt " + r.day : ""}` : ""); };
+const av = (id, s = 20) => (isAgent(id) ? `<img class="av" src="/static/agent-${id}.svg" width="${s}" height="${s}" alt="">` : "");
+const agentTag = (id, s = 20) => (!id ? "" : isAgent(id) ? `<span class="agtag" title="${esc(agentRole(id))}">${av(id, s)}<span>${esc(id)}</span></span>` : esc(id));
+const agChip = (id) => (isAgent(id) ? `<span class="chip agchip" title="${esc(agentRole(id))}">${av(id, 16)}${esc(id)}</span>` : `<span class="chip">${esc(id)}</span>`);
+let ROLES = null, ROLEDIRTY = false;
+const roleRow = (agent) => (ROLES ? ROLES.rows.find((r) => r.agent === agent) : null);
+async function loadRoles() {
+  try { ROLES = await (await fetch("/api/roles", { cache: "no-store" })).json(); } catch (e) { ROLES = { rows: [], days: [] }; }
+  if (PAGE === "roles") renderInfo(); else if (DATA && PAGE === "dashboard") render(DATA);
+}
+const DOW = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 const IC = (n) => `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 
 /* Menu trái: màn rộng thu gọn còn icon (nhớ theo trình duyệt), màn hẹp là ngăn kéo */
@@ -533,6 +569,7 @@ function renderMenu() {
   (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
+  if (ROLES) cnt.roles = ROLES.rows.length;
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
     `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("") + `<div class="navfoot">© 2026 NextSky Ecom<br>NextSky® · Efitco Agent Ops</div>`;
   if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
@@ -588,6 +625,7 @@ function renderInfoInner(box) {
   else if (PAGE === "t-new") { box.innerHTML = pageTNew(); bindTNew(); return; }
   else if (PAGE === "t-detail") { box.innerHTML = pageTDetail(); if (TDETAIL.t) bindTDetail(); else loadTDetail(TDETAIL.key); return; }
   else if (PAGE === "process") box.innerHTML = pageProcess();
+  else if (PAGE === "roles") { box.innerHTML = pageRoles(); bindRoles(); return; }
   else if (PAGE === "raci") box.innerHTML = pageRaci();
   else if (PAGE.startsWith("r-")) {
     DRAWS = [];
@@ -604,7 +642,7 @@ function renderInfoInner(box) {
       `<div class="page-head"><h2 ${PAGE === "agents" ? 'hidden' : ""}>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
       <div class="tablewrap"><table class="info"><thead><tr>${pg.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
       <tbody>${rows.map((r) => `<tr>${r.map((c, i) => i === pg.group_col ? `<td><span class="chip">${esc(c)}</span></td>` :
-        `<td class="${i === 0 && pg.group_col == null && /^(\/|[A-Z0-9_ \/]+$)/.test(c) ? (c.length < 30 ? "k" : "k wrap") : ""}">${linkify(c)}</td>`).join("")}</tr>`).join("") ||
+        (PAGE === "agents" && i === 0 && isAgent(c) ? `<td class="nw">${agentTag(c, 24)}</td>` : `<td class="${i === 0 && pg.group_col == null && /^(\/|[A-Z0-9_ \/]+$)/.test(c) ? (c.length < 30 ? "k" : "k wrap") : ""}">${linkify(c)}</td>`)).join("")}</tr>`).join("") ||
         `<tr><td colspan="${pg.columns.length}" class="empty">Không có dòng khớp.</td></tr>`}</tbody></table></div>
       ${pg.note ? `<p class="note">${esc(pg.note)}</p>` : ""}`;
   }
@@ -617,9 +655,9 @@ function renderInfoInner(box) {
 const DG = {
   defs: (id) => `<defs><marker id="${id}a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
     <marker id="${id}h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs>`,
-  box: (x, y, w, h, lines, cls = "") => {
-    const lh = 15, top = y + h / 2 - ((lines.length - 1) * lh) / 2 + 4.5, cx = x + w / 2;
-    return `<g class="bx ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/>${lines.map((t, i) =>
+  box: (x, y, w, h, lines, cls = "", avatar = null) => {
+    const lh = 15, top = y + h / 2 - ((lines.length - 1) * lh) / 2 + 4.5, cx = x + w / 2 + (avatar ? 12 : 0);
+    return `<g class="bx ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/>${avatar ? `<image href="/static/agent-${avatar}.svg" x="${x + 8}" y="${y + h / 2 - 13}" width="26" height="26"/>` : ""}${lines.map((t, i) =>
       `<text x="${cx}" y="${top + i * lh}" text-anchor="middle" class="${i ? "s" : "t"}">${esc(t)}</text>`).join("")}</g>`;
   },
   // pts: [[x,y],...]; lab: [text, x, y, anchor]
@@ -642,7 +680,8 @@ function diagramAgents() {
     [3, R1, ["QA", "Test case, E2E", "Bug, checklist R"]], [3, R2, ["DevOps", "CI, preview, zip", "Runbook, rollback"]],
     [4, R1, ["Writer", "Tài liệu merchant", "Release note, Canvas"]],
   ];
-  B.forEach(([c, y, l]) => (g += b(X[c], y, W, H, l)));
+  const AVM = { PO: "po", BA: "ba", Designer: "designer", "Tech Lead": "techlead", "Dev FE": "dev-fe", "Dev BE": "dev-be", QA: "qa", DevOps: "devops", Writer: "writer" };
+  B.forEach(([c, y, l]) => (g += b(X[c], y, W, H, l, "", AVM[l[0]])));
   g += b(X[4], R2, W, H, ["Canvas · yum-dev", "Người upload zip", "kiểm Sidekick"], "human");
   const L = (pts, lab, cls) => (g += DG.ln(id, pts, lab, cls));
   L([[100, 180], [100, 234]], ["PRD", 106, 211, "start"]);
@@ -659,6 +698,7 @@ function diagramAgents() {
   L([[870, 140], [938, 140]], ["block đạt", 905, 132]);
   L([[870, 276], [938, 276]], ["zip", 905, 268], "dash");
   g += b(20, 340, 1080, 46, ["gate-reviewer", "Chấm rubric độc lập, chỉ đọc, không thấy ngữ cảnh người làm — điểm tầng 2 cho cổng và eval"]);
+  g += `<image href="/static/agent-gate-reviewer.svg" x="34" y="350" width="26" height="26"/>`;
   g += b(20, 398, 1080, 46, ["Rào chắn chung cho mọi agent", "Chạy qua Orchestrator · nhánh feature/ai-<key> · hook scope-guard chặn ghi ngoài phạm vi · cấm push develop/main, publish, --live · chỉ store hoa-qua-nhap-khau"], "human");
   return DG.fig(1120, 456, "Sơ đồ bàn giao giữa 10 agent: PO, BA sang Designer, Tech Lead; sang Dev FE, Dev BE; sang QA, DevOps; sang Writer và Canvas; CTO duyệt mọi bước, gate-reviewer chấm độc lập", g,
     "Đầu ra đi từ trái sang phải, mỗi mũi tên là thứ được bàn giao. Markup FE luôn đi trước JS BE (BE bám data-testid). QA trả bug về Dev FE trên cùng nhánh. Khung nét đứt là việc người làm hoặc quy tắc chung; agent không vào store Canvas.");
@@ -733,8 +773,50 @@ function diagramStates() {
 function agentFlowBlock() {
   const F = PROJECT.agent_flow; if (!F) return "";
   return `<h3 class="sub">${esc(F.title)}</h3><div class="tablewrap"><table class="info flow"><thead><tr>${F.columns.map((c, i) => `<th class="${i ? "" : "n"}">${esc(c)}</th>`).join("")}</tr></thead>
-    <tbody>${F.rows.map((r) => `<tr><td class="n">${esc(r[0])}</td><td class="who">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join("")}</tbody></table></div>
+    <tbody>${F.rows.map((r) => `<tr><td class="n">${esc(r[0])}</td><td class="who">${String(r[1]).split(" + ").map((n) => { const id = { PO: "po", BA: "ba", Designer: "designer", "Tech Lead": "techlead", "Dev FE": "dev-fe", "Dev BE": "dev-be", QA: "qa", DevOps: "devops", Writer: "writer", "gate-reviewer": "gate-reviewer" }[n]; return id ? `<span class="agtag" title="${esc(agentRole(id))}">${av(id, 20)}${esc(n)}</span>` : esc(n); }).join(" + ")}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join("")}</tbody></table></div>
     <p class="note">${esc(F.note)}</p>`;
+}
+
+function pageRoles() {
+  if (!ROLES) return '<div class="empty">Đang tải…</div>';
+  const T = DATA ? DATA.tickets : [], today = DOW[new Date().getDay()], days = ROLES.days || DOW.slice(1);
+  const ag = ROLES.rows.filter((r) => r.agent);
+  const cnt = (a) => { const m = T.filter((t) => t.agent === a && t.status !== "Closed"); return { open: m.length, rev: m.filter((t) => classify(t) === "review").length, run: m.filter((t) => classify(t) === "running").length }; };
+  const wk = days.filter((d) => ag.some((r) => r.day === d) || ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"].includes(d));
+  return `<div class="page-head"><h2>Vai trò</h2><span class="fresh">${ag.length} agent · Role owner và ngày duyệt cố định sửa ở bảng cuối trang</span></div>
+    <div class="pcards">${ag.map((r) => { const c = cnt(r.agent), a = PROJECT && PROJECT.raci && (PROJECT.raci.agents || []).find((x) => x.id === r.agent);
+      return `<article class="pcard">${av(r.agent, 64)}<div class="nm">${esc(r.role)}</div><div class="rl"><span class="chip">${esc(r.agent)}</span>${a ? " " + esc(a.role) : ""}</div>
+        <div class="own">Role owner: <b>${esc(r.owner || "—")}</b>${r.day ? ` · duyệt <b>${esc(r.day)}</b>` : ""}</div>
+        <div class="st">${c.run ? status("warning", "đang chạy") + " " : ""}${c.open} ticket mở · ${c.rev} chờ chấm</div></article>`; }).join("")}</div>
+    <h3 class="sub">Lịch duyệt trong tuần</h3>
+    <div class="week" style="grid-template-columns:repeat(${Math.min(wk.length, 7)},minmax(0,1fr))">${wk.map((d) => `<div class="day ${d === today ? "today" : ""}"><h4>${esc(d)}${d === today ? " · hôm nay" : ""}</h4>
+      ${ag.filter((r) => r.day === d).map((r) => `<div class="who">${av(r.agent, 24)}<div><div>${esc(r.role)}</div><div class="fresh">${esc(r.owner)}</div></div></div>`).join("") || '<div class="fresh">—</div>'}</div>`).join("")}</div>
+    <h3 class="sub">Role owner và ngày duyệt cố định</h3>
+    <div class="tablewrap"><table class="info rtable"><thead><tr><th>Vai trò</th><th>Agent</th><th>Role owner</th><th>Ngày duyệt cố định</th><th>Ghi chú</th><th>Sửa lần cuối</th></tr></thead>
+      <tbody>${ROLES.rows.map((r, i) => `<tr data-i="${i}"><td class="nw"><b>${esc(r.role)}</b></td><td class="nw">${r.agent ? agentTag(r.agent, 22) : '<span class="fresh">người</span>'}</td>
+        <td><input data-f="owner" value="${esc(r.owner || "")}" maxlength="60" aria-label="Role owner ${esc(r.role)}"></td>
+        <td><select data-f="day" aria-label="Ngày duyệt ${esc(r.role)}">${["", ...days].map((d) => opt(d, r.day, d || "— không cố định")).join("")}</select></td>
+        <td class="fresh">${esc(r.note || "")}</td><td class="fresh nw">${r.edited_at ? `${esc(r.edited_by || "")} · ${esc(String(r.edited_at).slice(5, 16).replace("T", " "))}` : "mặc định"}</td></tr>`).join("")}</tbody></table></div>
+    <div class="rbar"><button class="btn primary" id="rolesSave" disabled>${IC("save")}Lưu thay đổi</button><button class="btn" id="rolesReset" disabled>${IC("x")}Huỷ</button>
+      <span class="fresh" id="rolesMsg">Lưu vào data/tickets.db (sao lưu mỗi ngày). Dùng cho: lịch duyệt hôm nay ở Dashboard, RACI, chi tiết ticket, báo cáo tuần, nhắc việc của Orchestrator.</span></div>`;
+}
+function bindRoles() {
+  const tb = document.querySelector(".rtable tbody"); if (!tb) return;
+  const changed = () => [...tb.querySelectorAll("tr")].map((tr) => { const r = ROLES.rows[+tr.dataset.i], o = tr.querySelector('[data-f="owner"]').value.trim(), d = tr.querySelector('[data-f="day"]').value;
+    tr.classList.toggle("dirty", o !== (r.owner || "") || d !== (r.day || "")); return o !== (r.owner || "") || d !== (r.day || "") ? { role: r.role, owner: o, day: d } : null; }).filter(Boolean);
+  const upd = () => { const c = changed(); ROLEDIRTY = c.length > 0; $("rolesSave").disabled = !c.length; $("rolesReset").disabled = !c.length;
+    $("rolesSave").innerHTML = `${IC("save")}Lưu thay đổi${c.length ? ` (${c.length})` : ""}`; };
+  tb.oninput = upd; tb.onchange = upd;
+  $("rolesReset").onclick = () => { ROLEDIRTY = false; renderInfo(); };
+  $("rolesSave").onclick = async () => {
+    const c = changed(); if (!c.length) return;
+    $("rolesSave").disabled = true;
+    try {
+      const r = await fetch("/api/roles/update", { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: JSON.stringify({ changes: c }) });
+      const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+      ROLES = j; ROLEDIRTY = false; toast(`Đã lưu ${c.length} vai trò`); renderInfo();
+    } catch (e) { toast(e.message, true); $("rolesSave").disabled = false; }
+  };
 }
 
 function tableOf(t, qid) {
@@ -840,7 +922,7 @@ function pageTList() {
     <div class="tablewrap"><table class="info tlist"><thead><tr><th>Key</th><th>Tên ticket</th><th>Giai đoạn</th><th>Nhãn</th><th>Agent</th><th>Loại việc</th><th class="n">Point</th><th>Story</th><th>Ưu tiên</th><th>Cập nhật</th><th class="n" title="Comment">Cmt</th></tr></thead>
     <tbody>${rows.map((t) => `<tr><td class="k"><a href="#/t/${esc(t.key)}">${esc(t.key)}</a></td>
       <td style="min-width:240px"><a class="plain" href="#/t/${esc(t.key)}">${esc(t.title)}</a></td><td class="nw">${stageOf(t)}</td>
-      <td class="nw">${(t.labels || []).map(lab).join(" ")}</td><td class="nw">${esc(t.agent || "")}</td><td class="nw">${esc(t.task_type || (t.side ? String(t.side).toUpperCase() : ""))}</td><td class="n">${t.points ?? ""}</td><td class="nw">${esc(t.parent || "")}</td>
+      <td class="nw">${(t.labels || []).map(lab).join(" ")}</td><td class="nw">${agentTag(t.agent)}</td><td class="nw">${esc(t.task_type || (t.side ? String(t.side).toUpperCase() : ""))}</td><td class="n">${t.points ?? ""}</td><td class="nw">${esc(t.parent || "")}</td>
       <td class="nw">${esc(PRIO[t.priority || "none"])}</td><td class="fresh nw">${fmt(t.updated_at || t.created_at)}</td><td class="n">${t.comments_n ?? ""}</td></tr>`).join("") ||
       '<tr><td colspan="11" class="empty">Không có ticket khớp.</td></tr>'}</tbody></table></div>`;
 }
@@ -853,7 +935,7 @@ function pageTBoard() {
   const cols = [["ready", "Đang chạy · Sẵn sàng"], ["blocked", "Bị chặn"], ["question", "Câu hỏi"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["other", "Chưa gắn nhãn"], ["done", "Đã xong"]];
   const G = Object.fromEntries(cols.map(([g]) => [g, []])); G.running = [];
   T.forEach((t) => { const g = classify(t); (G[g] || G.other).push(t); });
-  const card = (t) => `<a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? lab(t.agent) : ""}
+  const card = (t) => `<a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? agChip(t.agent) : ""}
       ${t.side ? lab(String(t.side).toUpperCase()) : ""}${t.points ? lab(t.points + " pt") : ""}${t.parent ? lab(t.parent) : ""}
       ${t.priority && t.priority !== "none" ? lab("ưu tiên " + PRIO[t.priority].toLowerCase()) : ""}${G.running.includes(t) ? status("warning", "đang chạy") : ""}${ciStageChip(t)}</div>
       <div class="ttl">${esc(t.title)}</div>${t.comments_n ? `<div class="fresh" style="margin-top:4px">${t.comments_n} comment · ${fmt(t.updated_at)}</div>` : ""}</a>`;
@@ -988,11 +1070,13 @@ function pageTDetail() {
       <form id="tFields" class="tform" autocomplete="off"><h3>Thông tin</h3>${fieldsForm(t, "edit")}
         ${canWrite() ? `<div class="actions"><button class="btn primary" type="submit">${IC("save")}Lưu thông tin</button></div>` : ""}</form>
       <dl class="tmeta">
+        <dt>Agent</dt><dd>${t.agent ? agentTag(t.agent, 22) : "—"}</dd>
+        <dt>Người duyệt</dt><dd>${roleRow(t.agent) ? `${esc(roleRow(t.agent).owner)}${roleRow(t.agent).day ? " · " + esc(roleRow(t.agent).day) : ""}` : "—"}</dd>
         <dt>Đầu ra</dt><dd>${outUrl ? `<a href="${esc(outUrl)}" target="_blank" rel="noopener">${esc(outUrl.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\//, "PR #"))}</a>` : esc(out || "—")}</dd>
         <dt>Bị chặn bởi</dt><dd>${(t.blocked_by || []).map(linkT).join("<br>") || "—"}</dd>
         <dt>Đang chặn</dt><dd>${blocking.map((x) => linkT(x.key)).join("<br>") || "—"}</dd>
         <dt>Chấm điểm</dt><dd>${rv.severity ? `${esc(rv.severity)} · ${esc(rv.by || "")} · ${esc(rv.at || "")}<br><span class="fresh">${esc(Object.entries(rv.scores || {}).map(([k, v]) => `${k}=${v}`).join(", "))}</span>${rv.reason ? `<br>${esc(rv.reason)}` : ""}` : "—"}</dd>
-        <dt>Lượt agent</dt><dd>${runs.map((r) => `${fmt(r.started_at)} · ${esc(r.agent)} · ${r.num_turns ?? "—"} turn${r.duration_s != null ? " · " + dur(r.duration_s) : ""} ${r.is_error ? status("critical", "lỗi") : ""}`).join("<br>") || "—"}</dd>
+        <dt>Lượt agent</dt><dd>${runs.map((r) => `${fmt(r.started_at)} · ${agentTag(r.agent, 16)} · ${r.num_turns ?? "—"} turn${r.duration_s != null ? " · " + dur(r.duration_s) : ""} ${r.is_error ? status("critical", "lỗi") : ""}`).join("<br>") || "—"}</dd>
         <dt>Tạo</dt><dd>${fmt(t.created_at)} · ${esc(t.created_by || "")}</dd>
         <dt>Cập nhật</dt><dd>${fmt(t.updated_at)}</dd>
         ${t.closed_at ? `<dt>Đóng</dt><dd>${fmt(t.closed_at)}</dd>` : ""}
@@ -1063,7 +1147,7 @@ function pageRaci() {
     ${raciAgentsBlock(C, T)}
     <h3 class="sub">Ma trận loại việc × agent</h3>
     <dl class="legend-dl">${C.legend.map(([k, v]) => `<dt>${k === "A" ? '<span class="rA">A</span>' : k === "C" ? '<span class="rC">C</span>' : esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
-    <div class="tablewrap"><table class="info raci"><thead><tr><th>Loại việc</th><th>Việc</th>${C.order.map((a) => `<th class="rc">${esc(C.names[a])}</th>`).join("")}
+    <div class="tablewrap"><table class="info raci"><thead><tr><th>Loại việc</th><th>Việc</th>${C.order.map((a) => `<th class="rc" title="${esc(agentRole(a))}">${av(a, 24)}${esc(C.names[a])}</th>`).join("")}
       <th class="n">Ticket mở</th><th class="n">Đã đóng</th></tr></thead>
     <tbody>${shown.map((r, i) => `<tr class="${i && shown[i - 1].a !== r.a ? "grp-top" : ""}"><td class="k">${esc(r.tt)}</td><td>${esc(C.desc[r.tt] || "")}</td>
       ${C.order.map((a) => cell(r, a)).join("")}<td class="n">${by[r.tt] && by[r.tt].open ? `<a href="#/t-list" onclick="Q.tlist='${esc(r.tt)}';Q.ts='Open'" title="Xem ticket mở loại ${esc(r.tt)}">${by[r.tt].open}</a>` : 0}</td><td class="n">${by[r.tt] ? by[r.tt].closed : 0}</td></tr>`).join("") ||
@@ -1080,7 +1164,7 @@ function raciAgentsBlock(C, T) {
   const cards = C.agents.filter((a) => !q || [a.name, a.role, a.A, a.C, a.I, a.no, ...(RACI[a.id] || [])].join(" ").toLowerCase().includes(q));
   return `<h3 class="sub" style="margin-top:4px">RACI từng agent</h3>
     <div class="rcards">${cards.map((a) => `<article class="rcard" aria-label="RACI ${esc(a.name)}">
-      <header><b>${esc(a.name)}</b><span class="chip">${esc(a.id)}</span><span class="fresh">${esc(a.role)}</span>
+      <header>${av(a.id, 36)}<b>${esc(a.name)}</b><span class="chip">${esc(a.id)}</span><span class="fresh">${esc(a.role)}${roleRow(a.id) ? ` · role owner ${esc(roleRow(a.id).owner)}${roleRow(a.id).day ? ", duyệt " + esc(roleRow(a.id).day) : ""}` : ""}</span>
         <a class="cnt" href="#/t-list" onclick="Q.tlist='';Q.ts='Open';document.getElementById('agentFilter').value='${esc(a.id)}'">${open(a.id)} ticket mở →</a></header>
       <dl>
         <dt><span class="rL R" title="Responsible: loại việc agent nhận và làm">R</span></dt><dd>${(RACI[a.id] || []).map((x) => `<span class="chip">${esc(x)}</span>`).join(" ") || "—"}</dd>
@@ -1252,7 +1336,7 @@ function tableView(cats, series, unit) {
 function barChart(id, cats, series, o = {}) {
   later(() => {
     const el = $(id); if (!el) return;
-    const svg = el.querySelector("svg"), W = svg.clientWidth || 700, H = o.h || 200, pl = 36, pr = 8, pt = 10, pb = 26;
+    const hasAv = cats.some((c) => c.av), svg = el.querySelector("svg"), W = svg.clientWidth || 700, H = (o.h || 200) + (hasAv ? 20 : 0), pl = 36, pr = 8, pt = 10, pb = hasAv ? 46 : 26;
     const max = Math.max(o.min || 1, ...series.flatMap((s) => s.values.map((v) => v || 0))), step = niceStep(max / 4), top = Math.ceil(max / step) * step;
     const gw = (W - pl - pr) / Math.max(1, cats.length), ns = series.length, bw = Math.max(3, Math.min(o.bw || 26, (gw - 10 - (ns - 1) * 2) / ns));
     const y = (v) => H - pb - ((H - pb - pt) * v) / top;
@@ -1266,8 +1350,9 @@ function barChart(id, cats, series, o = {}) {
       if (o.labels) series.forEach((s, j) => { const v = s.values[i]; if (v) g += `<text class="axis vl" x="${x0 + j * (bw + 2) + bw / 2}" y="${y(v) - 4}" text-anchor="middle">${fmtV(v)}</text>`; });
       g += `<rect x="${pl + i * gw}" y="${pt}" width="${gw}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`;
       if (i % every === 0) g += `<text class="axis" x="${cx}" y="${H - 8}" text-anchor="middle">${esc(c.short || c.label)}</text>`;
+      if (c.av && isAgent(c.av)) g += `<image href="/static/agent-${c.av}.svg" x="${cx - 9}" y="${H - pb + 6}" width="18" height="18"/>`;
     });
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.style.height = H + "px"; svg.innerHTML = g;
     hoverTip(el, svg, (i) => `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${fmtV(s.values[i], o.unit)}`).join(""));
   });
   return `${legendOf(series)}<div class="chart" id="${id}"><svg role="img" aria-label="${esc(o.aria || "")}" style="height:${o.h || 200}px"></svg><div class="tip"></div></div>${tableView(cats, series, o.unit)}`;
@@ -1308,7 +1393,7 @@ function hoverTip(el, svg, html, leave) {
 }
 /* Thanh ngang (HTML): xếp hạng một chỉ số theo nhóm */
 const hbars = (rows, o = {}) => { const max = o.max || Math.max(1e-9, ...rows.map((r) => r.v || 0));
-  return `<div class="hbars" role="list">${rows.map((r) => `<div class="hb" role="listitem"><span class="hl" title="${esc(r.title || r.label)}">${esc(r.label)}</span>
+  return `<div class="hbars" role="list">${rows.map((r) => `<div class="hb" role="listitem"><span class="hl" title="${esc(r.title || r.label)}">${r.icon ? av(r.icon, 18) + " " : ""}${esc(r.label)}</span>
     <span class="bar"><i style="width:${Math.max(0, Math.min(100, ((r.v || 0) / max) * 100))}%;${r.color ? `background:var(${r.color})` : ""}"></i>${o.mark != null ? `<b class="mark" style="left:${(o.mark / max) * 100}%" title="${esc(o.markLabel || "")}"></b>` : ""}</span>
     <span class="hv">${esc(r.text ?? fmtV(r.v))}</span></div>`).join("") || '<div class="empty">Chưa có dữ liệu.</div>'}</div>`; };
 const card = (title, body, sub) => `<div class="rcardx"><h3>${esc(title)}</h3>${sub ? `<p class="fresh" style="margin:-4px 0 8px">${esc(sub)}</p>` : ""}${body}</div>`;
@@ -1362,8 +1447,8 @@ function pageRWeek() {
         { name: "Tuần này", color: "--series-1", values: [S.done.length, S.created.length, S.qs.length, S.runs.length, S.merged.length, S.rev.length] }], { aria: "So sánh số lượng tuần này với tuần trước", labels: true, lw: 60 }), "cùng đơn vị: số lượng")}
     </div>
     <div class="rgrid">
-      ${card(`Đã hoàn thành (${S.done.length})`, `<div class="tablewrap"><table class="info"><tbody>${S.done.sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at))).map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${esc(t.agent || "")}</td><td class="n">${t.points ?? ""}</td><td class="nw">${sevChip(t.review && t.review.severity)}</td></tr>`).join("") || '<tr><td class="empty">Chưa có ticket đóng trong tuần.</td></tr>'}</tbody></table></div>`)}
-      ${card(`Cần CTO xử lý (${waiting.length})`, `<div class="tablewrap"><table class="info"><tbody>${waiting.map(({ t, age }) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${stageOf(t)}</td><td class="n nw">${age >= 2 ? status("warning", Math.floor(age) + " ngày") : Math.floor(age) + " ngày"}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`, "đang chờ chấm hoặc chờ trả lời, cũ nhất lên đầu; ≥ 2 ngày có cảnh báo")}
+      ${card(`Đã hoàn thành (${S.done.length})`, `<div class="tablewrap"><table class="info"><tbody>${S.done.sort((a, b) => String(b.closed_at).localeCompare(String(a.closed_at))).map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${sevChip(t.review && t.review.severity)}</td></tr>`).join("") || '<tr><td class="empty">Chưa có ticket đóng trong tuần.</td></tr>'}</tbody></table></div>`)}
+      ${card(`Cần CTO xử lý (${waiting.length})`, `<div class="tablewrap"><table class="info"><tbody>${waiting.map(({ t, age }) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent, 16)}${roleRow(t.agent) && roleRow(t.agent).day ? `<div class="fresh">duyệt ${esc(roleRow(t.agent).day)}</div>` : ""}</td><td class="nw">${stageOf(t)}</td><td class="n nw">${age >= 2 ? status("warning", Math.floor(age) + " ngày") : Math.floor(age) + " ngày"}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`, "đang chờ chấm hoặc chờ trả lời, cũ nhất lên đầu; ≥ 2 ngày có cảnh báo")}
     </div>
     ${card(`Bị chặn (${blocked.length})`, `<div class="tablewrap"><table class="info"><tbody>${blocked.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">chờ ${(t.blocked_by || []).map((b) => K[b] ? `<a href="#/t/${esc(b)}">${esc(b)}</a>` : esc(b)).join(", ")}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`)}`;
 }
@@ -1398,13 +1483,13 @@ function pageRPerf() {
       ${card("Phân bố cycle time", barChart("rpCyc", bins.map(([l]) => ({ label: l })), [{ name: "Số ticket", color: "--series-1", values: bins.map(([, lo, hi]) => cyc.filter((h) => h >= lo && h < hi).length) }], { aria: "Phân bố thời gian từ tạo đến đóng ticket", labels: true, lw: 70 }), "thời gian từ tạo đến đóng của ticket hoàn thành")}
     </div>
     <div class="rgrid">
-      ${card("Lượt chạy theo agent", barChart("rpRuns", st.map((x) => ({ label: x.a })), [{ name: "Thành công", color: "--series-1", values: st.map((x) => x.ok) }, { name: "Lỗi", color: "--series-2", values: st.map((x) => x.err) }], { aria: "Lượt chạy thành công và lỗi theo agent", labels: true, lw: 60 }))}
-      ${card("Point hoàn thành theo agent", hbars(st.filter((x) => x.pts).sort((a, b) => b.pts - a.pts).map((x) => ({ label: x.a, v: x.pts, text: `${x.pts} point · ${x.done} ticket` }))))}
+      ${card("Lượt chạy theo agent", barChart("rpRuns", st.map((x) => ({ label: x.a, av: x.a })), [{ name: "Thành công", color: "--series-1", values: st.map((x) => x.ok) }, { name: "Lỗi", color: "--series-2", values: st.map((x) => x.err) }], { aria: "Lượt chạy thành công và lỗi theo agent", labels: true, lw: 60 }))}
+      ${card("Point hoàn thành theo agent", hbars(st.filter((x) => x.pts).sort((a, b) => b.pts - a.pts).map((x) => ({ label: x.a, icon: x.a, v: x.pts, text: `${x.pts} point · ${x.done} ticket` }))))}
     </div>
-    ${card("Cycle time trung vị theo agent", hbars(st.filter((x) => x.cyc != null).sort((a, b) => b.cyc - a.cyc).map((x) => ({ label: x.a, v: x.cyc, text: fmtH(x.cyc) })), {}), "càng ngắn càng tốt; tính trên ticket đóng trong kỳ")}
+    ${card("Cycle time trung vị theo agent", hbars(st.filter((x) => x.cyc != null).sort((a, b) => b.cyc - a.cyc).map((x) => ({ label: x.a, icon: x.a, v: x.cyc, text: fmtH(x.cyc) })), {}), "càng ngắn càng tốt; tính trên ticket đóng trong kỳ")}
     <h3 class="sub">Bảng chỉ số theo agent</h3>
     <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Thành công</th><th class="n">Thời gian/lượt</th><th class="n">TB turn</th><th class="n">Ticket xong</th><th class="n">Point</th><th class="n">Cycle time</th><th class="n" title="Câu hỏi agent tạo ra khi thiếu thông tin">Câu hỏi đã tạo</th></tr></thead>
-      <tbody>${st.map((x) => `<tr><td class="nw">${esc(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
+      <tbody>${st.map((x) => `<tr><td class="nw">${agentTag(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
         <td class="n">${x.done}</td><td class="n">${x.pts}</td><td class="n">${fmtH(x.cyc)}</td><td class="n">${x.asked}</td></tr>`).join("")}</tbody></table></div>
     <p class="note">Cycle time = ngày đóng − ngày tạo ticket (ticket chuyển từ Zoho giữ ngày gốc). Câu hỏi gán cho agent của ticket được nhắc trong tên câu hỏi. Lượt chạy trước 03/11 chưa ghi thời lượng.</p>`;
 }
@@ -1436,16 +1521,16 @@ function pageRQuality() {
     ${repTiles(tiles)}
     <div class="rgrid">
       ${card("Kết quả chấm theo agent", `<div class="legend">${SEV.map(([, l, c]) => `<span><i style="background:var(${c})"></i>${l}</span>`).join("")}</div>` +
-        barChart("rqSev", agents.map((a) => ({ label: a })), SEV.map(([k, l, c]) => ({ name: l, color: c, values: agents.map((a) => rev.filter((t) => t.agent === a && t.review.severity === k).length) })), { aria: "Số ticket đạt, sửa nhẹ, sửa nặng, loại theo agent", labels: true, lw: 60 }).replace(/^<div class="legend">.*?<\/div>/, ""), "mỗi cột có nhãn số; màu theo mức, kèm chú thích chữ")}
+        barChart("rqSev", agents.map((a) => ({ label: a, av: a })), SEV.map(([k, l, c]) => ({ name: l, color: c, values: agents.map((a) => rev.filter((t) => t.agent === a && t.review.severity === k).length) })), { aria: "Số ticket đạt, sửa nhẹ, sửa nặng, loại theo agent", labels: true, lw: 60 }).replace(/^<div class="legend">.*?<\/div>/, ""), "mỗi cột có nhãn số; màu theo mức, kèm chú thích chữ")}
       ${card("Tỉ lệ đạt theo tuần", lineChart("rqTrend", weeks, [{ name: "Tỉ lệ đạt (%)", color: "--series-1", values: weeks.map((w) => { const r = wr(w); return r.length ? Math.round((r.filter((t) => t.review.severity === "dat").length / r.length) * 100) : null; }) }], { aria: "Tỉ lệ đạt theo tuần", unit: "%" }), "phần trăm ticket chấm đạt trong tuần")}
     </div>
     ${card("Tiêu chí rubric yếu nhất", hbars(crit.slice(0, 10).map((c) => ({ label: `${c.a} · ${c.id}`, title: c.text, v: c.avg, text: `${c.avg.toFixed(2)} / 2 · ${c.n} lần`, color: c.avg < 1.5 ? "--warning" : "--series-1" })), { max: 2, mark: 1.6, markLabel: "ngưỡng 80% (1,6/2)" }), "trung bình điểm 0–2 mỗi tiêu chí; vạch dọc = ngưỡng đạt 80% của rubric; tiêu chí dưới 1,5 tô màu cảnh báo — ưu tiên sửa prompt/skill")}
     <h3 class="sub">Điểm theo tiêu chí rubric</h3>
     <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th>Tiêu chí</th><th>Nội dung</th><th class="n">Lần chấm</th><th class="n">TB (0–2)</th><th class="n">0</th><th class="n">1</th><th class="n">2</th><th>Đánh giá</th></tr></thead>
-      <tbody>${crit.map((c) => `<tr><td class="nw">${esc(c.a)}</td><td class="k">${esc(c.id)}</td><td>${esc(c.text)}</td><td class="n">${c.n}</td><td class="n">${c.avg.toFixed(2)}</td><td class="n">${c.d0}</td><td class="n">${c.d1}</td><td class="n">${c.d2}</td>
+      <tbody>${crit.map((c) => `<tr><td class="nw">${agentTag(c.a)}</td><td class="k">${esc(c.id)}</td><td>${esc(c.text)}</td><td class="n">${c.n}</td><td class="n">${c.avg.toFixed(2)}</td><td class="n">${c.d0}</td><td class="n">${c.d1}</td><td class="n">${c.d2}</td>
         <td class="nw">${c.avg >= 1.6 ? status("good", "đạt ngưỡng") : c.avg >= 1.5 ? status("warning", "sát ngưỡng") : status("serious", "cần cải thiện")}</td></tr>`).join("") || '<tr><td colspan="9" class="empty">Chưa có điểm rubric trong kỳ.</td></tr>'}</tbody></table></div>
     <h3 class="sub">Bài học từ ticket phải sửa / loại</h3>
-    <div class="tablewrap"><table class="info"><tbody>${lessons.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="nw">${esc(t.agent || "")}</td><td class="nw">${sevChip(t.review.severity)}</td><td>${esc(t.review.reason)}</td><td class="fresh nw">${esc(t.review.at || "")}</td></tr>`).join("") || '<tr><td class="empty">Chưa có lý do ghi khi chấm sửa/loại.</td></tr>'}</tbody></table></div>`;
+    <div class="tablewrap"><table class="info"><tbody>${lessons.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="nw">${agentTag(t.agent)}</td><td class="nw">${sevChip(t.review.severity)}</td><td>${esc(t.review.reason)}</td><td class="fresh nw">${esc(t.review.at || "")}</td></tr>`).join("") || '<tr><td class="empty">Chưa có lý do ghi khi chấm sửa/loại.</td></tr>'}</tbody></table></div>`;
 }
 
 /* ---------- 4. Kết quả dự án ---------- */
@@ -1509,7 +1594,7 @@ function pageRSprint() {
   const tiles = [["Cam kết đầu sprint", `${r.cp} point`, `${r.committed.length} ticket mở lúc bắt đầu`], ["Thêm giữa sprint", `${r.ap} point`, `${r.added.length} ticket`],
     ["Hoàn thành", `${r.dp} point`, `${r.done.length} ticket · ${pct(r.dp, r.cp + r.ap)} phạm vi`], ["Còn lại", `${r.lp} point`, today > sp.end ? "chuyển sprint sau" : `${r.left.length} ticket`],
     ["Việc không point đã xong", other, "câu hỏi, chia task, test…"], ["Vận tốc TB", vel.length ? Math.round(vel.reduce((a, v) => a + v.dp, 0) / vel.length) + " point" : "—", `${vel.length} sprint đã/đang chạy`]];
-  const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${esc(t.agent || "")}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
+  const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td>${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
   COPY.sprint = [`Báo cáo ${sp.name} (${ddmm(sp.start)}–${ddmm(sp.end)}) · Efitco`, `- Mục tiêu: ${sp.goal || "chưa ghi"}`,
     `- Cam kết ${r.cp} point, thêm ${r.ap} point, hoàn thành ${r.dp} point (${pct(r.dp, r.cp + r.ap)}), còn lại ${r.lp} point`,
     `- Hoàn thành: ${r.done.map((t) => t.key).join(", ") || "—"}`, `- Còn lại: ${r.left.map((t) => t.key).join(", ") || "—"}`].join("\n");
@@ -1561,9 +1646,9 @@ function drawActivity(d) {
   const busyN = runs.filter((r) => r.kind === "run").length;
   const ms = (r) => (r.en ? Math.max(0, Math.min(r.en, now) - Math.max(r.st, t0)) : 0);
   $("actSum").textContent = `${busyN} đang chạy · ${agents.length - busyN} rảnh · ${inWin.length} lượt trong khung · ${dur(Math.round(inWin.reduce((a, r) => a + ms(r), 0) / 1000))} chạy`;
-  const RH = 38, AX = 22, H = AX + agents.length * RH + 4;
+  const RH = 46, AX = 22, H = AX + agents.length * RH + 4;
   const names = agents.map((a) => { const [chip, busy] = agentStatus(a, d, G), rr = inWin.filter((r) => r.agent === a);
-    return `<div class="row ${busy ? "busy" : ""}"><div class="top"><span class="nm">${esc(a)}</span>${chip}</div>
+    return `<div class="row ${busy ? "busy" : ""}"><div class="top">${av(a, 22)}<span class="nm" title="${esc(agentRole(a))}">${esc(a)}</span>${chip}</div>
       <div class="sub">${rr.length ? `${rr.length} lượt · ${dur(Math.round(rr.reduce((x, r) => x + ms(r), 0) / 1000))}${rr.some((r) => r.kind === "err") ? ` · ${rr.filter((r) => r.kind === "err").length} lỗi` : ""}` : "chưa chạy trong khung"}</div></div>`; }).join("");
   if (!ACT || !box.querySelector(".chart")) {
     box.innerHTML = `<div class="names" id="actNames"></div><div class="chart" id="actChart"><svg role="img" aria-label="Dòng thời gian lượt chạy của các agent"></svg><div class="tip"></div></div>`;
@@ -1585,7 +1670,7 @@ function drawActivity(d) {
   const items = [];
   inWin.forEach((r) => {
     const i = agents.indexOf(r.agent); if (i < 0) return;
-    const y = AX + i * RH + 9, h = RH - 18;
+    const y = AX + i * RH + 11, h = RH - 22;
     const color = r.kind === "run" ? "var(--warning)" : r.kind === "err" ? "var(--critical)" : "var(--series-1)";
     const idx = items.push(r) - 1;
     if (!r.en) { const xx = x(r.st.getTime()); g += `<rect class="bar" x="${xx - 1.5}" y="${y}" width="3" height="${h}" rx="1.5" fill="${color}" data-k="${idx}"/>`; return; }
@@ -1608,7 +1693,7 @@ function drawActivity(d) {
     b.onclick = () => r.ticket && (location.hash = `#/t/${r.ticket}`);
   });
   ACT = { d };
-  $("actTable").innerHTML = inWin.slice().sort((a, b) => b.st - a.st).map((r) => `<tr><td>${esc(r.agent)}</td><td class="k">${esc(r.ticket || "")}</td><td class="nw fresh">${esc(r.st.toLocaleString("vi-VN"))}</td>
+  $("actTable").innerHTML = inWin.slice().sort((a, b) => b.st - a.st).map((r) => `<tr><td>${agentTag(r.agent)}</td><td class="k">${esc(r.ticket || "")}</td><td class="nw fresh">${esc(r.st.toLocaleString("vi-VN"))}</td>
     <td class="n">${r.kind === "run" ? "đang chạy" : r.en ? dur(Math.round((r.en - r.st) / 1000)) : "—"}</td><td class="n">${r.num_turns ?? "—"}</td>
     <td>${r.kind === "run" ? status("warning", "đang chạy") : r.kind === "err" ? status("critical", "lỗi") : status("good", "xong")}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Không có lượt chạy trong khung.</td></tr>';
 }
@@ -1623,7 +1708,7 @@ function render(d) {
     sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
   }
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-")) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
@@ -1657,11 +1742,18 @@ function render(d) {
   }).join("");
 
   drawActivity(d);
+  // Lịch duyệt hôm nay (theo Role owner + ngày duyệt cố định CTO đặt ở trang Vai trò)
+  if (ROLES) {
+    const today = DOW[new Date().getDay()], due = ROLES.rows.filter((r) => r.day === today && r.agent);
+    const waitN = (a) => d.tickets.filter((t) => t.agent === a && classify(t) === "review" && (!prOf(t.key) || gateOf(prOf(t.key).checks) === "pass")).length;
+    $("todayRev").innerHTML = `${IC("calendar")}<b>Lịch duyệt hôm nay · ${esc(today)}</b>` + (due.length ? due.map((r) => `<span class="who">${av(r.agent, 22)}<span>${esc(r.role)} — ${esc(r.owner)}</span>${waitN(r.agent) ? status("warning", waitN(r.agent) + " chờ chấm") : status("good", "không có ticket chờ")}</span>`).join("")
+      : `<span class="fresh">Không có vai nào duyệt cố định hôm nay.</span>`) + `<a class="fresh" href="#/roles" style="margin-left:auto">Sửa lịch duyệt →</a>`;
+  }
 
   // Live
   if (live && live.alive) {
     liveKey = live.ticket;
-    $("live").innerHTML = `<div class="live-head"><span class="t">${esc(live.ticket)}</span><span class="chip">${esc(live.agent)}</span>
+    $("live").innerHTML = `<div class="live-head"><span class="t">${esc(live.ticket)}</span>${agentTag(live.agent, 28)}
       ${pushing ? status("warning", "agent xong · Orchestrator đang commit, push, mở PR") : status("warning", "đang chạy " + dur(live.elapsed_s))}<span class="fresh">${live.turns} lượt · ${live.tools} lần gọi tool</span></div>
       ${live.source === "ps" ? `<div class="fresh" style="margin-top:4px">Phát hiện qua tiến trình + transcript Claude Code (lượt này chạy bằng Orchestrator bản cũ).</div>` : ""}
       <div style="margin-top:4px">${esc(live.title)}</div>
@@ -1671,7 +1763,7 @@ function render(d) {
     liveKey = last ? last.ticket : null;
     const next = { pending: "chờ CI xong", fail: "xem log CI, sửa trên nhánh", pass: "CTO /review-pr → /merge-pr", none: "chờ CI khởi chạy" };
     const fl = d.prs.filter((p) => p.branch.startsWith("feature/ai-"));
-    $("live").innerHTML = `<div class="empty" style="padding-top:0">${status("none", "Không có agent nào đang chạy")}${last ? ` · Lượt gần nhất <b>${esc(last.ticket)}</b> (${esc(last.agent)})
+    $("live").innerHTML = `<div class="empty" style="padding-top:0">${status("none", "Không có agent nào đang chạy")}${last ? ` · Lượt gần nhất <b>${esc(last.ticket)}</b> ${agentTag(last.agent, 16)}
         bắt đầu ${esc((last.started_at || "").slice(5, 16).replace("T", " "))}${last.duration_s != null ? ` · ${dur(last.duration_s)}` : ""} · ${last.is_error ? status("critical", "lỗi") : status("good", "agent xong")}
         ${last.pr ? ` · <a href="${esc(last.pr)}" target="_blank" rel="noopener">PR #${esc(String(last.pr).split("/").pop())}</a>` : ""}` : ""}</div>
       ${fl.length ? `<div class="inflight"><div class="fresh" style="margin:6px 0 4px">Đang xử lý sau agent (${fl.length} PR mở)</div><table class="info"><tbody>${fl.map((p) => {
@@ -1688,7 +1780,7 @@ function render(d) {
     if (g === "ready") list = groups.running.concat(list);
     if (g === "done") list = list.slice(-8).reverse();
     return `<div class="col"><h3><span>${name}</span><span>${g === "done" ? groups.done.length : list.length}</span></h3>${list.map((t) => `
-      <a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? `<span class="chip">${esc(t.agent)}</span>` : ""}
+      <a class="card tcard" href="#/t/${esc(t.key)}"><div class="top"><span class="key">${esc(t.key)}</span>${t.agent ? agChip(t.agent) : ""}
       ${t.side ? `<span class="chip">${esc(String(t.side).toUpperCase())}</span>` : ""}${t.points ? `<span class="chip">${t.points} pt</span>` : ""}
       ${t.parent && String(t.parent).startsWith("TE-") ? `<span class="chip">${esc(t.parent)}</span>` : ""}
       ${t.review && t.review.severity ? `<span class="chip">${esc(t.review.severity)}</span>` : ""}
@@ -1718,7 +1810,7 @@ function render(d) {
   // Lượt chạy gần đây
   const R = d.runs.filter((r) => !f || r.agent === f);
   $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
-    <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${esc(r.agent)}</td>
+    <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${agentTag(r.agent)}</td>
     <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td>
     <td>${r.is_error ? status("critical", "lỗi") : status("good", "xong")}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Chưa có lượt chạy.</td></tr>';
 
@@ -1729,7 +1821,7 @@ function render(d) {
   d.tickets.forEach((t) => { if (!t.agent || !A[t.agent]) return; const L = t.labels || [];
     if (L.includes("ai-dat")) A[t.agent].dat++; else if (L.includes("ai-sua")) A[t.agent].sua++; else if (L.includes("ai-loai")) A[t.agent].loai++; });
   $("agents").innerHTML = Object.entries(A).sort().map(([a, s]) => { const sc = s.dat + s.sua + s.loai;
-    return `<tr><td>${esc(a)}</td><td class="n">${s.n}</td><td class="n">${s.err}</td><td class="n">${s.dn ? dur(Math.round(s.dsum / s.dn)) : "—"}</td>
+    return `<tr><td>${agentTag(a)}</td><td class="n">${s.n}</td><td class="n">${s.err}</td><td class="n">${s.dn ? dur(Math.round(s.dsum / s.dn)) : "—"}</td>
     <td class="n">${(s.turns / s.n).toFixed(0)}</td><td class="n">${s.dat}</td><td class="n">${s.sua}</td><td class="n">${s.loai}</td>
     <td class="n">${sc ? Math.round((s.dat / sc) * 100) + "%" : "—"}</td></tr>`; }).join("") ||
     '<tr><td colspan="9" class="empty">Chưa có dữ liệu.</td></tr>';
@@ -1832,7 +1924,7 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); loadRaci(); loadRubrics(); route();
+loadProject(); loadRaci(); loadRubrics(); loadRoles(); route();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);

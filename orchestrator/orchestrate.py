@@ -173,12 +173,24 @@ def make_eval_records():
                "reason": rev.get("reason", ""), "reviewed_at": rev.get("at", datetime.date.today().isoformat())}
         os.makedirs(os.path.dirname(p), exist_ok=True); json.dump(rec, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=2); print("eval record", p)
 
+def role_of(agent):
+    """(role owner, ngày duyệt) của agent: project.json đè bởi giá trị CTO sửa trên dashboard."""
+    try:
+        import ticket_local as L
+        rows = next(p for p in json.load(open(os.path.join(ROOT, "ops/dashboard/project.json"), encoding="utf-8"))["pages"] if p["id"] == "roles")["rows"]
+        ov = L.get_roles()
+        for r in rows:
+            if len(r) > 3 and r[3] == agent: o = ov.get(r[0], {}); return o.get("owner", r[1]), o.get("day", r[2])
+    except Exception: pass
+    return agent, ""
+
 def remind_and_budget():
     today = datetime.date.today()
     for t in T.list(label="ai-review"):
         full = T.get(t["id"]); last = max((c["at"] for c in full.get("comments", [])), default=full.get("created_at", str(today)))
         if (today - datetime.date.fromisoformat(last[:10])).days >= CFG["review_overdue_days"]:
-            print(f"NHẮC: {t['id']} ở ai-review quá {CFG['review_overdue_days']} ngày — role owner {t['agent']}")
+            owner, day = role_of(t["agent"])
+            print(f"NHẮC: {t['id']} ở ai-review quá {CFG['review_overdue_days']} ngày — role owner {owner}{f' (duyệt {day})' if day else ''}, agent {t['agent']}")
     runs = os.path.join(ROOT, "evals/raw/_runs.jsonl"); spent = 0.0
     if os.path.exists(runs):
         for l in open(runs, encoding="utf-8"):

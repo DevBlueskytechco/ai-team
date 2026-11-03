@@ -244,6 +244,21 @@ def read_rubrics():
         out[f[:-5]] = {"pass_threshold": float(m.group(1)) if m else 0.8, "criteria": crit}
     return out
 
+def roles_merged():
+    """Bảng Vai trò = project.json (mặc định) đè bởi giá trị CTO sửa trên dashboard (data/tickets.db meta roles)."""
+    import ticket_local as L
+    pj = json.load(open(os.path.join(HERE, "project.json"), encoding="utf-8"))
+    rows = next(p for p in pj["pages"] if p["id"] == "roles")["rows"]
+    try: ov = L.get_roles()
+    except Exception: ov = {}
+    out = []
+    for r in rows:
+        role, owner, day, agent, note = (list(r) + [""] * 5)[:5]
+        o = ov.get(role, {})
+        out.append({"role": role, "owner": o.get("owner", owner), "day": o.get("day", day), "agent": agent if agent not in ("", "—") else None,
+                    "note": note, "default_owner": owner, "default_day": day, "edited_by": o.get("by"), "edited_at": o.get("at")})
+    return {"rows": out, "days": list(L.DAYS)}
+
 def snapshot():
     runs = read_runs()
     with LOCK:
@@ -286,8 +301,20 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update",) and not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
+        if u.path == "/api/roles/update":
+            try:
+                import ticket_local as L
+                n = int(self.headers.get("Content-Length") or 0)
+                if n > 50_000: return self._send(413, '{"error":"quá lớn"}')
+                d = json.loads(self.rfile.read(n) or b"{}"); known = {r["role"] for r in roles_merged()["rows"]}
+                bad = [c.get("role") for c in d.get("changes", []) if c.get("role") not in known]
+                if bad: return self._send(400, json.dumps({"error": f"không có vai trò {', '.join(map(str, bad))}"}, ensure_ascii=False))
+                L.set_roles(d.get("changes", []), by=UI_USER); VERSION["n"] += 1
+                return self._send(200, json.dumps(roles_merged(), ensure_ascii=False))
+            except (ValueError, TypeError) as e:
+                return self._send(400, json.dumps({"error": str(e)}, ensure_ascii=False))
         n = int(self.headers.get("Content-Length") or 0)
         if n > 200_000: return self._send(413, '{"error":"quá lớn"}')
         try:
@@ -317,6 +344,9 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/api/project":   # trang thông tin (chuyển từ Efitco-thong-tin-du-an.xlsx), đọc lại mỗi lần để sửa file là thấy
             try: return self._send(200, open(os.path.join(HERE, "project.json"), "rb").read())
             except Exception as e: return self._send(500, json.dumps({"error": str(e)}))
+        if u.path == "/api/roles":
+            try: return self._send(200, json.dumps(roles_merged(), ensure_ascii=False))
+            except Exception as e: return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
         if u.path == "/api/rubrics":
             return self._send(200, json.dumps(read_rubrics(), ensure_ascii=False))
         if u.path == "/api/raci":   # agent → loại việc được nhận (orchestrator/raci.yaml)
