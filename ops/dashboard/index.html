@@ -147,7 +147,7 @@ nav.menu .cnt:empty{display:none}
 .app.collapsed nav.menu a[aria-current="page"]::before{left:-5px}
 .navback{display:none}
 .navhead{display:none}
-@media (max-width:600px){#fresh,label[for="agentFilter"],#themeBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
+@media (max-width:600px){#fresh,#themeBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
 /* màn hẹp: menu là ngăn kéo trượt từ trái, có nền mờ */
 @media (max-width:900px){
   .app,.app.collapsed{grid-template-columns:minmax(0,1fr)}
@@ -351,8 +351,6 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <span class="conn"><span class="dot" id="dot"></span><span id="connText">đang kết nối…</span></span>
   <span class="fresh" id="fresh"></span>
   <span class="spacer"></span>
-  <label class="fresh" for="agentFilter">Agent</label>
-  <select id="agentFilter"><option value="">Tất cả</option></select>
   <button id="themeBtn" class="iconbtn" type="button" aria-label="Đổi giao diện sáng/tối"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span>Sáng/Tối</span></button>
 </header>
 
@@ -454,7 +452,6 @@ function syncThemeIcon() {
     syncThemeIcon();
     if (DATA) render(DATA);
   };
-  $("agentFilter").onchange = () => DATA && render(DATA);
   try { const p = localStorage.getItem("efitco-period"); if (p) $("period").value = p; } catch (e) {}
   $("period").onchange = () => { try { localStorage.setItem("efitco-period", $("period").value); } catch (e) {} if (DATA) render(DATA); };
 })();
@@ -581,8 +578,6 @@ function route() {
   if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
   $("page-dashboard").hidden = PAGE !== "dashboard";
   $("page-info").hidden = PAGE === "dashboard";
-  const showAgent = ["dashboard", "t-list", "t-board"].includes(PAGE);
-  $("agentFilter").hidden = !showAgent; document.querySelector('label[for="agentFilter"]').hidden = !showAgent;
   document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : PAGE === "t-detail" ? `${TDETAIL.key} · Efitco Agent Ops` : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
   window.scrollTo(0, 0);
   if (DATA && PAGE === "dashboard") render(DATA); else { renderMenu(); renderInfo(); }
@@ -897,9 +892,11 @@ const storyOpts = (cur) => { const st = PROJECT ? PROJECT.story : [];
 const readonlyNote = () => canWrite() ? "" : `<p class="note">${status("warning", "Chỉ xem")} Chưa kết nối được ticket nội bộ (data/tickets.db).</p>`;
 
 /* ---- Danh sách ---- */
+const agentOpts = (T, cur) => { const has = new Set(T.map((t) => t.agent).filter(Boolean)); if (cur) has.add(cur);
+  return [...AGENT_IDS.filter((a) => has.has(a)), ...[...has].filter((a) => !isAgent(a)).sort()].map((a) => [a, a]); };
 function pageTList() {
   const all = (DATA ? DATA.tickets : []).slice();
-  const f = $("agentFilter").value, st = Q.ts ?? "Open", sy = Q.tstory || "", ty = Q.ttype || "", lb = Q.tlabel || "", pr = Q.tprio || "", so = Q.tsort || "key";
+  const f = Q.tagent || "", st = Q.ts ?? "Open", sy = Q.tstory || "", ty = Q.ttype || "", lb = Q.tlabel || "", pr = Q.tprio || "", so = Q.tsort || "key";
   const stories = [...new Set(all.map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
   const labels = [...new Set(all.flatMap((t) => t.labels || []))].sort();
   let rows = all.filter((t) => (!f || t.agent === f) && (!st || t.status === st) && (!sy || t.parent === sy) && (!ty || (t.type || "task") === ty) &&
@@ -909,6 +906,7 @@ function pageTList() {
   const sel = (id, cur, list, all) => `<select data-sel="${id}" aria-label="${esc(all)}">${list.map(([v, l]) => opt(v, cur, l)).join("")}</select>`;
   return `<div class="page-head"><h2>Ticket</h2>${searchBox("tlist", "Tìm key, tên, nhãn")}
       ${sel("ts", st, [["", "Mọi trạng thái"], ["Open", "Đang mở"], ["Closed", "Đã đóng"]], "Trạng thái")}
+      ${sel("tagent", f, [["", "Mọi agent"], ...agentOpts(all, f)], "Agent")}
       ${sel("tstory", sy, [["", "Mọi story"], ...stories.map((s) => [s, s])], "Story")}
       ${sel("ttype", ty, [["", "Mọi loại"], ...TYPES.map((s) => [s, s])], "Loại")}
       ${sel("tlabel", lb, [["", "Mọi nhãn"], ...labels.map((s) => [s, s])], "Nhãn")}
@@ -927,7 +925,7 @@ function pageTList() {
 
 /* ---- Kanban ---- */
 function pageTBoard() {
-  const f = $("agentFilter").value, sy = Q.bstory || "";
+  const f = Q.bagent || "", sy = Q.bstory || "";
   const T = (DATA ? DATA.tickets : []).filter((t) => (!f || t.agent === f) && (!sy || t.parent === sy) && match(Q.tboard, [t.key, t.title, t.agent]));
   const stories = [...new Set((DATA ? DATA.tickets : []).map((t) => t.parent).filter((x) => x && String(x).startsWith("TE-")))].sort((a, b) => parseInt(a.slice(3)) - parseInt(b.slice(3)));
   const cols = [["ready", "Đang chạy · Sẵn sàng"], ["blocked", "Bị chặn"], ["question", "Câu hỏi"], ["review", "Chờ CTO chấm"], ["fix", "Cần sửa"], ["other", "Chưa gắn nhãn"], ["done", "Đã xong"]];
@@ -939,6 +937,7 @@ function pageTBoard() {
       <div class="ttl">${esc(t.title)}</div>${t.comments_n ? `<div class="fresh" style="margin-top:4px">${t.comments_n} comment · ${fmt(t.updated_at)}</div>` : ""}</a>`;
   return `<div class="page-head"><h2>Kanban</h2>${searchBox("tboard", "Tìm key, tên")}
       <select data-sel="bstory" aria-label="Story">${[["", "Mọi story"], ...stories.map((s) => [s, s])].map(([v, l]) => opt(v, sy, l)).join("")}</select>
+      <select data-sel="bagent" aria-label="Agent">${[["", "Mọi agent"], ...agentOpts(DATA ? DATA.tickets : [], f)].map(([v, l]) => opt(v, f, l)).join("")}</select>
       ${canWrite() ? `<a class="btn primary" href="#/t-new">${IC("plus")}Tạo ticket</a>` : ""}<span class="fresh">${T.length} ticket · cột theo quy trình agent (trang Quy trình)</span></div>
     <div class="board kanban">${cols.map(([g, name]) => {
       let list = G[g].sort((a, b) => num(a.key) - num(b.key));
@@ -1163,7 +1162,7 @@ function raciAgentsBlock(C, T) {
   return `<h3 class="sub" style="margin-top:4px">RACI từng agent</h3>
     <div class="rcards">${cards.map((a) => `<article class="rcard" aria-label="RACI ${esc(a.name)}">
       <header>${av(a.id, 36)}<b>${esc(a.name)}</b><span class="chip">${esc(a.id)}</span><span class="fresh">${esc(a.role)}${roleRow(a.id) ? ` · role owner ${esc(roleRow(a.id).owner)}${roleRow(a.id).day ? ", duyệt " + esc(roleRow(a.id).day) : ""}` : ""}</span>
-        <a class="cnt" href="#/t-list" onclick="Q.tlist='';Q.ts='Open';document.getElementById('agentFilter').value='${esc(a.id)}'">${open(a.id)} ticket mở →</a></header>
+        <a class="cnt" href="#/t-list" onclick="Q.tlist='';Q.ts='Open';Q.tagent='${esc(a.id)}'">${open(a.id)} ticket mở →</a></header>
       <dl>
         <dt><span class="rL R" title="Responsible: loại việc agent nhận và làm">R</span></dt><dd>${(RACI[a.id] || []).map((x) => `<span class="chip">${esc(x)}</span>`).join(" ") || "—"}</dd>
         <dt><span class="rL A" title="Accountable: chịu trách nhiệm đầu ra">A</span></dt><dd>${esc(a.A)}</dd>
@@ -1637,7 +1636,7 @@ function agentStatus(a, d, G) {
 let ACT = null;
 function drawActivity(d) {
   const box = $("act"); if (!box) return;
-  const G = {}; (d.tickets || []).forEach((t) => (G[classify(t)] ||= []).push(t));   // trạng thái tính trên mọi ticket, không theo bộ lọc agent
+  const G = {}; (d.tickets || []).forEach((t) => (G[classify(t)] ||= []).push(t));
   const win = Number($("actWin").value || 24) * 3600e3, now = Date.now(), t0 = now - win;
   const runs = actRuns(d), agents = ACT_AGENTS.concat([...new Set(runs.map((r) => r.agent))].filter((a) => a && !ACT_AGENTS.includes(a)));
   const inWin = runs.filter((r) => (r.en ? r.en.getTime() : r.st.getTime()) >= t0);
@@ -1699,19 +1698,13 @@ function drawActivity(d) {
 function render(d) {
   DATA = d;
   renderMenu();
-  const f = $("agentFilter").value;
-  const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
-  const sel = $("agentFilter");
-  if (sel.options.length - 1 !== agents.length) {
-    sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
-  }
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
   if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
 
-  const T = d.tickets.filter((t) => !f || t.agent === f);
+  const T = d.tickets;
   const groups = { running: [], ready: [], blocked: [], review: [], fix: [], question: [], done: [] };
   T.forEach((t) => { const g = classify(t); if (groups[g]) groups[g].push(t); });
 
@@ -1806,7 +1799,7 @@ function render(d) {
   }).join("") || '<tr><td class="empty">Chưa lấy được CI.</td></tr>';
 
   // Lượt chạy gần đây
-  const R = d.runs.filter((r) => !f || r.agent === f);
+  const R = d.runs;
   $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
     <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${agentTag(r.agent)}</td>
     <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td>
@@ -1826,20 +1819,19 @@ function render(d) {
 
   // PR đã merge gần đây
   const keyOf = (br) => String(br || "").replace("feature/ai-", "");
-  const agentOfKey = Object.fromEntries(d.tickets.map((t) => [t.key, t.agent]));
-  const M = (d.merged || []).filter((p) => !f || agentOfKey[keyOf(p.branch)] === f);
+  const M = d.merged || [];
   $("merged").innerHTML = M.slice(0, 10).map((p) => `<tr><td><a href="${esc(p.url)}" target="_blank" rel="noopener">#${p.number}</a></td>
     <td title="${esc(p.title)}">${esc(keyOf(p.branch))}</td><td class="fresh">${esc((p.mergedAt || "").slice(5, 16).replace("T", " "))}</td>
     <td class="n">${hrs(p)}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có PR merge.</td></tr>';
 
-  report(d, f, R, M);
+  report(d, R, M);
 }
 
 const hrs = (p) => { const h = (new Date(p.mergedAt) - new Date(p.createdAt)) / 36e5; return isFinite(h) ? (h < 24 ? `${h.toFixed(1)} giờ` : `${(h / 24).toFixed(1)} ngày`) : "—"; };
 const dayKey = (iso) => { if (!iso) return ""; const dt = new Date(iso); return isNaN(dt) ? String(iso).slice(0, 10) : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`; };
 
 /* Báo cáo kết quả vận hành theo kỳ: lượt chạy, PR merge, ticket chấm, tỉ lệ đạt, story point, thời gian lượt */
-function report(d, f, R, M) {
+function report(d, R, M) {
   const n = parseInt($("period").value, 10) || 7;
   const days = [];
   for (let i = n - 1; i >= 0; i--) days.push(dayKey(new Date(Date.now() - i * 864e5).toISOString()));
@@ -1848,7 +1840,7 @@ function report(d, f, R, M) {
   const ok = runs.filter((r) => !r.is_error).length;
   const merged = M.filter((p) => inP(p.mergedAt));
   const lead = merged.map((p) => (new Date(p.mergedAt) - new Date(p.createdAt)) / 36e5).filter(isFinite);
-  const T = d.tickets.filter((t) => (!f || t.agent === f) && t.review && t.review.at && days.includes(String(t.review.at).slice(0, 10)));
+  const T = d.tickets.filter((t) => t.review && t.review.at && days.includes(String(t.review.at).slice(0, 10)));
   const sev = (s) => T.filter((t) => t.review.severity === s).length;
   const dat = sev("dat"), sua = sev("sua_nhe") + sev("sua_nang"), loai = sev("loai");
   const pts = T.filter((t) => t.review.severity === "dat").reduce((a, t) => a + (Number(t.points) || 0), 0);
@@ -1867,7 +1859,7 @@ function report(d, f, R, M) {
   const by = Object.fromEntries(days.map((k) => [k, { runs: 0, err: 0, pr: 0, rev: 0 }]));
   R.forEach((r) => { const k = dayKey(r.started_at); if (by[k]) { by[k].runs++; if (r.is_error) by[k].err++; } });
   M.forEach((p) => { const k = dayKey(p.mergedAt); if (by[k]) by[k].pr++; });
-  d.tickets.forEach((t) => { if (f && t.agent !== f) return; const k = t.review && t.review.at && String(t.review.at).slice(0, 10); if (k && by[k]) by[k].rev++; });
+  d.tickets.forEach((t) => { const k = t.review && t.review.at && String(t.review.at).slice(0, 10); if (k && by[k]) by[k].rev++; });
   drawTp(days, by);
   $("tpTable").innerHTML = days.slice().reverse().map((k) => `<tr><td>${k}</td><td class="n">${by[k].runs}</td><td class="n">${by[k].err}</td><td class="n">${by[k].pr}</td><td class="n">${by[k].rev}</td></tr>`).join("");
 }
