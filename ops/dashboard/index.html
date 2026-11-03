@@ -44,8 +44,6 @@ header::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;back
 @media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) .brand img{background:#f4f6ff;border-radius:6px;padding:3px 6px}}
 .brandfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:14px 20px 22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:8px}
 .brandfoot img{height:16px;vertical-align:-3px;margin-right:6px}
-.navfoot{margin:8px 4px 0;font-size:11px;color:var(--muted);line-height:1.4}
-.app.collapsed .navfoot{display:none}
 header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
 header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em}
 .conn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
@@ -571,7 +569,7 @@ function renderMenu() {
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   if (ROLES) cnt.roles = ROLES.rows.length;
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
-    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("") + `<div class="navfoot">© 2026 NextSky Ecom<br>NextSky® · Efitco Agent Ops</div>`;
+    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
   if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
 }
 
