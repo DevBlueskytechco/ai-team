@@ -105,6 +105,24 @@ nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-num
 .note{font-size:12.5px;color:var(--text-2);margin:10px 0 0}
 tfoot td{font-weight:600}
 main[hidden]{display:none}
+.dg{margin:4px 0 20px}
+.dg .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px}
+.dg svg{display:block;width:100%;min-width:900px;height:auto;color:var(--muted)}
+.dg figcaption{font-size:12.5px;color:var(--text-2);margin-top:8px;max-width:960px}
+.dg .bx rect{fill:var(--surface-2);stroke:var(--line);stroke-width:1.2}
+.dg .bx.hl rect{stroke:var(--accent);stroke-width:2}
+.dg .bx.human rect{fill:none;stroke:var(--muted);stroke-dasharray:5 4}
+.dg .t{font-size:13px;font-weight:600;fill:var(--text)}
+.dg .s{font-size:11.5px;fill:var(--text-2)}
+.dg .h{font-size:11px;font-weight:600;letter-spacing:.06em;fill:var(--muted)}
+.dg .lane{font-size:12px;font-weight:600;fill:var(--text)}
+.dg .lb{font-size:11px;fill:var(--text-2);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.dg .ln{fill:none;stroke:currentColor;stroke-width:1.4}
+.dg .ln.dash{stroke-dasharray:5 4}
+.dg .ln.hl{stroke:var(--accent);stroke-width:2}
+.dg .sep{stroke:var(--line);stroke-width:1}
+.dg .band{fill:var(--surface-2);opacity:.55}
+h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
 .rep{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:14px}
@@ -250,7 +268,7 @@ const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard"]]],
   ["Thông tin dự án", [["links", "Links"], ["accounts", "Tài khoản & biến"]]],
-  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["commands", "Lệnh"]]],
+  ["Vận hành", [["roles", "Vai trò"], ["agents", "Agent"], ["process", "Quy trình"], ["commands", "Lệnh"]]],
   ["Tiến độ", [["story", "Story"], ["tickets", "Ticket Zoho"]]],
   ["Quy ước", [["decisions", "Quyết định"]]],
 ];
@@ -259,6 +277,7 @@ const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
 function renderMenu() {
   const cnt = { tickets: DATA ? DATA.tickets.length : "", story: PROJECT ? PROJECT.story.length : "" };
   (PROJECT ? PROJECT.pages : []).forEach((pg) => (cnt[pg.id] = pg.rows.length));
+  if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   const html = MENU.map(([grp, items]) => `<div class="grp">${esc(grp)}</div>` + items.map(([id, name]) =>
     `<a href="#/${id}" ${id === PAGE ? 'aria-current="page"' : ""}><span>${esc(name)}</span><span class="cnt">${cnt[id] ?? ""}</span></a>`).join("")).join("");
   if ($("menu").innerHTML !== html) $("menu").innerHTML = html;
@@ -307,11 +326,13 @@ function renderInfoInner(box) {
   if (!PROJECT) { box.innerHTML = '<div class="empty">Đang tải…</div>'; return; }
   if (PAGE === "story") box.innerHTML = pageStory();
   else if (PAGE === "tickets") box.innerHTML = pageTickets();
+  else if (PAGE === "process") box.innerHTML = pageProcess();
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
     if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
     const rows = pg.rows.filter((r) => match(Q[PAGE], r));
-    box.innerHTML = `<div class="page-head"><h2>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
+    box.innerHTML = (PAGE === "agents" ? `<div class="page-head"><h2>Agent</h2><span class="fresh">10 agent · sơ đồ vận hành và phạm vi</span></div>${diagramAgents()}<h3 class="sub">Phạm vi từng agent</h3>` : "") +
+      `<div class="page-head"><h2 ${PAGE === "agents" ? 'hidden' : ""}>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
       <div class="tablewrap"><table class="info"><thead><tr>${pg.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
       <tbody>${rows.map((r) => `<tr>${r.map((c, i) => i === pg.group_col ? `<td><span class="chip">${esc(c)}</span></td>` :
         `<td class="${i === 0 && pg.group_col == null && /^(\/|[A-Z0-9_ \/]+$)/.test(c) ? (c.length < 30 ? "k" : "k wrap") : ""}">${linkify(c)}</td>`).join("")}</tr>`).join("") ||
@@ -320,6 +341,137 @@ function renderInfoInner(box) {
   }
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${PAGE === "tickets" || PAGE === "story" ? "Zoho trực tiếp (" + ago(DATA && DATA.zoho_at) + ") + " : ""}ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.</p>`);
   bindSearch();
+}
+
+/* ---------- Sơ đồ (SVG viết tay, màu theo token nên đúng cả sáng/tối) ---------- */
+const DG = {
+  defs: (id) => `<defs><marker id="${id}a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+    <marker id="${id}h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker></defs>`,
+  box: (x, y, w, h, lines, cls = "") => {
+    const lh = 15, top = y + h / 2 - ((lines.length - 1) * lh) / 2 + 4.5, cx = x + w / 2;
+    return `<g class="bx ${cls}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/>${lines.map((t, i) =>
+      `<text x="${cx}" y="${top + i * lh}" text-anchor="middle" class="${i ? "s" : "t"}">${esc(t)}</text>`).join("")}</g>`;
+  },
+  // pts: [[x,y],...]; lab: [text, x, y, anchor]
+  ln: (id, pts, lab, cls = "") => `<path class="ln ${cls}" d="M${pts.map((p) => p.join(",")).join(" L")}" marker-end="url(#${id}${cls.includes("hl") ? "h" : "a"})"/>` +
+    (lab ? `<text class="lb" x="${lab[1]}" y="${lab[2]}" text-anchor="${lab[3] || "middle"}">${esc(lab[0])}</text>` : ""),
+  fig: (w, h, aria, body, cap) => `<figure class="dg"><div class="scroll"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(aria)}">${body}</svg></div><figcaption>${esc(cap)}</figcaption></figure>`,
+};
+
+/* Sơ đồ 1 (trang Agent): đầu ra của agent nào bàn giao cho agent nào */
+function diagramAgents() {
+  const id = "dga", X = [20, 250, 480, 710, 940], W = 160, R1 = 100, R2 = 236, H = 80, b = DG.box;
+  let g = DG.defs(id);
+  g += b(20, 12, 1080, 48, ["CTO · kiêm 9 role owner", "Duyệt mọi đầu ra theo rubric · trả lời ticket [Q] · quyết merge — agent không tự qua cổng"], "hl");
+  ["1 · ĐỊNH NGHĨA", "2 · GIẢI PHÁP", "3 · XÂY DỰNG", "4 · KIỂM CHỨNG", "5 · BÀN GIAO"].forEach((t, i) =>
+    (g += `<text class="h" x="${X[i] + W / 2}" y="86" text-anchor="middle">${t}</text>`));
+  const B = [
+    [0, R1, ["PO", "Charter, PRD", "Ưu tiên backlog, CR"]], [0, R2, ["BA", "SRS, story + AC", "Ma trận truy vết"]],
+    [1, R1, ["Designer", "UI spec từ Figma", "Token, so lệch UI"]], [1, R2, ["Tech Lead", "ADR, chia task FE/BE", "Ước lượng, review PR"]],
+    [2, R1, ["Dev FE", "Liquid, CSS, schema", "Không viết JS"]], [2, R2, ["Dev BE", "JS, partial rendering", "Cart, variant, search"]],
+    [3, R1, ["QA", "Test case, E2E", "Bug, checklist R"]], [3, R2, ["DevOps", "CI, preview, zip", "Runbook, rollback"]],
+    [4, R1, ["Writer", "Tài liệu merchant", "Release note, Canvas"]],
+  ];
+  B.forEach(([c, y, l]) => (g += b(X[c], y, W, H, l)));
+  g += b(X[4], R2, W, H, ["Canvas · yum-dev", "Người upload zip", "kiểm Sidekick"], "human");
+  const L = (pts, lab, cls) => (g += DG.ln(id, pts, lab, cls));
+  L([[100, 180], [100, 234]], ["PRD", 106, 211, "start"]);
+  L([[180, 276], [248, 276]], ["story + AC", 215, 268]);
+  L([[180, 256], [248, 162]], ["story", 222, 214]);
+  L([[410, 140], [478, 140]], ["UI spec", 445, 132]);
+  L([[410, 256], [478, 162]], ["task FE", 452, 214]);
+  L([[410, 276], [478, 276]], ["task BE", 445, 268]);
+  L([[560, 180], [560, 234]], ["markup + testid", 566, 211, "start"]);
+  L([[640, 128], [708, 128]], ["PR", 675, 121]);
+  L([[710, 154], [642, 154]], ["bug", 675, 170], "dash");
+  L([[640, 276], [708, 276]], ["PR → CI", 675, 268]);
+  L([[790, 236], [790, 182]], ["preview", 796, 211, "start"]);
+  L([[870, 140], [938, 140]], ["block đạt", 905, 132]);
+  L([[870, 276], [938, 276]], ["zip", 905, 268], "dash");
+  g += b(20, 340, 1080, 46, ["gate-reviewer", "Chấm rubric độc lập, chỉ đọc, không thấy ngữ cảnh người làm — điểm tầng 2 cho cổng và eval"]);
+  g += b(20, 398, 1080, 46, ["Rào chắn chung cho mọi agent", "Chạy qua Orchestrator · nhánh feature/ai-<key> · hook scope-guard chặn ghi ngoài phạm vi · cấm push develop/main, publish, --live · chỉ store hoa-qua-nhap-khau"], "human");
+  return DG.fig(1120, 456, "Sơ đồ bàn giao giữa 10 agent: PO, BA sang Designer, Tech Lead; sang Dev FE, Dev BE; sang QA, DevOps; sang Writer và Canvas; CTO duyệt mọi bước, gate-reviewer chấm độc lập", g,
+    "Đầu ra đi từ trái sang phải, mỗi mũi tên là thứ được bàn giao. Markup FE luôn đi trước JS BE (BE bám data-testid). QA trả bug về Dev FE trên cùng nhánh. Khung nét đứt là việc người làm hoặc quy tắc chung; agent không vào store Canvas.");
+}
+
+/* Sơ đồ 2 (trang Quy trình): đường đi của 1 ticket qua 6 bên, theo thời gian */
+function diagramFlow() {
+  const id = "dgf", lanes = ["CTO", "Claude Code", "Orchestrator", "Agent", "GitHub + CI", "Zoho"], LY = 34, LH = 64;
+  const cy = (l) => LY + l * LH + LH / 2, bx = (c) => 140 + c * 147, BW = 127, BH = 44;
+  let g = DG.defs(id);
+  lanes.forEach((n, i) => {
+    if (i % 2 === 0) g += `<rect class="band" x="0" y="${LY + i * LH}" width="1160" height="${LH}"/>`;
+    g += `<text class="lane" x="12" y="${cy(i) + 4}">${esc(n)}</text>`;
+  });
+  g += `<line class="sep" x1="124" x2="124" y1="${LY}" y2="${LY + 6 * LH}"/>`;
+  ["1 · GIAO VIỆC", "2 · KHỞI CHẠY", "3 · LÀM", "4 · NỘP", "5 · KIỂM", "6 · DUYỆT", "7 · ĐÓNG"].forEach((t, i) =>
+    (g += `<text class="h" x="${bx(i) + BW / 2}" y="22" text-anchor="middle">${t}</text>`));
+  const B = (c, l, lines, cls) => (g += DG.box(bx(c), cy(l) - BH / 2, BW, BH, lines, cls));
+  B(0, 0, ["Tạo, chia ticket", "Tech Lead task_split"]); B(0, 5, ["ai-draft", "agent, loại, blocked_by"]);
+  B(1, 1, ["/run-next", "preflight, /sprint"]); B(1, 2, ["Chọn ticket", "RACI, không bị chặn"]);
+  B(2, 2, ["Tạo nhánh", "feature/ai-<key>"]); B(2, 3, ["Làm ticket", "SRS, Figma snapshot"]);
+  B(3, 3, ["Tự kiểm, nộp", "set_label ai-review"]); B(3, 2, ["Commit, push, PR", "nextsky-ai-agent"]); B(3, 5, ["ai-review", "Chờ CTO chấm"]);
+  B(4, 4, ["CI trên PR", "check · preview · e2e"]);
+  B(5, 1, ["/review-pr", "rubric, đề xuất điểm"]); B(5, 0, ["/merge-pr", "duyệt + chấm điểm"], "hl");
+  B(6, 4, ["Squash merge", "vào develop"]); B(6, 5, ["Đóng ticket", "ai-dat · điểm → eval"]);
+  const L = (pts, lab, cls) => (g += DG.ln(id, pts, lab, cls)), r = (c) => bx(c) + BW, m = (c) => bx(c) + BW / 2, top = (l) => cy(l) - BH / 2, bot = (l) => cy(l) + BH / 2;
+  L([[m(0), bot(0)], [m(0), top(5) - 2]], ["tạo", m(0) + 6, 240, "start"]);
+  L([[r(0), cy(0)], [m(1), cy(0)], [m(1), top(1) - 2]], ["gõ lệnh", (r(0) + m(1)) / 2, cy(0) - 7]);
+  L([[m(1), bot(1)], [m(1), top(2) - 2]]);
+  L([[r(0), cy(5)], [bx(1) + 24, cy(5)], [bx(1) + 24, bot(2) + 2]], ["đọc ai-draft", bx(1) + 30, 300, "start"]);
+  L([[r(1), cy(2)], [bx(2) - 2, cy(2)]]);
+  L([[m(2), bot(2)], [m(2), top(3) - 2]], ["claude -p --agent", m(2) + 6, (bot(2) + top(3)) / 2 + 4, "start"]);
+  L([[r(2), cy(3)], [bx(3) - 2, cy(3)]]);
+  L([[m(3), bot(3)], [m(3), top(5) - 2]], ["set_label", m(3) + 6, cy(4) + 4, "start"]);
+  L([[m(3), top(3)], [m(3), bot(2) + 2]]);
+  L([[r(3), cy(2)], [m(4), cy(2)], [m(4), top(4) - 2]], ["push + PR", (r(3) + m(4)) / 2, cy(2) - 7]);
+  L([[r(4), cy(4)], [bx(5) - 10, cy(4)], [bx(5) - 10, cy(1)], [bx(5) - 2, cy(1)]], ["CI xanh", bx(5) - 4, cy(3) + 4, "start"]);
+  L([[m(5), top(1)], [m(5), bot(0) + 2]], ["đề xuất", m(5) + 6, (top(1) + bot(0)) / 2 + 4, "start"]);
+  L([[r(5), cy(0)], [m(6), cy(0)], [m(6), top(4) - 2]], ["approve + merge", m(6) - 6, cy(2) + 4, "end"], "hl");
+  L([[m(6), bot(4)], [m(6), top(5) - 2]], ["review.py", m(6) + 6, (bot(4) + top(5)) / 2 + 4, "start"]);
+  return DG.fig(1160, LY + 6 * LH + 6, "Đường đi của một ticket qua CTO, Claude Code, Orchestrator, Agent, GitHub CI và Zoho: tạo ai-draft, /run-next, agent làm trên nhánh, nộp ai-review và PR, CI, /review-pr, CTO /merge-pr, merge và đóng ticket", g,
+    "Đọc theo cột từ trái sang phải. Chỉ một bước do CTO quyết (viền màu nhấn): /merge-pr. Các nhánh rẽ khác (bị chặn, câu hỏi, sửa, loại) ở sơ đồ trạng thái bên dưới. Ticket không có PR (PO, BA, Tech Lead, Designer, QA, Writer) bỏ bước 5: CTO đọc đầu ra ở nhánh/drafts rồi chấm.");
+}
+
+/* Sơ đồ 3 (trang Quy trình): trạng thái ticket — trùng tên cột Bảng ticket trên Dashboard */
+function diagramStates() {
+  const id = "dgs", b = DG.box;
+  let g = DG.defs(id);
+  g += b(20, 14, 150, 52, ["Bị chặn", "blocked_by còn mở"]);
+  g += b(240, 14, 150, 52, ["Câu hỏi [Q]", "CTO trả lời, đóng"]);
+  g += b(20, 112, 150, 56, ["Sẵn sàng", "ai-draft"]);
+  g += b(240, 112, 150, 56, ["Đang chạy", "agent trên nhánh"]);
+  g += b(460, 112, 170, 56, ["Chờ CTO chấm", "ai-review · PR + CI"], "hl");
+  const O = [["Đã xong · đạt", "merge · ai-dat · Closed"], ["Đã xong · sửa nhẹ", "CTO sửa PR, merge · ai-sua · Closed"],
+    ["Cần sửa · sửa nặng", "không merge · ai-sua · còn mở"], ["Loại", "đóng PR · ai-loai · Closed"]];
+  const OY = [14, 82, 150, 218];
+  O.forEach((l, i) => (g += b(740, OY[i], 260, 52, l)));
+  const L = (pts, lab, cls) => (g += DG.ln(id, pts, lab, cls));
+  L([[95, 66], [95, 110]], ["ticket chặn đóng", 101, 93, "start"]);
+  L([[315, 112], [315, 68]], ["agent hỏi", 321, 93, "start"], "dash");
+  L([[240, 40], [172, 40]], ["chặn ticket", 206, 33], "dash");
+  L([[170, 140], [238, 140]], ["chạy", 204, 133]);
+  L([[390, 140], [458, 140]], ["nộp", 424, 133]);
+  // trục rẽ nhánh: 1 đường ra từ "Chờ CTO chấm", 4 mũi tên ngang có nhãn chấm
+  g += `<path class="ln" d="M630,140 L670,140 M670,40 L670,244"/>`;
+  ["đạt", "sửa nhẹ", "sửa nặng", "loại"].forEach((t, i) => L([[670, OY[i] + 26], [738, OY[i] + 26]], [t, 704, OY[i] + 19], i === 0 ? "hl" : ""));
+  L([[1000, 176], [1010, 176], [1010, 290], [95, 290], [95, 170]], ["chạy lại hoặc Tech Lead chia nhỏ", 552, 284], "dash");
+  return DG.fig(1020, 300, "Trạng thái ticket: Bị chặn, Câu hỏi, Sẵn sàng, Đang chạy, Chờ CTO chấm, rồi đạt, sửa nhẹ, sửa nặng quay lại Sẵn sàng, hoặc loại", g,
+    "Tên trạng thái trùng các cột Bảng ticket trên Dashboard. Nhãn chấm (dat, sua_nhe, sua_nang, loai) là đối số của /merge-pr hoặc review.py. Sửa nặng không merge: ticket về Sẵn sàng để agent chạy lại hoặc Tech Lead chia nhỏ.");
+}
+
+function tableOf(t, qid) {
+  const rows = t.rows.filter((r) => match(Q[qid], r));
+  return `<h3 class="sub">${esc(t.title)}</h3><div class="tablewrap"><table class="info"><thead><tr>${t.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i === 0 && /^\d+$/.test(c) ? "n" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("") ||
+    `<tr><td colspan="${t.columns.length}" class="empty">Không có dòng khớp.</td></tr>`}</tbody></table></div>`;
+}
+
+function pageProcess() {
+  const P = PROJECT.process;
+  if (!P) return '<div class="empty">project.json chưa có mục process.</div>';
+  return `<div class="page-head"><h2>Quy trình vận hành agent</h2>${searchBox("process", "Tìm trong các bảng")}<span class="fresh">từ giao việc tới đóng ticket</span></div>
+    ${diagramFlow()}${diagramStates()}${["steps", "rhythm", "incidents", "rules"].map((k) => tableOf(P[k], "process")).join("")}`;
 }
 
 function pageStory() {
