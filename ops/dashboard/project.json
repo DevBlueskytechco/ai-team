@@ -946,5 +946,299 @@
     ]
    ]
   }
+ },
+ "raci": {
+  "order": [
+   "po",
+   "ba",
+   "designer",
+   "techlead",
+   "dev-fe",
+   "dev-be",
+   "qa",
+   "devops",
+   "writer"
+  ],
+  "names": {
+   "po": "PO",
+   "ba": "BA",
+   "designer": "Designer",
+   "techlead": "Tech Lead",
+   "dev-fe": "Dev FE",
+   "dev-be": "Dev BE",
+   "qa": "QA",
+   "devops": "DevOps",
+   "writer": "Writer"
+  },
+  "consulted": {
+   "change_request": [
+    "techlead",
+    "ba",
+    "qa"
+   ]
+  },
+  "desc": {
+   "charter": "Charter 1 trang",
+   "prd": "PRD 2 trang",
+   "backlog_prioritize": "Ưu tiên backlog theo giá trị × chi phí",
+   "change_request": "Xử lý change request, gọi Tech Lead/BA/QA đánh giá tác động",
+   "questionnaire": "Bộ câu hỏi stakeholder, mỗi câu có mặc định",
+   "srs": "SRS theo module",
+   "user_story": "Story + AC Given/When/Then",
+   "traceability": "Ma trận yêu cầu → story → test case",
+   "ui_spec": "UI spec block/trang từ Figma",
+   "design_token": "Token Figma → tokens.json, settings",
+   "ui_diff": "So preview với Figma, báo lệch",
+   "pr_review": "Thẩm định PR theo rubric 4 bậc",
+   "adr": "ADR một trang",
+   "task_split": "Chia story thành task FE/BE",
+   "estimate": "Ước lượng story point",
+   "fe_task": "Liquid, CSS, schema, locales (không JS)",
+   "be_task": "JS, partial rendering, cart/variant/search",
+   "test_case_from_story": "Test case GWT từ AC",
+   "e2e_from_story": "Spec Playwright E2E từ story",
+   "bug_report": "Báo bug theo mức P1–P4",
+   "theme_store_checklist": "Checklist mã R (chuẩn Theme Store)",
+   "canvas_check": "Kiểm theme trong Canvas trên yum-dev",
+   "regression": "Chạy hồi quy",
+   "pipeline": "CI: theme check, Lighthouse, Playwright",
+   "preview": "Preview unpublished theo nhánh",
+   "zip": "Đóng zip theme",
+   "runbook": "Runbook sự cố",
+   "rollback_test": "Thử rollback version theme",
+   "release_note": "Release note từ PR",
+   "merchant_guide": "Tài liệu merchant theo block",
+   "ticket_triage": "Phân loại ticket hỗ trợ",
+   "canvas_guide": "Hướng dẫn dùng theme trong Canvas"
+  },
+  "legend": [
+   [
+    "A",
+    "Agent nhận loại việc này và chịu trách nhiệm đầu ra (orchestrator/raci.yaml). Orchestrator từ chối giao sai vai; form Tạo ticket cũng kiểm."
+   ],
+   [
+    "C",
+    "Được hỏi ý kiến trước khi chốt (PO gọi Tech Lead, BA, QA đánh giá tác động change request — po.md)."
+   ],
+   [
+    "Mọi dòng",
+    "Role owner (CTO kiêm 9 vai) duyệt và chấm rubric, quyết merge; gate-reviewer chấm độc lập tại cổng và eval."
+   ]
+  ]
+ },
+ "scrum": {
+  "sprints": [
+   {
+    "name": "Chuẩn bị (pha 0)",
+    "start": "2026-10-22",
+    "end": "2026-11-01",
+    "goal": "Charter, SRS, kiểm kê Figma, khung CI; ký G1 30/10"
+   },
+   {
+    "name": "Sprint 1",
+    "start": "2026-11-02",
+    "end": "2026-11-15",
+    "goal": ""
+   },
+   {
+    "name": "Sprint 2",
+    "start": "2026-11-16",
+    "end": "2026-11-29",
+    "goal": ""
+   },
+   {
+    "name": "Sprint 3",
+    "start": "2026-11-30",
+    "end": "2026-12-13",
+    "goal": ""
+   },
+   {
+    "name": "Sprint 4",
+    "start": "2026-12-14",
+    "end": "2026-12-27",
+    "goal": ""
+   }
+  ],
+  "sprint_note": "Sprint 1 từ 02/11/2026 (quyết định CTO 30/10); Sprint 2–4 tính theo charter 2 tuần/sprint. Sửa ngày và mục tiêu sprint trong project.json mục scrum.sprints.",
+  "roles": {
+   "title": "Vai trò Scrum ở Efitco",
+   "columns": [
+    "Vai Scrum",
+    "Ở Efitco",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "Product Owner",
+     "PO agent soạn charter, PRD, ưu tiên backlog; CTO (Mr PO) duyệt thứ Hai",
+     "Quyết làm gì, không chọn giải pháp kỹ thuật (po.md)"
+    ],
+    [
+     "Scrum Master",
+     "Không có agent riêng: Orchestrator giữ luật luồng (RACI, blocked_by, cổng CI); kỹ sư AI gỡ chặn agent; CTO quyết tranh chấp",
+     "Luật luồng ở trang Quy trình"
+    ],
+    [
+     "Developers",
+     "Designer, Tech Lead, Dev FE, Dev BE, QA, DevOps, Writer agent",
+     "Tech Lead quyết làm thế nào; FE trước BE"
+    ],
+    [
+     "Stakeholder",
+     "Merchant 1, Merchant 2 (phỏng vấn, UAT); CTO review 30 phút thứ Sáu",
+     "charter"
+    ]
+   ]
+  },
+  "events": {
+   "title": "Sự kiện",
+   "columns": [
+    "Sự kiện",
+    "Khi",
+    "Ai",
+    "Ở Efitco",
+    "Đầu ra"
+   ],
+   "rows": [
+    [
+     "Sprint",
+     "2 tuần; Sprint 1 từ 02/11/2026",
+     "Cả team",
+     "4 sprint rồi lên Canvas store thật tuần 11 (charter)",
+     "Increment trên develop"
+    ],
+    [
+     "Sprint planning",
+     "Thứ Hai đầu sprint",
+     "PO, Tech Lead, CTO",
+     "PO ưu tiên backlog (backlog_prioritize); Tech Lead chia story thành task FE/BE (task_split, estimate)",
+     "Ticket ai-draft có point, blocked_by"
+    ],
+    [
+     "Daily",
+     "Mỗi sáng",
+     "CTO",
+     "/status hoặc Dashboard: ticket sẵn sàng, bị chặn, chờ chấm; /sprint chạy agent",
+     "Việc CTO trong ngày"
+    ],
+    [
+     "Backlog refinement",
+     "Trong sprint",
+     "BA, Designer, PO",
+     "BA viết story + AC; câu hỏi [Q] trả lời trong ticket",
+     "Story đủ AC cho sprint sau"
+    ],
+    [
+     "Sprint review",
+     "Cuối sprint",
+     "QA, DevOps, Writer, CTO",
+     "Zip lên yum-dev + canvas_check, theme_store_checklist, release_note; xem trên preview",
+     "Checklist, release note"
+    ],
+    [
+     "Retrospective",
+     "Thứ Năm hằng tuần + cuối sprint",
+     "Kỹ sư AI, CTO",
+     "Đọc eval sửa/loại, sửa agent và skill; xem Kết quả vận hành kỳ 14 ngày",
+     "Commit .claude/agents, skills; agent_version mới"
+    ]
+   ]
+  },
+  "artifacts": {
+   "title": "Artifact",
+   "columns": [
+    "Artifact",
+    "Ở Efitco",
+    "Xem ở"
+   ],
+   "rows": [
+    [
+     "Product backlog",
+     "14 story TE-1..TE-14 trong docs/srs.md, PO ưu tiên",
+     "Tiến độ › Story"
+    ],
+    [
+     "Sprint backlog",
+     "Ticket của sprint: nhãn ai-*, point, blocked_by",
+     "Ticket › Kanban, Danh sách"
+    ],
+    [
+     "Increment",
+     "Nhánh develop + theme preview trên hoa-qua-nhap-khau; zip cuối sprint lên yum-dev",
+     "GitHub, Dashboard › CI develop"
+    ],
+    [
+     "Burndown",
+     "Point còn lại theo ngày, tính từ ticket nội bộ (ngày tạo, ngày đóng)",
+     "Biểu đồ trên trang này"
+    ]
+   ]
+  },
+  "dor": {
+   "title": "Definition of Ready (ticket được chạy)",
+   "columns": [
+    "Điều kiện",
+    "Kiểm bằng"
+   ],
+   "rows": [
+    [
+     "Có agent và loại việc đúng raci.yaml",
+     "Orchestrator từ chối sai vai; form Tạo ticket kiểm"
+    ],
+    [
+     "Tên việc cụ thể: file, số lượng, phạm vi",
+     "skill task-split-fe-be"
+    ],
+    [
+     "Giải pháp là quyết định kỹ thuật; DoD có lệnh chạy",
+     "skill task-split-fe-be"
+    ],
+    [
+     "Task FE trước BE; BE có data-testid, partial name để bám",
+     ".claude/rules/fe-be-boundary.md"
+    ],
+    [
+     "blocked_by đã đóng; không còn câu hỏi [Q] mở cho ticket",
+     "Orchestrator pick()"
+    ],
+    [
+     "Nhãn ai-draft",
+     "Orchestrator chỉ nhận ai-draft"
+    ]
+   ]
+  },
+  "dod": {
+   "title": "Definition of Done",
+   "columns": [
+    "Điều kiện",
+    "Kiểm bằng"
+   ],
+   "rows": [
+    [
+     "shopify theme check 0 lỗi, không thêm override .theme-check.yml",
+     "CI theme-check (bắt buộc)"
+    ],
+    [
+     "Preview đẩy được lên hoa-qua-nhap-khau",
+     "CI preview (bắt buộc)"
+    ],
+    [
+     "Playwright E2E pass trên preview",
+     "CI e2e (bắt buộc)"
+    ],
+    [
+     "Lighthouse performance ≥ 96 desktop, ≥ 90 mobile; accessibility ≥ 98",
+     "CI lighthouse — chưa chặn merge tới cuối TE-2 (CTO 31/10)"
+    ],
+    [
+     "Rubric của vai đạt; CTO /merge-pr",
+     "review.py, ruleset code owner"
+    ],
+    [
+     "Ticket đóng, điểm ghi vào eval",
+     "merge_pr.sh, Orchestrator make_eval_records"
+    ]
+   ]
+  }
  }
 }
