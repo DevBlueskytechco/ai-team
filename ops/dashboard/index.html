@@ -170,6 +170,19 @@ details.tsec summary{cursor:pointer}
 .legend-dl dt{font-weight:600;color:var(--text)} .legend-dl dd{margin:0}
 .legend i.dash{background:none;border-top:2px dashed var(--muted);height:0;width:14px;vertical-align:3px}
 #bdChart svg{display:block;width:100%;height:200px}
+.rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin:0 0 6px}
+.rcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.rcard header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px;margin-bottom:8px}
+.rcard header b{font-size:15px} .rcard header .cnt{margin-left:auto;font-size:12px}
+.rcard dl{display:grid;grid-template-columns:44px 1fr;gap:7px 8px;margin:0;font-size:12.8px;line-height:1.45}
+.rcard dd{margin:0;overflow-wrap:anywhere} .rcard dd.no{color:var(--text-2)}
+.rL{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 4px;border-radius:5px;font-size:11.5px;font-weight:700}
+.rL.R{background:var(--chip);color:var(--text)} .rL.A{background:var(--accent);color:#fff}
+.rL.C{border:1.5px solid var(--accent);color:var(--accent)} .rL.I{border:1.5px solid var(--muted);color:var(--text-2)}
+.rL.N{font-weight:600;color:var(--critical);font-size:11px}
+.rextra{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
+.rextra div{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:12.8px} .rextra b{display:block;margin-bottom:3px}
+.flow td.who{white-space:nowrap;font-weight:600}
 h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-head h2{margin:0}
@@ -389,7 +402,7 @@ function renderInfoInner(box) {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
     if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
     const rows = pg.rows.filter((r) => match(Q[PAGE], r));
-    box.innerHTML = (PAGE === "agents" ? `<div class="page-head"><h2>Agent</h2><span class="fresh">10 agent · sơ đồ vận hành và phạm vi</span></div>${diagramAgents()}<h3 class="sub">Phạm vi từng agent</h3>` : "") +
+    box.innerHTML = (PAGE === "agents" ? `<div class="page-head"><h2>Agent</h2><span class="fresh">10 agent · sơ đồ vận hành và phạm vi</span></div>${diagramAgents()}${agentFlowBlock()}<h3 class="sub">Phạm vi từng agent</h3>` : "") +
       `<div class="page-head"><h2 ${PAGE === "agents" ? 'hidden' : ""}>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
       <div class="tablewrap"><table class="info"><thead><tr>${pg.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
       <tbody>${rows.map((r) => `<tr>${r.map((c, i) => i === pg.group_col ? `<td><span class="chip">${esc(c)}</span></td>` :
@@ -517,6 +530,13 @@ function diagramStates() {
   L([[1000, 176], [1010, 176], [1010, 290], [95, 290], [95, 170]], ["chạy lại hoặc Tech Lead chia nhỏ", 552, 284], "dash");
   return DG.fig(1020, 300, "Trạng thái ticket: Bị chặn, Câu hỏi, Sẵn sàng, Đang chạy, Chờ CTO chấm, rồi đạt, sửa nhẹ, sửa nặng quay lại Sẵn sàng, hoặc loại", g,
     "Tên trạng thái trùng các cột Bảng ticket trên Dashboard. Nhãn chấm (dat, sua_nhe, sua_nang, loai) là đối số của /merge-pr hoặc review.py. Sửa nặng không merge: ticket về Sẵn sàng để agent chạy lại hoặc Tech Lead chia nhỏ.");
+}
+
+function agentFlowBlock() {
+  const F = PROJECT.agent_flow; if (!F) return "";
+  return `<h3 class="sub">${esc(F.title)}</h3><div class="tablewrap"><table class="info flow"><thead><tr>${F.columns.map((c, i) => `<th class="${i ? "" : "n"}">${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${F.rows.map((r) => `<tr><td class="n">${esc(r[0])}</td><td class="who">${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join("")}</tbody></table></div>
+    <p class="note">${esc(F.note)}</p>`;
 }
 
 function tableOf(t, qid) {
@@ -836,6 +856,8 @@ function pageRaci() {
   const cell = (r, a) => a === r.a ? `<td class="rc"><span class="rA" title="A: ${esc(C.names[a])} nhận">A</span></td>` :
     ((C.consulted[r.tt] || []).includes(a) ? `<td class="rc"><span class="rC" title="C: hỏi ý kiến ${esc(C.names[a])}">C</span></td>` : '<td class="rc"></td>');
   return `<div class="page-head"><h2>RACI</h2>${searchBox("raci", "Tìm loại việc")}<span class="fresh">${rows.length} loại việc · ${C.order.length} agent · nguồn orchestrator/raci.yaml</span></div>
+    ${raciAgentsBlock(C, T)}
+    <h3 class="sub">Ma trận loại việc × agent</h3>
     <dl class="legend-dl">${C.legend.map(([k, v]) => `<dt>${k === "A" ? '<span class="rA">A</span>' : k === "C" ? '<span class="rC">C</span>' : esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
     <div class="tablewrap"><table class="info raci"><thead><tr><th>Loại việc</th><th>Việc</th>${C.order.map((a) => `<th class="rc">${esc(C.names[a])}</th>`).join("")}
       <th class="n">Ticket mở</th><th class="n">Đã đóng</th></tr></thead>
@@ -843,6 +865,28 @@ function pageRaci() {
       ${C.order.map((a) => cell(r, a)).join("")}<td class="n">${by[r.tt] && by[r.tt].open ? `<a href="#/t-list" onclick="Q.tlist='${esc(r.tt)}';Q.ts='Open'" title="Xem ticket mở loại ${esc(r.tt)}">${by[r.tt].open}</a>` : 0}</td><td class="n">${by[r.tt] ? by[r.tt].closed : 0}</td></tr>`).join("") ||
       `<tr><td colspan="${C.order.length + 4}" class="empty">Không có loại việc khớp.</td></tr>`}</tbody></table></div>
     ${noType ? `<p class="note">${status("warning", `${noType} ticket mở có agent nhưng chưa có loại việc`)} Orchestrator tự suy fe_task/be_task từ phía FE/BE; ticket khác cần gán loại việc trước khi chạy.</p>` : ""}`;
+}
+
+/* Khối RACI từng agent: R (loại việc, raci.yaml) · A (agent md) · C (ticket hỏi thực tế) · I (luồng bàn giao) · Không */
+const keyLinks = (txt) => esc(txt).replace(/ES1-T\d+/g, (k) => `<a href="#/t/${k}">${k}</a>`);
+function raciAgentsBlock(C, T) {
+  if (!C.agents) return "";
+  const open = (a) => T.filter((t) => t.agent === a && t.status !== "Closed").length;
+  const q = (Q.raci || "").toLowerCase();
+  const cards = C.agents.filter((a) => !q || [a.name, a.role, a.A, a.C, a.I, a.no, ...(RACI[a.id] || [])].join(" ").toLowerCase().includes(q));
+  return `<h3 class="sub" style="margin-top:4px">RACI từng agent</h3>
+    <div class="rcards">${cards.map((a) => `<article class="rcard" aria-label="RACI ${esc(a.name)}">
+      <header><b>${esc(a.name)}</b><span class="chip">${esc(a.id)}</span><span class="fresh">${esc(a.role)}</span>
+        <a class="cnt" href="#/t-list" onclick="Q.tlist='';Q.ts='Open';document.getElementById('agentFilter').value='${esc(a.id)}'">${open(a.id)} ticket mở →</a></header>
+      <dl>
+        <dt><span class="rL R" title="Responsible: loại việc agent nhận và làm">R</span></dt><dd>${(RACI[a.id] || []).map((x) => `<span class="chip">${esc(x)}</span>`).join(" ") || "—"}</dd>
+        <dt><span class="rL A" title="Accountable: chịu trách nhiệm đầu ra">A</span></dt><dd>${esc(a.A)}</dd>
+        <dt><span class="rL C" title="Consulted: hỏi ai / được ai hỏi">C</span></dt><dd>${keyLinks(a.C)}</dd>
+        <dt><span class="rL I" title="Informed: báo cho ai">I</span></dt><dd>${keyLinks(a.I)}</dd>
+        <dt><span class="rL N" title="Ranh giới: không làm">Không</span></dt><dd class="no">${esc(a.no)}</dd>
+      </dl></article>`).join("") || '<div class="empty">Không có agent khớp.</div>'}</div>
+    <div class="rextra">${(C.extra || []).map((x) => `<div><b>${esc(x.name)}</b>${esc(x.text)}</div>`).join("")}</div>
+    <p class="note">${esc(C.agents_note || "")}</p>`;
 }
 
 /* ================= Agile/Scrum: sprint, burndown, vận tốc, vai trò, sự kiện, DoR/DoD ================= */
@@ -962,7 +1006,6 @@ function diagramScrum() {
 function render(d) {
   DATA = d;
   renderMenu();
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const f = $("agentFilter").value;
   const agents = [...new Set(d.tickets.map((t) => t.agent).filter(Boolean))].sort();
   const sel = $("agentFilter");
@@ -970,6 +1013,7 @@ function render(d) {
     sel.innerHTML = '<option value="">Tất cả</option>' + agents.map((a) => `<option ${a === f ? "selected" : ""}>${esc(a)}</option>`).join("");
   }
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum"].includes(PAGE)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
