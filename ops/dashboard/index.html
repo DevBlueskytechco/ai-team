@@ -169,6 +169,57 @@ table.sb th.sb-role a.fresh{display:inline-flex;align-items:center;gap:4px} tabl
 .sb-card{display:block;border:1px solid var(--line);border-radius:8px;padding:6px 8px;margin-bottom:6px;background:var(--bg);color:var(--text);text-decoration:none;font-size:12.5px}
 .sb-card:hover{border-color:var(--accent)} .sb-card .k{font-family:var(--mono);font-size:12px;color:var(--accent)} .sb-card .tt{margin-top:3px;line-height:1.35} .sb-card .chip{font-size:11px;padding:0 5px}
 .rq-tk{display:grid;grid-template-columns:minmax(0,1fr) 150px 80px 140px auto;gap:8px;margin-top:8px}
+/* Tổng quan dự án */
+.ov-roles{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px} .ov-roles .btn.on{background:var(--chip);border-color:var(--accent);color:var(--accent);font-weight:600}
+.ov-warn{border:1px solid var(--warning);background:color-mix(in srgb,var(--warning) 12%,var(--surface));border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:13px}
+.ov-flow{list-style:none;margin:0 0 18px;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.ov-flow li{position:relative;min-width:0}
+.ov-flow li+li::before{content:"";position:absolute;left:-10px;top:50%;width:7px;height:7px;border-top:2px solid var(--muted);border-right:2px solid var(--muted);transform:translateY(-50%) rotate(45deg)}
+.ov-flow button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;height:100%;text-align:left;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.ov-flow button:hover{border-color:var(--accent)} .ov-flow button:disabled{opacity:.45;cursor:default}
+.ov-flow b{font-size:14px} .ov-flow .ov-fv{font-size:12.5px;color:var(--text)} .ov-flow .fresh{font-size:11.5px}
+.ov-n{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:var(--on-brand);font-size:12px;font-weight:700;padding:0 5px} .ov-n .ic{width:13px;height:13px}
+.ov-who{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:var(--text-2)}
+.ov-sec{margin:0 0 24px;scroll-margin-top:72px}
+.ov-sh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+.ov-sh h3{margin:0;font-size:17px}
+.ov-ch{display:flex;align-items:flex-start;gap:8px} .ov-ch h3{flex:1} .ov-own{display:inline-flex;gap:3px}
+.ov-sub{margin:-4px 0 8px} .ov-srcl{margin:10px 0 0!important;font-size:11.5px} .ov-srcl a{color:inherit}
+.ov-card p{margin:0 0 8px} .ov-card h4{margin:0 0 6px;font-size:13px} .ov-card .tablewrap{margin-bottom:8px}
+.ov-k{font-size:12px;font-weight:700;color:var(--text-2);margin:10px 0 4px!important}
+.ov-ul,.ov-ol{margin:0 0 8px;padding-left:20px} .ov-ul li,.ov-ol li{margin:3px 0}
+.ov-msc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px} .ov-mc ul{margin:0;padding-left:18px} .ov-mc li{margin:5px 0}
+.chip.ov-m{font-weight:600} .ov-m-must{background:color-mix(in srgb,var(--critical) 16%,var(--surface))} .ov-m-should{background:color-mix(in srgb,var(--warning) 24%,var(--surface))} .ov-m-could{background:var(--chip)} .ov-m-wont{background:var(--surface-2);color:var(--muted)}
+.chip.ov-sc{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px} .ov-sc b{display:inline-block;width:8px;height:8px;border-radius:50%}
+.ov-cnt{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;font-size:13px} .ov-cnt b{font-variant-numeric:tabular-nums}
+.ov-dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 14px;margin:0} .ov-dl dt{font-weight:600;font-size:13px} .ov-dl dd{margin:0;min-width:0} .ov-dl dd p{margin:0 0 4px} .ov-dl dd ul{margin:0;padding-left:18px}
+.ov-t{color:var(--text-2);font-size:12.5px}
+.ov-us{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;min-width:200px}
+table.ov-mx td{vertical-align:top} table.ov-mx td.ov-pg{min-width:140px} .ov-rc{max-width:200px;white-space:normal} table.ov-mx th .fresh{font-weight:400;text-transform:none;letter-spacing:0}
+.ov-leg{margin:0 0 8px}
+.ov-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--surface-2);min-width:100px} .ov-stack i{display:block;height:100%}
+.ov-sbars{display:grid;gap:7px} .ov-sbr{display:grid;grid-template-columns:52px minmax(0,1fr) 46px;gap:8px;align-items:center;font-size:12.5px} .ov-sbr .hv{text-align:right;font-variant-numeric:tabular-nums}
+.ov-bar{display:inline-block;width:72px;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;vertical-align:middle} .ov-bar i{display:block;height:100%;background:var(--series-1)}
+details.ov-ac summary{cursor:pointer;color:var(--accent);font-size:12.5px;white-space:nowrap} details.ov-ac ol{margin:6px 0 0;padding-left:34px;font-size:12.5px;min-width:260px} details.ov-ac li{margin:3px 0}
+.ov-act{margin-top:4px;color:var(--text-2);font-size:12.5px} .ov-act .ic{width:13px;height:13px;color:var(--good);vertical-align:-2px}
+.ov-big{font-size:28px;font-weight:700;margin:0 0 6px!important} .ov-big.late{color:var(--critical)} .ov-big.ok{color:var(--good)}
+.ov-tlw{margin-bottom:10px} .ov-tl{min-width:640px;padding:4px 0}
+.ov-tr{display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;min-height:30px}
+.ov-tll{font-size:12px;color:var(--text-2)} .ov-tt{position:relative;height:28px}
+.ov-seg{position:absolute;top:3px;height:22px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;font-size:11.5px;display:flex;align-items:center;justify-content:center;white-space:nowrap;box-sizing:border-box}
+.ov-seg.past{background:color-mix(in srgb,var(--good) 18%,var(--surface));border-color:color-mix(in srgb,var(--good) 45%,var(--line))}
+.ov-seg.cur{background:var(--accent);border-color:var(--accent);color:var(--on-brand);font-weight:600}
+.ov-seg.ms{background:repeating-linear-gradient(45deg,var(--chip),var(--chip) 4px,var(--surface) 4px,var(--surface) 8px);border-color:var(--accent)}
+.ov-mk{position:absolute;top:0;height:28px;transform:translateX(-5px);display:flex;align-items:center;gap:5px;font-size:11.5px;white-space:nowrap}
+.ov-mk.rt{flex-direction:row-reverse;transform:translateX(calc(-100% + 5px))} .ov-mk i{width:9px;height:9px;transform:rotate(45deg);background:var(--good);display:block;flex:none} .ov-mk.late i{background:var(--critical)} .ov-mk.ok i{background:var(--series-1)}
+.ov-now{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--critical);z-index:1}
+.ov-ax .ov-tt{height:30px} .ov-ax .ov-tt span{position:absolute;top:0;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap} .ov-ax .ov-tt span.today{top:14px;color:var(--critical);font-weight:600}
+details.ov-more summary{white-space:normal} .ov-leg{flex-wrap:wrap;gap:4px 14px} .ov-leg span{white-space:nowrap} .ov-card code,.ov-dl code{overflow-wrap:anywhere} .ov-stc{min-width:140px;max-width:200px} .ov-ust{font-size:12.5px;min-width:240px} .ov-late{color:var(--critical)}
+@media (max-width:1100px){.ov-flow{grid-template-columns:repeat(3,minmax(0,1fr))} .ov-flow li:nth-child(3n+1)::before{display:none} .ov-msc{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.ov-flow{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} .ov-flow li::before{display:none!important} .ov-msc{grid-template-columns:minmax(0,1fr)} .ov-dl{grid-template-columns:minmax(0,1fr)} .ov-dl dt{margin-top:6px}}
+@media print{.ov-roles,.ov-flow{display:none!important} .ov-sec{break-inside:auto} .ov-sh{break-after:avoid} .ov-tl{min-width:0}
+  .ov-sec table.info{font-size:10.5px} .ov-sec table.info th{font-size:9.5px} .ov-sec td{white-space:normal!important;padding:4px 5px!important}
+  .ov-us,.ov-ust,.ov-stc,table.ov-mx td.ov-pg,details.ov-ac ol{min-width:0!important} .ov-stack{min-width:40px} .ov-rc{max-width:none} .ov-msc{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:1100px){.pl-grid{grid-template-columns:minmax(0,1fr)}} @media (max-width:800px){.rq-tk{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .rq-flow{margin:0;padding-left:20px;line-height:1.6;font-size:13.5px} .rq-flow li{margin:3px 0}
 .rq-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:14px;align-items:start} .rq-grid .rcardx{margin:0}
@@ -407,6 +458,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol>
   <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
   <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
   <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
@@ -602,7 +654,7 @@ let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard", "dashboard"], ["inbox", "Việc chờ tôi", "inbox"]]],
-  ["Quản lý dự án", [["req", "Yêu cầu dự án", "clipboard"], ["req-new", "Nạp yêu cầu", "plus-square"], ["plan", "Kế hoạch sprint", "layers"], ["sprint-board", "Bảng sprint", "kanban"]]],
+  ["Quản lý dự án", [["overview", "Tổng quan dự án", "compass"], ["req", "Yêu cầu dự án", "clipboard"], ["req-new", "Nạp yêu cầu", "plus-square"], ["plan", "Kế hoạch sprint", "layers"], ["sprint-board", "Bảng sprint", "kanban"]]],
   ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
   ["Báo cáo vận hành", [["r-week", "Báo cáo tuần", "calendar"], ["r-perf", "Hiệu suất", "activity"], ["r-quality", "Chất lượng", "shield"], ["r-results", "Kết quả dự án", "target"], ["r-sprint", "Báo cáo sprint", "flag"]]],
   ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
@@ -625,7 +677,7 @@ const ownerHtml = (r, cls = "") => unowned(r) ? '<span class="noown">chưa gán 
 const roleRow = (agent) => (ROLES ? ROLES.rows.find((r) => r.agent === agent) : null);
 async function loadRoles() {
   try { ROLES = await (await fetch("/api/roles", { cache: "no-store" })).json(); } catch (e) { ROLES = { rows: [], days: [] }; }
-  if (PAGE === "roles") renderInfo(); else if (DATA && PAGE === "dashboard") render(DATA);
+  if (["roles", "overview"].includes(PAGE)) renderInfo(); else if (DATA && PAGE === "dashboard") render(DATA);
 }
 const DOW = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 const IC = (n) => `<svg class="ic" aria-hidden="true"><use href="#i-${n}"/></svg>`;
@@ -677,6 +729,7 @@ function route() {
   if (id === "req-new" && RQ_EDIT) { RQ_EDIT = false; RQ_FORM = null; }
   if (km) { id = "knowledge"; KNA = km[1]; if (KDET[KNA]) loadKnowledge(KNA); } else if (id === "knowledge") { KNA = null; loadKnowledgeSummary(); }
   PAGE = tm ? "t-detail" : rm ? "req-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
+  if (PAGE === "overview" && OVD) loadOverview();
   if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
   $("page-dashboard").hidden = PAGE !== "dashboard";
   $("page-info").hidden = PAGE === "dashboard";
@@ -724,6 +777,10 @@ function renderInfoInner(box) {
   else if (PAGE === "inbox") { box.innerHTML = pageInbox(); bindInbox(); return; }
   else if (PAGE === "knowledge") { box.innerHTML = pageKnowledge(); bindKnowledge(); return; }
   else if (PAGE === "req") { box.innerHTML = pageReq(); bindSearch(); return; }
+  else if (PAGE === "overview") { const open = [...box.querySelectorAll("details[data-k][open]")].map((d) => d.dataset.k); OV_SIG = ovSig(); DRAWS = [];
+    box.innerHTML = pageOverview() + `<p class="note fresh print-only">In lúc ${new Date().toLocaleString("vi-VN")} · tài liệu theme-efitco nhánh develop, ticket nội bộ, GitHub · © 2026 NextSky Ecom</p>`;
+    open.forEach((k) => box.querySelectorAll("details[data-k]").forEach((d) => { if (d.dataset.k === k) d.open = true; }));
+    bindOverview(); bindCopy(COPY); runDraws(); return; }
   else if (PAGE === "plan") { box.innerHTML = pagePlan(); bindPlan(); return; }
   else if (PAGE === "sprint-board") { box.innerHTML = pageSprintBoard(); bindSearch(); return; }
   else if (PAGE === "req-new") { box.innerHTML = pageReqNew(); bindReq(); return; }
@@ -751,6 +808,302 @@ function renderInfoInner(box) {
   const live = ["t-list", "t-board", "story"].includes(PAGE);
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
+}
+
+/* ===== Quản lý dự án · Tổng quan dự án: toàn cảnh cho CTO và ban giám đốc — Yêu cầu (PO) → Giải pháp (BA, Tech Lead) → Kế hoạch xử lý →
+   Tiến độ vận hành → Kết quả hiện tại → Kết quả khi hoàn thành. Tài liệu đọc từ theme-efitco nhánh develop (/api/overview), số liệu từ ticket + GitHub ===== */
+let OVD = null, OV_ERR = null, OV_ROLE = "", OV_LOADING = false;
+async function loadOverview() {
+  if (OV_LOADING) return; OV_LOADING = true;
+  try { const r = await fetch("/api/overview", { cache: "no-store" }); const j = await r.json(); if (r.ok) { OVD = j; OV_ERR = null; } else OV_ERR = j.error || `HTTP ${r.status}`; }
+  catch (e) { OV_ERR = e.message; }
+  OV_LOADING = false; if (PAGE === "overview") renderInfo();
+}
+const OV_STEPS = [
+  ["Yêu cầu", ["po"], "bài toán, phạm vi, tính năng, mục tiêu"],
+  ["Giải pháp", ["ba", "techlead"], "đặc tả + AC, kiến trúc, ADR"],
+  ["Kế hoạch xử lý", ["techlead", "po"], "lộ trình, chia task, ngân sách, rủi ro"],
+  ["Tiến độ vận hành", ["*"], "point, ticket, story, vai trò"],
+  ["Kết quả hiện tại", ["qa", "devops"], "bàn giao, chất lượng, kiểm thử"],
+  ["Kết quả khi hoàn thành", ["po"], "chỉ số thành công, dự báo, nghiệm thu"],
+];
+const OV_ROLES = [["", "Toàn bộ"], ["po", "PO"], ["ba", "BA"], ["techlead", "Tech Lead"]];
+const mdi = (s) => md(s).replace(/^<p>/, "").replace(/<\/p>$/, "");
+const ovGit = (p) => `https://github.com/${(OVD && OVD.repo) || "DevBlueskytechco/theme-efitco"}/blob/${(OVD && OVD.branch) || "develop"}/${p}`;
+const ovSrc = (paths) => paths.map((p) => /^(ai-team|ticket|GitHub)/.test(p) || p.includes("*") ? `<span>${esc(p)}</span>` :
+  `<a href="${esc(p.endsWith("/") ? ovGit(p).replace("/blob/", "/tree/") : ovGit(p))}" target="_blank" rel="noopener">${esc(p)}</a>`).join(" · ");
+const ovShow = (own) => !OV_ROLE || own.includes("*") || own.includes(OV_ROLE);
+const ovCard = (title, body, own, src, sub) => !ovShow(own) ? "" :
+  `<div class="rcardx ov-card"><div class="ov-ch"><h3>${esc(title)}</h3><span class="ov-own">${own.filter((a) => a !== "*").map((a) => `<span title="${esc(agentRole(a))}">${av(a, 18)}</span>`).join("")}</span></div>${sub ? `<p class="fresh ov-sub">${sub}</p>` : ""}${body}${src && src.length ? `<p class="fresh ov-srcl">Nguồn: ${ovSrc(src)}</p>` : ""}</div>`;
+const ovGrid = (...cards) => { const c = cards.filter(Boolean); return !c.length ? "" : c.length === 1 ? c[0] : `<div class="rgrid">${c.join("")}</div>`; };
+const ovSec = (i, body) => { if (!body.replace(/\s/g, "")) return ""; const [name, own, what] = OV_STEPS[i];
+  return `<section class="ov-sec" id="ov-s${i + 1}" aria-labelledby="ov-h${i + 1}"><div class="ov-sh"><span class="ov-n">${i + 1}</span><h3 id="ov-h${i + 1}">${esc(name)}</h3>
+    <span class="ov-who">${own.includes("*") ? "mọi vai trò" : own.map((a) => agentTag(a, 18)).join(" ")}</span><span class="fresh">${esc(what)}</span></div>${body}</section>`; };
+const OV_ST_C = { done: "--good", review: "--series-1", ready: "--series-4", running: "--series-4", blocked: "--serious", fix: "--serious", question: "--line", other: "--line" };
+const OV_ST_L = [["done", "Đã xong"], ["review", "Chờ CTO chấm"], ["ready", "Sẵn sàng / đang chạy"], ["blocked", "Bị chặn / cần sửa"], ["other", "Chưa gắn nhãn"]];
+const ovStack = (G, n) => { if (!n) return '<span class="fresh">chưa có ticket</span>';
+  const g = { done: G.done || 0, review: G.review || 0, ready: (G.ready || 0) + (G.running || 0), blocked: (G.blocked || 0) + (G.fix || 0), other: (G.other || 0) + (G.question || 0) };
+  return `<span class="ov-stack" role="img" aria-label="${OV_ST_L.map(([k, l]) => `${l} ${g[k]}`).join(", ")}">${OV_ST_L.map(([k, l]) => g[k] ? `<i style="width:${(g[k] / n) * 100}%;background:var(${OV_ST_C[k]})" title="${esc(l)}: ${g[k]}"></i>` : "").join("")}</span>`; };
+const ovStoryChip = (k, M) => { const s = M.byKey[k]; return `<span class="chip ov-sc s-${s ? s.sk : "none"}" title="${esc(s ? `${s.title} · ${s.sl}` : k)}"><b></b>${esc(k)}</span>`; };
+const ovPct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const ovBar = (v, max, color) => `<span class="ov-bar"><i style="width:${Math.max(0, Math.min(100, max ? (v / max) * 100 : 0))}%;${color ? `background:var(${color})` : ""}"></i></span>`;
+const ovK = { good: "đạt", warning: "đang làm", none: "chưa đo", serious: "chưa đạt" };
+
+function ovModel() {
+  const O = OVD, T = DATA ? DATA.tickets : [], K = tByKey(), today = todayKey(), S = PROJECT.story || [];
+  const merged = (DATA ? DATA.merged || [] : []);
+  const storyOf = (key) => { const t = K[key]; return t && /^TE-\d+$/.test(t.parent || "") ? t.parent : null; };
+  const prStory = (p) => { for (const k of `${p.title} ${p.branch}`.match(/ES1-T\d+/g) || []) { const s = storyOf(k); if (s) return s; } return (p.title.match(/\bTE-\d+\b/) || [])[0] || null; };
+  const prBy = {}; merged.forEach((p) => { const s = prStory(p); if (s) (prBy[s] ||= []).push(p); });
+  const specStory = (sp) => /^TE-\d+$/.test(sp.key) ? sp.key : storyOf(sp.key) || (sp.stories.length === 1 ? sp.stories[0] : null);
+  const cov = {}; (O.specs || []).forEach((sp) => { const s = specStory(sp); if (!s) return; const c = (cov[s] ||= { acs: new Set(), files: [], tests: 0 }); sp.acs.forEach((a) => c.acs.add(a)); c.files.push(sp.file); c.tests += sp.tests; });
+  const moscow = {}; (O.prd.moscow || []).forEach((m) => m.items.forEach((it) => it.stories.forEach((k) => { if (!moscow[k]) moscow[k] = m.level; })));
+  const split = {}; (O.splits || []).forEach((x) => x.stories.forEach((k) => (split[k] = x)));
+  const stories = S.map((s) => {
+    const kids = T.filter((t) => t.parent === s.key), work = kids.filter(isWork), done = work.filter((t) => t.status === "Closed"), left = work.filter((t) => t.status !== "Closed");
+    const srs = (O.srs.stories || {})[s.key] || null, c = cov[s.key];
+    const G = {}; work.forEach((t) => { const g = classify(t); G[g] = (G[g] || 0) + 1; });
+    const [sk, sl] = storyState(kids), sides = {};
+    work.forEach((t) => { const k = t.side ? t.side.toUpperCase() : ({ "dev-fe": "FE", "dev-be": "BE", qa: "QA", techlead: "Tech Lead", designer: "Designer", ba: "BA", po: "PO", devops: "DevOps", writer: "Writer" })[t.agent] || "khác"; sides[k] = (sides[k] || 0) + 1; });
+    return { ...s, kids, work, done, left, srs, sk, sl, G, sides, cov: c, acN: srs ? srs.acs.length : 0, covN: c && srs ? srs.acs.filter((a) => c.acs.has(a.id)).length : 0,
+      sp: [...new Set(work.filter((t) => t.sprint).map((t) => t.sprint))], rough: srs && srs.est != null ? srs.est : s.points || 0,
+      ptsAll: work.reduce((a, t) => a + pts(t), 0), ptsDone: done.reduce((a, t) => a + pts(t), 0), leftPts: left.reduce((a, t) => a + pts(t), 0), leftNoPt: left.filter((t) => !pts(t)).length,
+      lastDone: work.length && done.length === work.length ? done.map((t) => dOnly(t.closed_at)).sort().slice(-1)[0] : null, firstDay: kids.map((t) => dOnly(t.created_at)).sort()[0] || null,
+      moscow: moscow[s.key] || "", split: split[s.key] || null, prs: prBy[s.key] || [] };
+  });
+  const byKey = Object.fromEntries(stories.map((s) => [s.key, s]));
+  const scope = stories.reduce((a, s) => a + (s.work.length ? s.ptsAll : s.rough), 0), donePts = stories.reduce((a, s) => a + s.ptsDone, 0);
+  const remaining = stories.reduce((a, s) => a + (s.work.length ? s.leftPts : s.rough), 0), rough = stories.filter((s) => !s.work.length);
+  const SP = spList(), cur = spCur(), past = SP.filter((s) => s.end < today), vel = past.length ? Math.round(past.reduce((a, s) => a + sprintReport(s, T).dp, 0) / past.length) : null;
+  const leftSp = SP.filter((s) => /^Sprint/i.test(s.name) && s.end >= today), need = vel ? Math.ceil(remaining / vel) : null;
+  const finishOf = (n) => (n == null ? null : cur ? addDays(cur.end, (n - 1) * 14) : addDays(today, n * 14)), finish = finishOf(need);
+  const based = stories.filter((s) => (s.split || s.sk === "good") && s.ptsAll && s.rough), bRough = based.reduce((a, s) => a + s.rough, 0);
+  const factor = bRough ? based.reduce((a, s) => a + s.ptsAll, 0) / bRough : null;
+  const remAdj = factor && factor > 1.05 ? Math.round(stories.reduce((a, s) => a + (s.work.length ? s.leftPts : s.rough * factor), 0)) : null;
+  const needAdj = remAdj != null && vel ? Math.ceil(remAdj / vel) : null, finishAdj = finishOf(needAdj);
+  const fc = finishAdj || finish, needFc = needAdj ?? need, remFc = remAdj ?? remaining;
+  const work = T.filter(isWork), open = T.filter((t) => t.status !== "Closed");
+  const bugs = open.filter((t) => t.type === "bug" || /^bug\b/i.test(t.title || "")), p12 = open.filter((t) => (t.labels || []).some((l) => /^P[12]$/.test(l)));
+  const ci = DATA && (DATA.ci_develop || [])[0], lh = ci && ci.jobs ? Object.entries(ci.jobs).find(([n]) => /lighthouse|lhci/i.test(n)) : null;
+  const base = SP.length ? SP[0].start : today, week = (n) => addDays(base, n * 7), C = O.charter || {};
+  const g1 = (C.gates || []).find((g) => g.gate === "G1"), g1d = g1 && g1.text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  const canvas = C.canvas_week != null ? [week(C.canvas_week), addDays(week(C.canvas_week), 6)] : null;
+  const ev = C.eval_weeks && C.eval_weeks[0] != null ? [week(C.eval_weeks[0]), addDays(week(C.eval_weeks[1] ?? C.eval_weeks[0]), 6)] : null;
+  const acAll = stories.reduce((a, s) => a + s.acN, 0), acCov = stories.reduce((a, s) => a + s.covN, 0);
+  const st = (O.checks && O.checks.store) || [], must = st.filter((r) => /bắt buộc/i.test(r.apply));
+  const res = (r) => (/^pass|^đạt/i.test(r.result) ? "pass" : /^fail|^lỗi/i.test(r.result) ? "fail" : /^n\/?a/i.test(r.result) ? "na" : "");
+  const cv = (O.checks && O.checks.canvas) || { cols: [], rows: [] };
+  const cvRan = cv.cols.map((c, i) => cv.rows.filter((r) => (r.cells[i] || "").trim()).length), cvPass = cv.cols.map((c, i) => cv.rows.filter((r) => /pass|đạt|ok|✓|✅/i.test(r.cells[i] || "")).length);
+  return { O, T, K, today, stories, byKey, scope, donePts, remaining, rough, SP, cur, past, vel, leftSp, need, finish, based, factor, remAdj, needAdj, finishAdj, fc, needFc, remFc, work, open, bugs, p12, ci, lh, base, week, g1d, canvas, ev,
+    acAll, acCov, st, must, res, cv, cvRan, cvPass, merged, review: open.filter((t) => classify(t) === "review").length, qs: open.filter(isQ).length };
+}
+
+/* Chỉ số thành công (PRD) + mục tiêu charter: đo được gì từ dữ liệu hiện có */
+function ovMetrics(M) {
+  const O = M.O, rows = [], evN = DATA ? DATA.evals_n || 0 : 0;
+  const one = (text, src) => {
+    if (/lighthouse/i.test(text)) { const v = M.lh ? String(M.lh[1]).toLowerCase() : "";
+      return { text, src, cur: M.lh ? `CI develop: job ${M.lh[0]} ${v === "success" ? "pass" : v || "đang chạy"}` : "chưa thấy job Lighthouse trong lần CI develop gần nhất", note: "điểm chi tiết trong artifact CI; chưa chặn merge (CTO 31/10)", k: !M.lh ? "none" : v === "success" ? "warning" : FAILS.includes(v) ? "serious" : "none" }; }
+    if (/canvas/i.test(text)) { const i = M.cv.cols.length - 1, ran = M.cvRan.filter(Boolean).length;
+      return { text, src, cur: ran ? `đã chạy ${ran}/${M.cv.cols.length} đợt; ${M.cv.cols[i] || "tuần 11"}: ${M.cvPass[i] || 0}/${M.cv.rows.length} bước đạt` : `chưa chạy đợt nào (${M.cv.cols.join(", ")})`, v: M.cvPass[i] || 0, max: M.cv.rows.length, k: ran ? "warning" : "none" }; }
+    if (/sidekick/i.test(text)) return { text, src, cur: `đo ở đợt cuối của checklist Canvas — ${(O.checks.sidekick || []).length} yêu cầu mẫu đã soạn`, k: "none" };
+    if (/P1\s*\/\s*P2/i.test(text)) return { text, src, cur: `${M.p12.length} bug P1/P2 đang mở · ${M.bugs.length} bug mở tổng`, k: M.p12.length ? "serious" : "good", note: M.p12.length ? M.p12.map((t) => t.key).join(", ") : "đang giữ được, xét lại khi lên Canvas" };
+    if (/merchant/i.test(text)) { const m = text.match(/(\d+)\s*\/\s*(\d+)/) || text.match(/(\d+)\s*block/), tgt = m ? Number(m[2] || m[1]) : 16, n = O.code.merchant_docs.length;
+      return { text, src, cur: `${n}/${tgt} tài liệu trong docs/merchant`, v: n, max: tgt, k: n >= tgt ? "good" : n ? "warning" : "none" }; }
+    if (/eval/i.test(text)) { const m = text.match(/≥\s*(\d+)/), tgt = m ? Number(m[1]) : 300;
+      return { text, src, cur: `${evN}/${tgt} bản ghi eval`, v: evN, max: tgt, k: evN >= tgt ? "good" : evN ? "warning" : "none" }; }
+    return null;
+  };
+  (O.prd.metrics || []).forEach((t) => { const r = one(t, "docs/prd.md"); if (r) rows.push(r); else rows.push({ text: t, src: "docs/prd.md", cur: "chưa có số liệu tự động", k: "none" }); });
+  (O.charter.goals || []).forEach((g) => { if (/eval/i.test(g)) rows.push(one(g.replace(/\s*\(.*\)\s*\.?$/, ""), "docs/charter.md")); });
+  const done = M.stories.filter((s) => s.sk === "good").length;
+  rows.unshift({ text: `${M.stories.length}/${M.stories.length} story trong backlog xong ticket`, src: "ai-team ops/dashboard/project.json", cur: `${done}/${M.stories.length} story · ${pct(M.donePts, M.scope)} point`, v: done, max: M.stories.length, k: done === M.stories.length ? "good" : done ? "warning" : "none" });
+  if (M.must.length) { const p = M.must.filter((r) => M.res(r) === "pass").length, ran = M.must.filter((r) => M.res(r)).length;
+    rows.push({ text: `Checklist Theme Store: ${M.must.length} mục bắt buộc đạt`, src: "docs/checklist-theme-store.md", cur: ran ? `${p}/${M.must.length} đạt · ${M.must.filter((r) => M.res(r) === "fail").length} lỗi` : "chưa chạy (chạy cuối mỗi sprint)", v: p, max: M.must.length, k: !ran ? "none" : p === M.must.length ? "good" : "warning" }); }
+  return rows;
+}
+
+function pageOverview() {
+  if (!OVD) { if (!OV_ERR) loadOverview(); return OV_ERR ? `<div class="empty">Không đọc được tài liệu dự án: ${esc(OV_ERR)} <button class="btn" type="button" id="ovRetry">Thử lại</button></div>` : '<div class="empty">Đang đọc tài liệu dự án…</div>'; }
+  if (!REQS) loadReqs();
+  const M = ovModel(), O = M.O, C = O.charter, P = O.prd, R = O.srs, today = M.today, metrics = ovMetrics(M);
+  const done = M.stories.filter((s) => s.sk === "good"), going = M.stories.filter((s) => ["Đang làm", "Đã chia task"].includes(s.sl));
+  const reqs = REQS ? REQS.items || [] : [], reqOpen = reqs.filter(rqOpen), mOk = metrics.filter((m) => m.k === "good").length;
+  const nextMs = [M.cur && { n: `hết ${M.cur.name}`, d: M.cur.end }, M.canvas && { n: "Lên Canvas store thật", d: M.canvas[0] }, M.ev && { n: "Eval, ký G5", d: M.ev[0] }].filter((x) => x && x.d >= today)[0];
+  const curR = M.cur ? sprintReport(M.cur, M.T) : null, dayN = M.cur ? daysOf(M.cur.start, today).length : 0, dayT = M.cur ? daysOf(M.cur.start, M.cur.end).length : 0;
+  const late = M.needFc != null && M.needFc > M.leftSp.length, yy = (d) => `${ddmm(d)}/${d.slice(0, 4)}`;
+  const tiles = [["Tiến độ toàn dự án", pct(M.donePts, M.scope), `${M.donePts}/${M.scope} point · ${M.rough.length} story tính theo ước lượng sơ bộ`],
+    ["Story xong", `${done.length}/${M.stories.length}`, `${going.length} story đang làm`],
+    ["Sprint hiện tại", M.cur ? M.cur.name : "—", M.cur ? `ngày ${dayN}/${dayT} · ${curR.dp}/${curR.cp + curR.ap} point` : "ngoài lịch sprint"],
+    ["Mốc kế tiếp", nextMs ? ddmm(nextMs.d) : "—", nextMs ? `${nextMs.n} · còn ${daysOf(today, nextMs.d).length - 1} ngày` : ""],
+    ["Dự báo hoàn thành", M.fc ? yy(M.fc) : "—", M.needFc != null ? `cần ~${M.needFc} sprint, lịch còn ${M.leftSp.length}${late ? " — trễ lịch" : ""}${M.finishAdj ? ` · theo ước lượng sơ bộ: ${ddmm(M.finish)}` : ""}` : "chưa đủ dữ liệu vận tốc"],
+    ["Chỉ số thành công", `${mOk}/${metrics.length}`, `đạt · ${M.review} ticket chờ CTO chấm`]];
+  const flowVal = [`${M.stories.length} story · ${P.moscow.reduce((a, m) => a + (m.level === "Must" ? m.items.length : 0), 0)} Must · ${reqOpen.length} yêu cầu mới`,
+    `${M.acAll} AC · ${O.adr.length} ADR · ${R.nfr.length} NFR`, `${M.SP.length} giai đoạn · tới ${M.ev ? ddmm(M.ev[1]) : M.SP.length ? ddmm(M.SP[M.SP.length - 1].end) : "—"}`,
+    `${pct(M.donePts, M.scope)} point · ${M.work.filter((t) => t.status === "Closed").length}/${M.work.length} ticket`, `${done.length} story · ${M.merged.length} PR merge · ${M.acCov}/${M.acAll} AC có E2E`,
+    `${mOk}/${metrics.length} chỉ số đạt${M.fc ? " · dự báo " + ddmm(M.fc) : ""}`];
+
+  COPY.ov = [`Tổng quan dự án Efitco · ${new Date().toLocaleDateString("vi-VN")}`,
+    `- Tiến độ: ${pct(M.donePts, M.scope)} point (${M.donePts}/${M.scope}), story xong ${done.length}/${M.stories.length}, đang làm ${going.map((s) => s.key).join(", ") || "—"}`,
+    M.cur ? `- ${M.cur.name} (${ddmm(M.cur.start)}–${ddmm(M.cur.end)}): ngày ${dayN}/${dayT}, ${curR.dp}/${curR.cp + curR.ap} point; mục tiêu: ${M.cur.goal || "chưa ghi"}` : "",
+    M.needFc != null ? `- Dự báo: còn ~${M.remFc} point, vận tốc TB ${M.vel} point/sprint → cần ~${M.needFc} sprint, lịch còn ${M.leftSp.length} → xong khoảng ${yy(M.fc)}${late ? ` (trễ ~${M.needFc - M.leftSp.length} sprint)` : ""}${M.finishAdj ? `; đã nhân hệ số chia task x${M.factor.toFixed(1)} cho story chưa chia, giữ ước lượng sơ bộ thì ${yy(M.finish)}` : ""}` : "",
+    `- Chỉ số thành công: ${metrics.map((m) => `${m.text} → ${m.cur}`).join("; ")}`,
+    `- Chất lượng: ${M.p12.length} bug P1/P2 mở, ${M.bugs.length} bug mở; ${M.acCov}/${M.acAll} AC có test E2E; CI develop ${M.ci ? (M.ci.conclusion || M.ci.status) : "—"}`,
+    `- Yêu cầu mới đang xử lý: ${reqOpen.map((r) => `${r.id} ${r.title}`).join("; ") || "không"}`,
+    `- Rủi ro: ${(C.risks || []).map((r, i) => `${i + 1}. ${r.risk.split(/\.\s/)[0].slice(0, 110)}`).join("; ")}`,
+    `- Chờ CTO: ${M.review} ticket chấm, ${M.qs} câu hỏi`].filter(Boolean).join("\n").replace(/`/g, "");
+
+  /* ----- Truy vết theo story ----- */
+  const matrix = ovShow(["*"]) ? `<section class="ov-sec" id="ov-s0" aria-labelledby="ov-h0"><div class="ov-sh"><span class="ov-n">${IC("grid")}</span><h3 id="ov-h0">Truy vết theo story</h3><span class="fresh">mỗi story: yêu cầu → giải pháp → kế hoạch → tiến độ → kết quả</span></div>
+    <div class="legend ov-leg">${OV_ST_L.map(([k, l]) => `<span><i style="background:var(${OV_ST_C[k]})"></i>${esc(l)}</span>`).join("")}</div>
+    <div class="tablewrap"><table class="info ov-mx"><thead><tr><th>Story</th><th>Yêu cầu <span class="fresh">PO</span></th><th>Giải pháp <span class="fresh">BA · Tech Lead</span></th><th>Kế hoạch</th><th>Tiến độ</th><th>Kết quả hiện tại</th><th>Khi hoàn thành</th></tr></thead>
+    <tbody>${M.stories.map((s) => `<tr id="ov-st-${esc(s.key)}"><td class="ov-stc"><b>${esc(s.key)}</b><div class="ov-t">${esc(s.title)}</div></td>
+      <td>${s.moscow ? `<span class="chip ov-m ov-m-${esc(s.moscow.toLowerCase().replace("'", ""))}">${esc(s.moscow)}</span> ` : ""}${s.srs && s.srs.story ? `<span class="ov-us" title="${esc(s.srs.story)}">${esc(s.srs.story)}</span>` : '<span class="fresh">chưa có trong SRS</span>'}</td>
+      <td class="nw">${s.srs ? `${s.acN} AC${s.srs.rcodes ? `<div class="fresh ov-rc" title="${esc(s.srs.rcodes)}">${esc(s.srs.rcodes.slice(0, 48))}${s.srs.rcodes.length > 48 ? "…" : ""}</div>` : ""}` : "—"}${s.split ? `<div class="fresh">chia task <a href="#/t/${esc(s.split.ticket)}">${esc(s.split.ticket)}</a></div>` : s.work.length ? "" : '<div class="fresh">chưa chia task</div>'}</td>
+      <td class="nw">${s.work.length ? `${s.ptsAll} point chốt` : `${s.rough} point sơ bộ`}<div class="fresh">${s.sp.length ? esc(s.sp.join(", ")) : "chưa xếp sprint"}</div></td>
+      <td class="ov-pg">${ovStack(s.G, s.work.length)}<div class="fresh">${s.done.length}/${s.work.length} ticket${s.leftNoPt ? ` · ${s.leftNoPt} chưa point` : ""}</div></td>
+      <td class="nw">${s.prs.length} PR merge<div class="fresh">${s.acN ? `${s.covN}/${s.acN} AC có E2E` : s.cov ? `${s.cov.acs.size} AC có E2E` : "chưa có E2E"}</div></td>
+      <td class="nw">${status(s.sk, s.sl)}<div class="fresh">${s.lastDone ? "xong " + ddmm(s.lastDone) : s.acN ? `${s.acN} AC đạt + DoD` : ""}</div></td></tr>`).join("")}</tbody></table></div>
+    <p class="fresh ov-srcl">Nguồn: ${ovSrc(["docs/prd.md", "docs/srs.md", "drafts/techlead/*/task-split.md", "tests/e2e/*.spec.ts", "ticket nội bộ", "GitHub PR đã merge"])}</p></section>` : "";
+
+  /* ----- 1. Yêu cầu ----- */
+  const parts = (x) => (x.includes(";") ? x.split(/;\s*/) : x.split(/,\s*(?![^()]*\))/)).map((y) => y.trim().replace(/\.$/, "")).filter(Boolean);
+  const sc = (x) => { const a = parts(x); return a.length > 1 ? `<ul class="ov-ul">${a.map((y) => `<li>${mdi(y)}</li>`).join("")}</ul>` : `<p>${mdi(x)}</p>`; };
+  const s1 = [
+    ovGrid(ovCard("Bài toán và người dùng", `${md(P.problem)}${P.users.length ? `<ul class="ov-ul">${P.users.map((u) => `<li>${mdi(u)}</li>`).join("")}</ul>` : ""}${C.persona ? `<p class="ov-k">Persona merchant</p>${md(C.persona)}` : ""}`, ["po"], ["docs/prd.md", "docs/charter.md"]),
+      ovCard("Phạm vi", `<p class="ov-k">Trong phạm vi</p>${sc(C.scope.in || "—")}<p class="ov-k">Ngoài phạm vi</p>${sc(C.scope.out || "—")}`, ["po"], ["docs/charter.md"])),
+    ovCard("Tính năng theo mức ưu tiên (MoSCoW)", `<div class="ov-msc">${P.moscow.map((m) => `<div class="ov-mc"><h4><span class="chip ov-m ov-m-${esc(m.level.toLowerCase().replace("'", ""))}">${esc(m.level)}</span> <span class="fresh">${m.items.length} mục</span></h4>
+      <ul>${m.items.map((it) => `<li>${mdi(it.text.replace(/\s*\(TE-\d+\)/g, ""))} ${it.stories.map((k) => ovStoryChip(k, M)).join(" ")}</li>`).join("")}</ul></div>`).join("")}</div>`, ["po"], ["docs/prd.md"], "chấm màu theo trạng thái story: xanh = xong ticket, vàng = đang làm, xám = chưa làm"),
+    ovGrid(ovCard("Mục tiêu đo được", `<ol class="ov-ol">${C.goals.map((g) => `<li>${mdi(g)}</li>`).join("")}</ol>`, ["po"], ["docs/charter.md"], esc(C.head || "")),
+      ovCard("Quyết định đã chốt", `<ul class="ov-ul">${C.decisions.map((d) => `<li>${mdi(d)}</li>`).join("")}${R.decided.map((d) => `<li>${mdi(d)}</li>`).join("")}</ul>`, ["po", "ba"], ["docs/charter.md", "docs/srs.md"])),
+    ovGrid(ovCard("Yêu cầu dự án nạp thêm", !REQS ? '<div class="empty">Đang tải…</div>' : `<div class="ov-cnt">${Object.entries(REQS.statuses || {}).map(([k, l]) => `<span>${rqSt(k)} <b>${reqs.filter((r) => r.status === k).length}</b></span>`).join("")}</div>
+      ${reqOpen.length ? `<div class="tablewrap"><table class="info"><tbody>${reqOpen.slice(0, 8).map((r) => `<tr><td class="k"><a href="#/req/${esc(r.id)}">${esc(r.id)}</a></td><td class="ttl">${esc(r.title)}<div class="fresh">${esc(rqSrc(r.source))}${r.due ? " · hạn " + ddmm(r.due) : ""}</div></td><td class="nw">${rqSt(r.status)}</td></tr>`).join("")}</tbody></table></div>` : '<p class="fresh">Không có yêu cầu đang mở.</p>'}
+      <p><a class="btn" href="#/req">${IC("clipboard")}Yêu cầu dự án</a> <a class="btn" href="#/req-new">${IC("plus-square")}Nạp yêu cầu</a></p>`, ["po", "ba", "techlead"], ["ai-team/requirements"], "từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi Shopify, khách hàng"),
+      ovCard("Câu hỏi mở", `${P.open.length ? `<ul class="ov-ul">${P.open.map((q) => `<li>${mdi(q)}</li>`).join("")}</ul>` : '<p class="fresh">PRD không còn câu hỏi mở.</p>'}<p class="fresh">${M.qs} ticket câu hỏi đang chờ người trả lời — <a href="#/inbox">Việc chờ tôi</a></p>`, ["po"], ["docs/prd.md"])),
+  ].join("");
+
+  /* ----- 2. Giải pháp ----- */
+  const rApply = {}; O.reqmap.forEach((r) => { const k = /bắt buộc/i.test(r.apply) ? "Bắt buộc" : /không áp dụng/i.test(r.apply) ? "Không áp dụng" : "Tham khảo"; rApply[k] = (rApply[k] || 0) + 1; });
+  const adrK = (s) => (/chấp nhận/i.test(s) ? "good" : /thay thế|bỏ/i.test(s) ? "none" : "warning");
+  const s2 = [
+    ovCard("Đặc tả theo story (SRS)", `<div class="ov-cnt"><span>Story <b>${Object.keys(R.stories).length}</b></span><span>Tiêu chí chấp nhận <b>${M.acAll} AC</b></span><span>Phi chức năng <b>${R.nfr.length} NFR</b></span></div>
+      <div class="tablewrap"><table class="info"><thead><tr><th>Story</th><th>Người dùng cần</th><th>Tiêu chí chấp nhận</th><th>Mã R</th></tr></thead><tbody>${Object.entries(R.stories).map(([k, s]) => `<tr><td class="nw"><b>${esc(k)}</b><div class="ov-t">${esc(s.title)}</div><div class="fresh">${esc(s.side)}${s.est != null ? ` · ${s.est} point sơ bộ` : ""}</div></td>
+        <td class="ov-ust">${esc(s.story || "—")}</td><td><details class="ov-ac" data-k="ac-${esc(k)}"><summary>${s.acs.length} AC</summary><ol>${s.acs.map((a) => `<li value="${esc(a.id.slice(2))}">${a.tag ? `<span class="chip">${esc(a.tag)}</span> ` : ""}${mdi(a.text)}</li>`).join("")}</ol></details></td><td class="fresh">${esc(s.rcodes)}</td></tr>`).join("")}</tbody></table></div>`, ["ba"], ["docs/srs.md"], esc(R.head || "")),
+    ovGrid(ovCard("Yêu cầu phi chức năng", `<ul class="ov-ul">${R.nfr.map((n) => `<li>${mdi(n)}</li>`).join("")}</ul>`, ["ba"], ["docs/srs.md"]),
+      ovCard("Đáp ứng chuẩn Theme Store và Canvas", `<div class="ov-cnt">${["Bắt buộc", "Tham khảo", "Không áp dụng"].filter((k) => rApply[k]).map((k) => `<span>${esc(k)} <b>${rApply[k]}</b></span>`).join("")}</div>
+        <details class="ov-ac" data-k="rmap"><summary>Xem ${O.reqmap.length} mã yêu cầu → story</summary><div class="tablewrap"><table class="info"><tbody>${O.reqmap.map((r) => `<tr><td class="nw"><b>${esc(r.code)}</b></td><td>${esc(r.text)}<div class="fresh">${esc(r.apply)}</div></td><td class="nw">${r.stories.map((k) => ovStoryChip(k, M)).join(" ") || `<span class="fresh">${esc(r.story_text || "—")}</span>`}</td></tr>`).join("")}</tbody></table></div></details>`, ["ba"], ["docs/requirements-map.md"], "mã R của Theme Store + 5 bước Canvas, mỗi mã gắn story chịu trách nhiệm")),
+    ovGrid(ovCard("Kiến trúc", `<dl class="ov-dl">${O.arch.parts.map((p) => `<dt>${esc(p.title)}</dt><dd>${p.text.length > 420 ? `<details class="ov-ac ov-more" data-k="arch-${esc(p.title)}"><summary>${esc(p.text.replace(/[`*]/g, "").replace(/^\s*[-•]\s*/, "").split(/\n|\.\s/)[0].slice(0, 90))}… <span class="fresh">(${p.text.split("\n").filter((l) => l.trim()).length} dòng)</span></summary>${md(p.text)}</details>` : md(p.text)}</dd>`).join("")}</dl>`, ["techlead"], ["docs/architecture.md"], esc(O.arch.head || "")),
+      ovCard("Quyết định kiến trúc (ADR)", `<div class="tablewrap"><table class="info"><tbody>${O.adr.map((a) => `<tr><td class="k"><a href="${esc(ovGit(a.file))}" target="_blank" rel="noopener">${esc(a.num)}</a></td><td class="ttl">${esc(a.title)}</td><td class="nw">${status(adrK(a.status), a.status.split(/\s[—-]\s/)[0] || "—")}<div class="fresh">${a.date ? ddmm(a.date) : ""}</div></td></tr>`).join("")}</tbody></table></div>
+        ${O.test.length ? `<p class="ov-k">Chiến lược kiểm thử (QA)</p><ul class="ov-ul">${O.test.map((x) => `<li>${mdi(x)}</li>`).join("")}</ul>` : ""}`, ["techlead"], ["docs/adr/", "docs/test-strategy.md"])),
+  ].join("");
+
+  /* ----- 3. Kế hoạch xử lý ----- */
+  const tlEnd = [M.SP.length ? M.SP[M.SP.length - 1].end : today, M.ev ? M.ev[1] : "", M.canvas ? M.canvas[1] : "", M.fc ? addDays(M.fc, 3) : "", today].sort().slice(-1)[0];
+  const span = Math.max(1, daysOf(M.base, tlEnd).length), X = (d) => Math.max(0, Math.min(100, ((daysOf(M.base, d).length - 1) / span) * 100));
+  const W = (a, b) => Math.max(0.6, ((daysOf(a, b).length) / span) * 100);
+  const segs = M.SP.map((s) => `<div class="ov-seg ${s.end < today ? "past" : s.start <= today ? "cur" : ""}" style="left:${X(s.start)}%;width:${W(s.start, s.end)}%" title="${esc(`${s.name} · ${ddmm(s.start)}–${ddmm(s.end)}${s.goal ? " · " + s.goal : ""}`)}"><span>${esc(s.name.replace("Chuẩn bị (pha 0)", "Pha 0").replace("Sprint ", "S"))}</span></div>`).join("")
+    + [M.canvas && ["Canvas", M.canvas, "Lên Canvas store thật"], M.ev && ["Eval", M.ev, "Eval, ký G5"]].filter(Boolean).map(([n, [a, b], t]) => `<div class="ov-seg ms" style="left:${X(a)}%;width:${W(a, b)}%" title="${esc(`${t} · ${ddmm(a)}–${ddmm(b)}`)}"><span>${esc(n)}</span></div>`).join("");
+  const g1 = M.g1d ? `${M.g1d[3]}-${M.g1d[2]}-${M.g1d[1]}` : null;
+  const mks = [g1 && ["G1", g1, "Ký G1, đóng pha 0"], M.fc && ["Dự báo", M.fc, "Dự báo xong backlog theo vận tốc"]].filter(Boolean).map(([n, d, t]) => `<div class="ov-mk ${n === "Dự báo" ? (late ? "late" : "ok") : ""}${X(d) > 82 ? " rt" : ""}" style="left:${X(d)}%" title="${esc(`${t} · ${ddmm(d)}`)}"><i></i><span>${esc(n)} ${ddmm(d)}</span></div>`).join("");
+  const months = []; for (let d = M.base.slice(0, 8) + "01"; d <= tlEnd; d = addDays(d, 32).slice(0, 8) + "01") if (d >= M.base) months.push(d);
+  const now = `<b class="ov-now" style="left:${X(today)}%" title="Hôm nay ${ddmm(today)}"></b>`;
+  const timeline = `<div class="tablewrap ov-tlw"><div class="ov-tl" role="img" aria-label="Lộ trình: ${esc(M.SP.map((s) => `${s.name} ${ddmm(s.start)}–${ddmm(s.end)}`).join(", "))}${M.canvas ? `, lên Canvas ${ddmm(M.canvas[0])}` : ""}${M.ev ? `, eval ${ddmm(M.ev[0])}–${ddmm(M.ev[1])}` : ""}">
+    <div class="ov-tr"><span class="ov-tll">Giai đoạn</span><div class="ov-tt">${segs}${now}</div></div>
+    <div class="ov-tr"><span class="ov-tll">Mốc</span><div class="ov-tt">${mks}${now}</div></div>
+    <div class="ov-tr ov-ax"><span class="ov-tll"></span><div class="ov-tt">${months.map((d) => `<span style="left:${X(d)}%">${ddmm(d)}</span>`).join("")}<span class="today" style="left:${X(today)}%">hôm nay</span></div></div></div></div>`;
+  const msRows = [g1 && ["Ký G1, đóng pha 0", ddmm(g1), today >= g1 ? ["good", "đã ký"] : ["none", "sắp tới"], ""],
+    ...M.SP.map((s) => [s.name, `${ddmm(s.start)} → ${ddmm(s.end)}`, s.end < today ? ["good", "đã qua"] : s.start <= today ? ["warning", "đang chạy"] : ["none", "sắp tới"], s.goal || ""]),
+    M.canvas && ["Lên Canvas store thật", `tuần ${C.canvas_week}: ${ddmm(M.canvas[0])} → ${ddmm(M.canvas[1])}`, today > M.canvas[1] ? ["good", "đã qua"] : ["none", "sắp tới"], "10 yêu cầu Sidekick, checklist Canvas"],
+    M.ev && ["Eval, ký G5", `tuần ${C.eval_weeks.filter((x) => x != null).join("–")}: ${ddmm(M.ev[0])} → ${ddmm(M.ev[1])}`, today > M.ev[1] ? ["good", "đã qua"] : ["none", "sắp tới"], (C.success || [])[0] || ""]].filter(Boolean);
+  const bh = C.budget.hours || {}, bmax = Math.max(1, ...Object.values(bh));
+  const s3 = [
+    ovCard("Lộ trình và mốc", `${timeline}<div class="tablewrap"><table class="info"><thead><tr><th>Mốc</th><th>Thời gian</th><th>Trạng thái</th><th>Mục tiêu</th></tr></thead><tbody>${msRows.map(([a, b, [k, l], g]) => `<tr><td class="nw">${esc(a)}</td><td class="nw">${esc(b)}</td><td class="nw">${status(k, l)}</td><td>${esc(g)}</td></tr>`).join("")}</tbody></table></div>`,
+      ["po", "techlead"], ["docs/charter.md", "ai-team ops/dashboard/project.json"], `${esc(C.milestones)} — tuần 0 = ${ddmm(M.base)}`),
+    ovCard("Kế hoạch theo story", `<div class="tablewrap"><table class="info"><thead><tr><th>Story</th><th>Ưu tiên</th><th class="n">Sơ bộ</th><th>Chốt / chia task</th><th>Task</th><th>Sprint</th><th>Trạng thái</th></tr></thead><tbody>${M.stories.map((s) => `<tr><td class="nw"><b>${esc(s.key)}</b> <span class="ov-t">${esc(s.title)}</span></td>
+      <td class="nw">${s.moscow ? `<span class="chip ov-m ov-m-${esc(s.moscow.toLowerCase().replace("'", ""))}">${esc(s.moscow)}</span>` : "—"}</td><td class="n">${s.rough || "—"}</td>
+      <td>${s.work.length ? `<b>${s.ptsAll}</b> point${s.leftNoPt ? ` <span class="fresh">(${s.leftNoPt} ticket chưa point)</span>` : ""}` : '<span class="fresh">chưa chia</span>'}${s.split ? `<div class="fresh">${esc(s.split.estimate.replace(/^Ước lượng chốt\s*[^:]*:\s*/, "").split(/\s[—–-]\s|\.\s/)[0].slice(0, 90))} — <a href="#/t/${esc(s.split.ticket)}">${esc(s.split.ticket)}</a></div>` : ""}</td>
+      <td class="nw">${Object.entries(s.sides).map(([k, n]) => `<span class="chip">${esc(k)} ${n}</span>`).join(" ") || "—"}</td><td class="nw">${s.sp.length ? esc(s.sp.join(", ")) : '<span class="fresh">chưa xếp</span>'}</td><td class="nw">${status(s.sk, s.sl)}</td></tr>`).join("")}</tbody></table></div>
+      <p><a class="btn" href="#/plan">${IC("layers")}Kế hoạch sprint</a> <a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint</a></p>`, ["techlead", "po"], ["docs/srs.md", "drafts/techlead/*/task-split.md", "ticket nội bộ"], "sơ bộ = SRS của BA; chốt = tổng point ticket sau khi Tech Lead chia task FE/BE"),
+    ovGrid(ovCard("Ngân sách", `${hbars(Object.entries(bh).map(([k, v]) => ({ label: k, v, text: `${v} giờ` })), { max: bmax })}<p class="fresh">${C.budget.total_h ? `Tổng ${C.budget.total_h} giờ người / ${C.budget.weeks} tuần. ` : ""}${esc((C.budget.text.split(/\.\s+/).slice(1).join(". ") || "").slice(0, 220))}</p>`, ["po"], ["docs/charter.md"]),
+      ovCard("Rủi ro và cách xử lý", `<div class="tablewrap"><table class="info"><tbody>${C.risks.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${mdi(r.risk)}${r.action ? `<div class="ov-act">${IC("check")} ${mdi(r.action)}</div>` : ""}</td></tr>`).join("")}</tbody></table></div>`, ["po", "techlead"], ["docs/charter.md"])),
+  ].join("");
+
+  /* ----- 4. Tiến độ vận hành ----- */
+  const days = daysOf(firstDay(), today), cats = days.map((d) => ({ label: d, short: ddmm(d) })), W2 = M.work.filter((t) => pts(t) > 0);
+  const scopeV = days.map((d) => W2.filter((t) => dOnly(t.created_at) <= d).reduce((a, t) => a + pts(t), 0)), doneV = days.map((d) => W2.filter((t) => t.status === "Closed" && dOnly(t.closed_at) <= d).reduce((a, t) => a + pts(t), 0));
+  const roles = (ROLES ? ROLES.rows : []).filter((r) => isAgent(r.agent));
+  const s4 = ovShow(["*"]) ? [repTiles([["Point hoàn thành", `${M.donePts}/${M.scope}`, pct(M.donePts, M.scope) + " phạm vi"], ["Ticket đã đóng", `${M.work.filter((t) => t.status === "Closed").length}/${M.work.length}`, "không tính câu hỏi"],
+      ["PR đã merge", M.merged.length, `${M.merged.filter(isAgentPR).length} PR của agent`], ["Vận tốc TB", M.vel != null ? `${M.vel} point` : "—", `${M.past.length} sprint đã xong`],
+      ["Chờ CTO chấm", M.review, `${M.qs} câu hỏi chờ trả lời`], ["Bug đang mở", M.bugs.length, `${M.p12.length} P1/P2`]]),
+    ovGrid(card("Burn-up toàn dự án", lineChart("ovBurn", cats, [{ name: "Phạm vi (point đã ước lượng)", color: "--series-2", values: scopeV }, { name: "Đã hoàn thành", color: "--series-1", values: doneV }], { aria: "Burn-up point phạm vi và hoàn thành theo ngày" }), "chỉ tính ticket đã có point"),
+      card("Tiến độ theo story", `<div class="legend ov-leg">${OV_ST_L.map(([k, l]) => `<span><i style="background:var(${OV_ST_C[k]})"></i>${esc(l)}</span>`).join("")}</div><div class="ov-sbars">${M.stories.map((s) => `<div class="ov-sbr"><span class="hl" title="${esc(s.title)}">${esc(s.key)}</span>${ovStack(s.G, s.work.length)}<span class="hv">${s.work.length ? `${s.done.length}/${s.work.length}` : "—"}</span></div>`).join("")}</div>`, "ticket con theo giai đoạn")),
+    card("Vận hành theo vai trò", `<div class="tablewrap"><table class="info"><thead><tr><th>Vai trò</th><th>Role owner</th><th class="n">Đang mở</th><th class="n">Chờ CTO chấm</th><th class="n">Bị chặn / cần sửa</th><th class="n">Đã xong</th><th class="n">${M.cur ? esc(M.cur.name) : "Sprint"}</th></tr></thead>
+      <tbody>${roles.map((r) => { const m = M.T.filter((t) => t.agent === r.agent && isWork(t)), o = m.filter((t) => t.status !== "Closed"), cs = M.cur ? m.filter((t) => t.sprint === M.cur.name) : [];
+        return `<tr><td class="nw">${agentTag(r.agent, 20)}</td><td class="nw">${ownerHtml(r)}${r.day ? `<div class="fresh">duyệt ${esc(r.day)}</div>` : ""}</td><td class="n">${o.length}</td><td class="n">${o.filter((t) => classify(t) === "review").length}</td>
+        <td class="n">${o.filter((t) => ["blocked", "fix"].includes(classify(t))).length}</td><td class="n">${m.length - o.length}</td><td class="n">${cs.length ? `${cs.filter((t) => t.status === "Closed").length}/${cs.length}` : "—"}</td></tr>`; }).join("") || '<tr><td colspan="7" class="empty">Đang tải vai trò…</td></tr>'}</tbody></table></div>
+      <p><a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint theo vai trò</a> <a class="btn" href="#/r-sprint">${IC("flag")}Báo cáo sprint</a></p>`, "role owner duyệt cột Chờ CTO chấm vào ngày cố định")].join("") : "";
+
+  /* ----- 5. Kết quả hiện tại ----- */
+  const js = O.code.js || [], jsT = js.reduce((a, f) => a + f.bytes, 0), jsMax = js.reduce((m, f) => (f.bytes > m.bytes ? f : m), { bytes: 0, name: "" });
+  const specN = O.specs.length, testN = O.specs.reduce((a, s) => a + s.tests, 0), sRes = M.st.map(M.res);
+  const ciG = M.ci && M.ci.jobs && Object.keys(M.ci.jobs).length ? gateOf(M.ci.jobs) : M.ci ? (M.ci.conclusion === "success" ? "pass" : M.ci.status !== "completed" ? "pending" : "fail") : null;
+  const delivered = M.stories.filter((s) => s.done.length);
+  const s5 = [
+    ovShow(["techlead", "qa"]) ? repTiles([["Story bàn giao", `${done.length}/${M.stories.length}`, `${delivered.length - done.length} story bàn giao một phần`], ["AC có test E2E", `${M.acCov}/${M.acAll}`, pct(M.acCov, M.acAll) + " tiêu chí chấp nhận"],
+      ["Test E2E", testN, `${specN} file spec`], ["Block", O.code.blocks.length, `${O.code.templates.length} template · ${O.code.snippets} snippet`],
+      ["JS theo trang", `${(jsT / 1024).toFixed(1)} KB`, `${js.length} file · lớn nhất ${jsMax.name} ${(jsMax.bytes / 1024).toFixed(1)} KB`], ["Phiên bản theme", O.code.theme ? O.code.theme.version : "—", `develop ${O.sha} · ${O.date ? ddmm(O.date.slice(0, 10)) : ""}`]]) : "",
+    ovCard("Bàn giao theo story", delivered.length ? `<div class="tablewrap"><table class="info"><thead><tr><th>Story</th><th>Trạng thái</th><th class="n">Ticket xong</th><th class="n">PR merge</th><th>AC có E2E</th><th>Thời gian</th></tr></thead><tbody>${delivered.map((s) => `<tr><td class="nw"><b>${esc(s.key)}</b> <span class="ov-t">${esc(s.title)}</span></td><td class="nw">${status(s.sk, s.sl)}</td>
+      <td class="n">${s.done.length}/${s.work.length}</td><td class="n">${s.prs.length}</td><td class="nw">${s.acN ? `${ovBar(s.covN, s.acN, s.covN === s.acN ? "--good" : "")} ${s.covN}/${s.acN}` : "—"}</td><td class="nw fresh">${s.firstDay ? ddmm(s.firstDay) : ""}${s.lastDone ? " → " + ddmm(s.lastDone) : " → nay"}</td></tr>`).join("")}</tbody></table></div>` : '<p class="fresh">Chưa có ticket nào đóng.</p>',
+      ["techlead", "po"], ["ticket nội bộ", "GitHub PR đã merge", "tests/e2e/*.spec.ts"]),
+    ovGrid(ovCard("Chất lượng trên develop", `<dl class="ov-dl ov-q">
+      <dt>CI develop</dt><dd>${M.ci ? `${status(ciG === "pass" ? "good" : ciG === "fail" ? "critical" : "warning", ciG === "pass" ? "pass" : ciG === "fail" ? "lỗi" : "đang chạy")} <a href="${esc(M.ci.url || "#")}" target="_blank" rel="noopener">${esc((M.ci.displayTitle || "").slice(0, 70))}</a>${M.ci.jobs ? `<div style="margin-top:4px">${ciOf(M.ci.jobs)}</div>` : ""}` : '<span class="fresh">chưa đọc được CI (gh)</span>'}</dd>
+      <dt>Checklist Theme Store</dt><dd>${sRes.some(Boolean) ? `${sRes.filter((x) => x === "pass").length} đạt · ${sRes.filter((x) => x === "fail").length} lỗi · ${sRes.filter((x) => x === "na").length} N/A / ${M.st.length} mục` : `chưa chạy — ${M.st.length} mục, ${M.must.length} bắt buộc (chạy cuối mỗi sprint)`}</dd>
+      <dt>Checklist Canvas</dt><dd>${M.cv.cols.map((c, i) => `<span class="chip">${esc(c)}: ${M.cvRan[i] ? `${M.cvPass[i]}/${M.cv.rows.length} đạt` : "chưa chạy"}</span>`).join(" ")}</dd>
+      <dt>Bug đang mở</dt><dd>${M.bugs.length ? M.bugs.slice(0, 6).map((t) => tkey(t)).join(", ") + (M.bugs.length > 6 ? "…" : "") : "không có"} <span class="fresh">· ${M.p12.length} P1/P2</span></dd>
+      <dt>Ngân sách JS</dt><dd>${hbars(js.map((f) => ({ label: f.name, v: f.bytes, text: `${(f.bytes / 1024).toFixed(1)} KB`, color: f.bytes > 8192 ? "--critical" : "" })), { max: 8192, mark: 8192, markLabel: "8 KB/file (ADR 0006)" })}</dd></dl>`,
+      ["techlead", "qa"], ["docs/checklist-theme-store.md", "docs/checklist-canvas.md", "GitHub CI", "assets/"]),
+      ovCard("Đã xây trong theme", `<p class="ov-k">${O.code.blocks.length} block</p><p>${O.code.blocks.map((b) => `<span class="chip">${esc(b)}</span>`).join(" ")}</p>
+        <p class="ov-k">${O.code.templates.length} template</p><p>${O.code.templates.map((b) => `<span class="chip">${esc(b.replace(/\.liquid$/, ""))}</span>`).join(" ")}</p>
+        <p class="ov-k">Kiểm thử E2E</p><div class="tablewrap"><table class="info"><tbody>${O.specs.map((s) => `<tr><td class="k"><a href="${esc(ovGit(s.file))}" target="_blank" rel="noopener">${esc(s.key)}</a></td><td class="n">${s.tests} test</td><td class="fresh">${esc(s.acs.join(" ") || "—")}</td></tr>`).join("")}</tbody></table></div>
+        <p class="fresh">Tài liệu merchant: ${O.code.merchant_docs.length} file · ${O.code.locales} locale</p>`, ["techlead"], ["blocks/", "templates/", "tests/e2e/", "docs/merchant/"])),
+  ].join("");
+
+  /* ----- 6. Kết quả khi hoàn thành ----- */
+  const inScope = parts(C.scope.in || "");
+  const s6 = [
+    ovCard("Chỉ số thành công: mục tiêu ↔ hiện tại", `<div class="tablewrap"><table class="info"><thead><tr><th>Khi hoàn thành phải đạt</th><th>Hiện tại</th><th>Tiến độ</th><th>Trạng thái</th></tr></thead><tbody>${metrics.map((m) => `<tr><td class="ttl">${mdi(m.text)}<div class="fresh">${ovSrc([m.src])}</div></td>
+      <td>${esc(m.cur)}${m.note ? `<div class="fresh">${esc(m.note)}</div>` : ""}</td><td class="nw">${m.max ? `${ovBar(m.v, m.max, m.k === "good" ? "--good" : "")} ${ovPct(m.v, m.max)}%` : ""}</td><td class="nw">${status(m.k, ovK[m.k])}</td></tr>`).join("")}</tbody></table></div>`,
+      ["po"], [], "mục tiêu lấy từ PRD (chỉ số thành công) và charter; số hiện tại đo tự động từ ticket, CI, checklist, eval"),
+    ovGrid(ovCard("Dự báo hoàn thành", M.vel ? `<p class="ov-big ${late ? "late" : "ok"}">${M.fc ? yy(M.fc) : "—"}</p>
+      <p>Còn ~<b>${M.remFc} point</b>; vận tốc TB <b>${M.vel} point/sprint</b> (${M.past.length} sprint đã xong${M.past.length < 2 ? ", còn ít dữ liệu" : ""}) → cần ~<b>${M.needFc} sprint</b>, lịch còn <b>${M.leftSp.length} sprint</b> (tới ${M.leftSp.length ? ddmm(M.leftSp[M.leftSp.length - 1].end) : "—"})${late ? ` — <b class="ov-late">trễ ~${M.needFc - M.leftSp.length} sprint</b>` : ""}.</p>
+      ${hbars([{ label: "Còn lại", v: M.remFc, text: `${M.remFc} point`, color: late ? "--warning" : "--series-1" }, { label: "Sức chứa còn lại", v: M.vel * M.leftSp.length, text: `${M.vel * M.leftSp.length} point`, color: "--good" }])}
+      <p class="ov-k">Cách tính</p><ul class="ov-ul"><li>Story đã có ticket: point của ticket còn mở.</li>
+      ${M.rough.length ? `<li>${M.rough.length} story chưa chia task (${M.rough.map((s) => s.key).join(", ")}): ${M.rough.reduce((a, s) => a + s.rough, 0)} point ước lượng sơ bộ trong SRS${M.finishAdj ? ` × <b>${M.factor.toFixed(1)}</b> — hệ số point chốt / sơ bộ của story đã chia (${M.based.map((s) => `${s.key}: ${s.rough} → ${s.ptsAll}`).join(", ")})` : ""}.</li>` : ""}
+      ${M.finishAdj ? `<li>Nếu giữ nguyên ước lượng sơ bộ: còn ${M.remaining} point, ~${M.need} sprint → ${yy(M.finish)}.</li>` : ""}</ul>
+      <p class="fresh">Tech Lead chia task các story còn lại sớm để dự báo sát hơn; vượt lịch thì PO cân nhắc dời Should/Could hoặc thêm sprint.</p>` : '<p class="fresh">Chưa có sprint nào kết thúc để tính vận tốc.</p>', ["po", "techlead"], ["ticket nội bộ", "docs/srs.md", "ai-team ops/dashboard/project.json"], "theo vận tốc trung bình các sprint đã xong"),
+      ovCard("Bàn giao và nghiệm thu", `<p class="ov-k">Sản phẩm bàn giao</p><ul class="ov-ul">${inScope.map((x) => `<li>${mdi(x)}</li>`).join("")}</ul>
+        <p class="ov-k">Tiêu chí nghiệm thu (G5)</p>${(C.success || []).map((x) => `<p>${mdi(x)}</p>`).join("")}
+        <p class="ov-k">Cổng đã qua</p><ul class="ov-ul">${(C.gates || []).map((g) => `<li>${status("good", g.gate)} ${mdi(g.text.replace(/^G\d\s*[—-]\s*/, ""))}</li>`).join("") || "<li>—</li>"}${(C.gates || []).some((g) => g.gate === "G5") ? "" : `<li>${status("none", "G5")} chưa ký${M.ev ? ` — dự kiến ${ddmm(M.ev[1])}` : ""}</li>`}</ul>`, ["po"], ["docs/charter.md"])),
+  ].join("");
+
+  const bodies = [s1, s2, s3, s4, s5, s6], sections = bodies.map((b, i) => ovSec(i, b)).join("");
+  return `<div class="page-head"><h2>Tổng quan dự án</h2><span class="fresh">theme-efitco · tài liệu ở ${esc(O.ref || "thư mục làm việc")} ${esc(O.sha)}${O.date ? " · " + ddmm(O.date.slice(0, 10)) : ""}</span>${tools("ov")}</div>
+    ${O.missing.length ? `<div class="ov-warn" role="status">Thiếu tài liệu: ${esc(O.missing.join(", "))} — phần tương ứng để trống.</div>` : ""}
+    <div class="ov-roles" role="group" aria-label="Góc nhìn">${OV_ROLES.map(([k, l]) => `<button type="button" class="btn${OV_ROLE === k ? " on" : ""}" data-ovrole="${k}" aria-pressed="${OV_ROLE === k}">${k ? av(k, 18) : IC("grid")}${esc(l)}</button>`).join("")}
+      <span class="fresh">${OV_ROLE ? `chỉ hiện phần ${esc(OV_ROLES.find(([k]) => k === OV_ROLE)[1])} phụ trách và phần chung` : "CTO, ban giám đốc: đọc từ trên xuống — 6 bước từ yêu cầu tới kết quả"}</span></div>
+    ${repTiles(tiles)}
+    <ol class="ov-flow">${OV_STEPS.map(([n, own, what], i) => `<li><button type="button" data-ovgo="ov-s${i + 1}" ${bodies[i].replace(/\s/g, "") ? "" : "disabled"}><span class="ov-n">${i + 1}</span><b>${esc(n)}</b>
+      <span class="ov-who">${own.includes("*") ? "mọi vai trò" : own.map((a) => av(a, 16)).join("")}</span><span class="ov-fv">${esc(flowVal[i])}</span><span class="fresh">${esc(what)}</span></button></li>`).join("")}</ol>
+    ${matrix}${sections}`;
+}
+let OV_SIG = "";
+const ovSig = () => JSON.stringify([OV_ROLE, OVD && OVD.sha, OVD && OVD.missing, REQS && (REQS.items || []).map((r) => r.id + r.status), ROLES && ROLES.rows.length,
+  (DATA ? DATA.tickets : []).map((t) => [t.key, t.status, t.labels, t.sprint, t.points, t.parent, t.agent, t.closed_at, classify(t)]), DATA && (DATA.merged || []).length,
+  DATA && (DATA.ci_develop || [])[0], DATA && DATA.evals_n]);
+function bindOverview() {
+  document.querySelectorAll("#info [data-ovrole]").forEach((b) => (b.onclick = () => { OV_ROLE = b.dataset.ovrole; renderInfo(); }));
+  document.querySelectorAll("#info [data-ovgo]").forEach((b) => (b.onclick = () => { const s = $(b.dataset.ovgo); if (s) s.scrollIntoView({ behavior: "smooth", block: "start" }); }));
+  const r = $("ovRetry"); if (r) r.onclick = () => { OV_ERR = null; loadOverview(); renderInfo(); };
 }
 
 /* ===== Quản lý dự án · nối Yêu cầu ↔ Ticket ↔ Sprint: Kế hoạch sprint (backlog → sprint, năng lực vai trò) và Bảng sprint theo vai trò ===== */
@@ -873,7 +1226,7 @@ const rqOpen = (r) => !["xong", "khong"].includes(r.status);
 const rqLate = (r) => r.due && r.due < todayKey() && rqOpen(r);
 async function loadReqs() {
   try { const r = await fetch("/api/req", { cache: "no-store" }); if (!r.ok) return; REQS = await r.json(); renderMenu();
-    if (["req", "inbox"].includes(PAGE) || (PAGE === "req-new" && !RQ_FORM)) renderInfo(); } catch (e) {}
+    if (["req", "inbox", "overview"].includes(PAGE) || (PAGE === "req-new" && !RQ_FORM)) renderInfo(); } catch (e) {}
 }
 async function loadReq(id) {
   try { const r = await fetch(`/api/req?id=${encodeURIComponent(id)}`, { cache: "no-store" }); const j = await r.json(); RQD[id] = r.ok ? j : { error: j.error || r.status }; }
@@ -1096,6 +1449,11 @@ const GLOSS = {
   "Kiến thức CTO nạp": "Kinh nghiệm, quy tắc, checklist CTO thêm cho agent (ai-team/knowledge); Orchestrator nối vào prompt agent mỗi lượt.",
   "Sprint": "Chu kỳ 2 tuần; có mục tiêu, ticket cam kết đầu sprint và ticket thêm giữa sprint.",
   "Sprint backlog": "Ticket CTO đã đưa vào một sprint (trường sprint của ticket) ở trang Kế hoạch sprint.",
+  "AC": "Tiêu chí chấp nhận (acceptance criteria) dạng Given/When/Then trong SRS của BA; story chỉ xong khi mọi AC đạt.",
+  "MoSCoW": "Mức ưu tiên tính năng trong PRD: Must (bắt buộc), Should (nên có), Could (có thì tốt), Won't (không làm đợt này).",
+  "ADR": "Ghi quyết định kiến trúc của Tech Lead (docs/adr): bối cảnh, lựa chọn đã cân nhắc, lý do chọn, trạng thái Đề xuất / Chấp nhận.",
+  "Mã R": "Mã yêu cầu Theme Store (R2–R22) và 5 bước Canvas trong docs/requirements-map.md; mỗi mã gắn story chịu trách nhiệm.",
+  "Dự báo hoàn thành": "Point còn lại ÷ vận tốc TB các sprint đã xong = số sprint cần; story chưa chia task tính theo ước lượng sơ bộ SRS nên dự báo thường lùi khi chia task.",
   "Yêu cầu dự án": "Yêu cầu từ ban giám đốc, quản lý sản phẩm, CTO, Shopify, khách hàng (REQ-xxxx). Đang áp dụng thì Orchestrator nạp vào prompt agent bị ảnh hưởng.",
 };
 const GUIDE = {
@@ -1277,6 +1635,27 @@ const GUIDE = {
     do: ["Lập kế hoạch đầu sprint (sprint planning) và điều chỉnh giữa sprint.", "Orchestrator chạy ticket ai-draft của sprint hiện tại trước, rồi mới tới ticket khác.", "Mở Bảng sprint theo vai trò để các vai trò theo dõi việc của mình."],
     src: ["Trường sprint của ticket nội bộ (sửa cả ở chi tiết ticket); lịch sprint và mục tiêu ở ops/dashboard/project.json.", "Báo cáo sprint vẫn tính theo ngày tạo/đóng ticket trong khoảng sprint."],
     terms: ["Sprint", "Sprint backlog", "Point", "Story", "Yêu cầu dự án", "Role owner", "Orchestrator"] },
+  overview: { t: "Tổng quan dự án", who: "CTO, ban giám đốc, PO, BA, Tech Lead",
+    what: "Toàn bộ dự án trên một trang, đọc từ trên xuống theo 6 bước: Yêu cầu → Giải pháp → Kế hoạch xử lý → Tiến độ vận hành → Kết quả hiện tại → Kết quả khi hoàn thành. Nội dung lấy thẳng từ tài liệu của PO, BA, Tech Lead trên nhánh develop và số liệu ticket, PR, CI.",
+    parts: [
+      ["Đầu trang", ["**Góc nhìn**: Toàn bộ, hoặc PO / BA / Tech Lead — chỉ hiện phần vai trò đó phụ trách và phần chung.",
+        "**Ô số liệu**: tiến độ point toàn dự án, story xong, sprint hiện tại, mốc kế tiếp, dự báo hoàn thành, số chỉ số thành công đã đạt.",
+        "**6 bước**: mỗi ô là một phần của trang, có vai trò phụ trách và con số chính; bấm để cuộn tới phần đó."]],
+      ["Truy vết theo story", ["Mỗi story một hàng: mức ưu tiên và câu chuyện người dùng (PO), số AC và mã R (BA), ticket chia task (Tech Lead), point và sprint, thanh tiến độ ticket theo giai đoạn, PR đã merge và AC có test E2E, trạng thái khi hoàn thành."]],
+      ["1. Yêu cầu", ["Bài toán, người dùng, persona; phạm vi trong/ngoài; tính năng theo MoSCoW gắn story (chấm màu = trạng thái story); mục tiêu đo được; quyết định đã chốt; yêu cầu dự án nạp thêm; câu hỏi mở."]],
+      ["2. Giải pháp", ["Đặc tả SRS theo story (bấm “n AC” để xem tiêu chí chấp nhận), yêu cầu phi chức năng, đáp ứng mã R Theme Store/Canvas; kiến trúc, ADR, chiến lược kiểm thử."]],
+      ["3. Kế hoạch xử lý", ["Lộ trình: giai đoạn (pha 0, sprint), mốc G1, lên Canvas, eval, dự báo; vạch đỏ là hôm nay.",
+        "Kế hoạch theo story: point sơ bộ (SRS) và point chốt sau khi Tech Lead chia task, task FE/BE/QA, sprint. Ngân sách giờ người, rủi ro và cách xử lý."]],
+      ["4. Tiến độ vận hành", ["Point, ticket, PR merge, vận tốc, việc chờ CTO, bug; burn-up; tiến độ từng story theo giai đoạn; vận hành theo vai trò (role owner, đang mở, chờ chấm, bị chặn, đã xong, sprint hiện tại)."]],
+      ["5. Kết quả hiện tại", ["Story bàn giao, AC có test E2E, block/template, JS so với 8 KB/file, phiên bản theme; CI develop, checklist Theme Store và Canvas, bug mở; danh sách block, template, file test."]],
+      ["6. Kết quả khi hoàn thành", ["Chỉ số thành công trong PRD và charter: mục tiêu ↔ số hiện tại ↔ trạng thái.", "Dự báo ngày xong theo vận tốc; sản phẩm bàn giao, tiêu chí nghiệm thu G5, cổng đã ký."]],
+    ],
+    do: ["Họp ban giám đốc: “In / lưu PDF” hoặc “Sao chép tóm tắt” để gửi chat, email.",
+      "Đổi mục tiêu, phạm vi, rủi ro: giao ticket cho PO (charter, PRD); đổi đặc tả: BA (srs.md); đổi kiến trúc: Tech Lead (architecture.md, ADR). Trang tự cập nhật khi PR merge vào develop.",
+      "Yêu cầu mới từ ban giám đốc, quản lý sản phẩm: menu Nạp yêu cầu."],
+    src: ["theme-efitco nhánh develop: docs/charter.md, prd.md (PO); srs.md, requirements-map.md (BA); architecture.md, adr/, drafts/techlead/*/task-split.md (Tech Lead); test-strategy.md, checklist-*.md, tests/e2e (QA); blocks/, templates/, assets/.",
+      "Ticket nội bộ, PR đã merge và CI develop (GitHub), lịch sprint ở ops/dashboard/project.json, yêu cầu dự án ở ai-team/requirements."],
+    terms: ["MoSCoW", "AC", "Mã R", "ADR", "Story", "Point", "Sprint", "Dự báo hoàn thành", "Yêu cầu dự án", "Role owner"] },
   "sprint-board": { t: "Bảng sprint theo vai trò", who: "Role owner, CTO, cả team",
     what: "Mỗi vai trò một hàng, mỗi giai đoạn một cột — để từng vai trò thấy việc của mình trong sprint và việc đang chờ mình duyệt.",
     parts: [
@@ -2784,7 +3163,7 @@ function render(d) {
   renderMenu();
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
   document.querySelector(".conn").title = $("fresh").textContent;
-  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum", "inbox", "plan", "sprint-board"].includes(PAGE) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
+  if (PAGE !== "dashboard") { if (["t-list", "t-board", "story", "raci", "scrum", "inbox", "plan", "sprint-board"].includes(PAGE) || (PAGE === "overview" && ovSig() !== OV_SIG) || PAGE.startsWith("r-") || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); else if (PAGE === "t-detail") refreshTDetail(); return; }
   const errs = Object.entries(d.errors || {});
   $("errbox").style.display = errs.length ? "block" : "none";
   $("errbox").innerHTML = errs.map(([k, v]) => `${status("critical", k)} ${esc(v)}`).join("<br>");
