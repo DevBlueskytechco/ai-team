@@ -104,21 +104,23 @@ def poll_gh():
             prs = json.loads(sh("gh", "pr", "list", "-R", REPO, "--json", "number,title,author,headRefName,createdAt,statusCheckRollup,url") or "[]")
             out = []
             for p in prs:
-                checks = {}
+                checks, meta = {}, {}
                 for c in p.get("statusCheckRollup") or []:
                     n = c.get("name") or c.get("context")
                     checks[n] = (c.get("conclusion") or c.get("state") or c.get("status") or "").lower()
+                    u = c.get("detailsUrl") or c.get("targetUrl") or ""; m = re.search(r"/actions/runs/(\d+)", u)
+                    meta[n] = {"started": c.get("startedAt"), "url": u, "run": int(m.group(1)) if m else None}   # run id → lệnh gh run rerun đúng lượt
                 out.append({"number": p["number"], "title": p["title"], "author": p["author"]["login"], "branch": p["headRefName"],
-                            "created": p["createdAt"], "url": p["url"], "checks": checks})
-            runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-w", "CI", "-e", "push", "-L", "5", "--json",
+                            "created": p["createdAt"], "url": p["url"], "checks": checks, "meta": meta})
+            runs = json.loads(sh("gh", "run", "list", "-R", REPO, "-b", "develop", "-w", "CI", "-e", "push", "-L", "10", "--json",
                                  "databaseId,status,conclusion,displayTitle,createdAt,url,workflowName,headSha,event") or "[]")
             for r in runs[:3]:
                 try: r["jobs"] = run_jobs(r)
                 except Exception: r["jobs"] = {}
             busy = any(v in PENDING for p in out for v in p["checks"].values()) or any(r.get("status") != "completed" for r in runs[:1])
             merged = json.loads(sh("gh", "pr", "list", "-R", REPO, "--state", "merged", "-L", "200", "--json",
-                                   "number,title,headRefName,createdAt,mergedAt,url") or "[]")
-            merged = [{"number": p["number"], "title": p["title"], "branch": p["headRefName"], "createdAt": p["createdAt"],
+                                   "number,title,author,headRefName,createdAt,mergedAt,url") or "[]")
+            merged = [{"number": p["number"], "title": p["title"], "author": (p.get("author") or {}).get("login"), "branch": p["headRefName"], "createdAt": p["createdAt"],
                        "mergedAt": p["mergedAt"], "url": p["url"]} for p in sorted(merged, key=lambda p: p.get("mergedAt") or "", reverse=True)]
             with LOCK: STATE["prs"] = out; STATE["merged"] = merged; STATE["ci_develop"] = runs; STATE["gh_at"] = now(); STATE["errors"].pop("gh", None)
         except Exception as e:
@@ -369,7 +371,8 @@ def snapshot():
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
     s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
-              "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2)})
+              "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
+              "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
     return s
 
 def ticker():

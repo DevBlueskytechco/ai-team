@@ -48,4 +48,5 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 ## Khi lỗi
 - preflight lỗi → báo dòng lỗi + cách sửa, dừng.
 - Shopify 502 / CI lỗi môi trường → `gh run rerun <run> --failed` (hỏi CTO trước).
+- Check bị huỷ (cancelled, thường do concurrency) hoặc chạy quá 45 phút → chạy lại CI (`gh run rerun <run>`, hỏi CTO trước), không trả ai-sua. Dashboard có nút chép lệnh đúng run id.
 - Agent chạm max_turns hoặc is_error → tóm tắt result, đề xuất chạy lại hay chia nhỏ ticket.
