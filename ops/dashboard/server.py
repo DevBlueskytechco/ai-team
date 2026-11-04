@@ -137,7 +137,7 @@ def read_runs():
             try: r = json.loads(l)
             except Exception: continue
             if not r.get("started_at") or not r.get("agent") or str(r.get("agent")).startswith("claude-code"): continue
-            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model")})
+            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model", "cost_usd", "tokens")})
     return sorted(out, key=lambda r: r.get("started_at") or "")
 
 def _etime(v):
@@ -365,14 +365,20 @@ def poll_setup():
             with LOCK: STATE["errors"]["setup"] = str(e)[:200]
         time.sleep(600)
 
+def cost_month(runs):
+    """Chi phí token theo tháng (cost_usd Claude Code báo trong mỗi lượt; chạy gói Max thì là chi phí quy đổi) — cùng cách Orchestrator dừng ở 100%."""
+    m = datetime.date.today().strftime("%Y-%m"); R = [r for r in runs if (r.get("started_at") or "")[:7] == m]
+    return {"month": m, "usd": round(sum(float(r.get("cost_usd") or 0) for r in R), 2), "runs": len(R), "with_cost": sum(1 for r in R if r.get("cost_usd") is not None)}
+
 def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
-    s.update({"live": read_live(), "runs": runs[-500:], "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+    s.update({"live": read_live(), "runs": runs[-500:], "cost_month": cost_month(runs), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
               "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
-              "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
+              "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent"),
+              "budget": {"usd_month": (CFG or {}).get("budget_usd_month", 2000), "warn_pct": (CFG or {}).get("budget_warn_pct", 80)}})
     return s
 
 def ticker():
