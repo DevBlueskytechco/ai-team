@@ -10,6 +10,7 @@ Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - Kiểm môi trường (biến .env có/không, claude, shopify CLI, gh, theme sạch)  trang Việc chờ tôi           — mỗi 10 phút
   - Yêu cầu dự án: ai-team/requirements (CTO nạp, POST /api/req/*), đề xuất từ drafts/<agent>/<key>/impact.md của ticket phân tích
   - Kiến thức agent: ai-team/knowledge (CTO nạp, ghi qua POST /api/knowledge/*) + theme-efitco/.claude (định nghĩa, skill, quy tắc, agent-memory) — đọc khi mở trang
+  - Tổng quan dự án: tài liệu PO/BA/Tech Lead/QA của theme-efitco (docs/, tests/e2e, drafts/techlead) đọc bằng git ở origin/develop — cache theo sha
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
 import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re, shutil
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -24,6 +25,7 @@ PORT = int(os.environ.get("DASHBOARD_PORT", "8787"))
 sys.path.insert(0, os.path.join(ROOT, "mcp"))
 sys.path.insert(0, os.path.join(ROOT, "orchestrator")); import knowledge as KN   # kiến thức agent (ai-team/knowledge + theme .claude)
 import requirements as RQ   # yêu cầu dự án (ai-team/requirements)
+import overview as OV       # tổng quan dự án (ops/dashboard/overview.py)
 os.environ.pop("GH_TOKEN", None)
 
 try:
@@ -483,6 +485,9 @@ class H(BaseHTTPRequestHandler):
             rid = (parse_qs(u.query).get("id") or [""])[0]
             try: return self._send(200, json.dumps(req_detail(rid) if rid else {"items": RQ.items(), **req_meta()}, ensure_ascii=False))
             except ValueError as e: return self._send(404, json.dumps({"error": str(e)}, ensure_ascii=False))
+        if u.path == "/api/overview":   # Tổng quan dự án: charter, PRD, SRS, kiến trúc, ADR, checklist, E2E của theme-efitco nhánh develop
+            try: return self._send(200, json.dumps(OV.build(THEME, REPO), ensure_ascii=False))
+            except Exception as e: return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
         if u.path == "/api/knowledge":   # ?agent=dev-fe → chi tiết; không có → số liệu mọi agent
             ag = (parse_qs(u.query).get("agent") or [""])[0]
             try: return self._send(200, json.dumps(knowledge_detail(ag) if ag else KN.summary(), ensure_ascii=False))
