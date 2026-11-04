@@ -886,6 +886,29 @@ const ovShow = (own) => !OV_ROLE || own.includes("*") || own.includes(OV_ROLE);
 const ovCard = (title, body, own, src, sub) => !ovShow(own) ? "" :
   `<div class="rcardx ov-card"><div class="ov-ch"><h3>${esc(title)}</h3><span class="ov-own">${own.filter((a) => a !== "*").map((a) => `<span title="${esc(agentRole(a))}">${av(a, 18)}</span>`).join("")}</span></div>${sub ? `<p class="fresh ov-sub">${sub}</p>` : ""}${body}${src && src.length ? `<p class="fresh ov-srcl">Nguồn: ${ovSrc(src)}</p>` : ""}</div>`;
 const ovGrid = (...cards) => { const c = cards.filter(Boolean); return !c.length ? "" : c.length === 1 ? c[0] : `<div class="rgrid">${c.join("")}</div>`; };
+/* Tiến độ: token agent đã dùng từ lượt đầu tiên tới nay — server cộng mọi lượt (không cắt 500), lượt trước 04/11 bù từ transcript Claude Code */
+function ovTokens(M, today) {
+  const S = DATA && DATA.tokens, T = "Token agent đã dùng đến nay";
+  if (!S || !S.runs) return card(T, '<div class="empty">Chưa có lượt agent nào.</div>');
+  const pl = planOf(), A = Object.entries(S.by_agent).sort((a, b) => b[1].total - a[1].total), miss = S.runs - S.with;
+  const days = daysOf(S.since, today); let acc = 0; const cum = days.map((d) => (acc += (S.by_day[d] || [0])[0]));
+  const sp = M.SP.filter((x) => x.start <= today).map((x) => { let t = 0, n = 0;
+    daysOf(x.start, x.end < today ? x.end : today).forEach((d) => { const v = S.by_day[d]; if (v) { t += v[0]; n += v[1]; } });
+    return { name: x.name, t, n, dp: sprintReport(x, M.T).dp }; }).filter((x) => x.n);
+  const pctT = (v) => (S.total ? `${Math.round((v * 100) / S.total)}%` : "");
+  const dd = (d) => `${d.slice(8)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
+  return ovGrid(card(T, `<p class="ov-big">${fmtTok(S.total)} token</p>
+      <dl class="ov-dl"><dt>Thành phần</dt><dd>input ${fmtTok(S.input)} · output ${fmtTok(S.output)} · cache ghi ${fmtTok(S.cache_write)}; cache đọc ${fmtTok(S.cache_read)} tính riêng</dd>
+        <dt>Lượt agent</dt><dd>${S.runs} lượt${miss ? ` · ${miss} lượt chưa có số token` : ""}${S.from_transcript ? ` · ${S.from_transcript} lượt trước 04/11 tính lại từ transcript Claude Code` : ""}</dd>
+        <dt>Chi phí thật</dt><dd>phí gói Claude cố định ${esc(usd(pl.usdMonth))}/tháng, dùng chung với CTO — không tăng theo token</dd>
+        <dt>Quy đổi giá API</dt><dd>~${esc(usd(S.api_usd))} — chỉ để so sánh, không phải hoá đơn</dd></dl>
+      <p class="ov-k">Theo agent</p>${hbars(A.map(([a, x]) => ({ label: a, icon: a, v: x.total, text: `${fmtTok(x.total)} · ${pctT(x.total)}`, title: `${a}: ${x.total.toLocaleString("vi-VN")} token · ${x.runs} lượt${x.runs > x.with ? `, ${x.runs - x.with} lượt chưa có số` : ""}` })))}`,
+      `từ ${dd(S.since)} tới nay · token = input + output + cache ghi, mọi model kể cả subagent`),
+    card("Token agent lũy kế", `${lineChart("ovTok", days.map((d) => ({ label: d, short: ddmm(d) })), [{ name: "Token lũy kế", color: "--series-1", values: cum }], { aria: "Token agent lũy kế theo ngày", fmt: fmtTok, unit: " token" })}
+      <div class="tablewrap"><table class="info"><thead><tr><th>Giai đoạn</th><th class="n">Lượt</th><th class="n">Token</th><th class="n">Point hoàn thành</th><th class="n">Token / point</th></tr></thead>
+        <tbody>${sp.map((x) => `<tr><td class="nw">${esc(x.name)}</td><td class="n">${x.n}</td><td class="n">${fmtTok(x.t)}</td><td class="n">${x.dp}</td><td class="n">${x.dp ? fmtTok(Math.round(x.t / x.dp)) : "—"}</td></tr>`).join("")}</tbody></table></div>`,
+      "sprint đang chạy tính tới hôm nay · token / point càng thấp càng tiết kiệm"));
+}
 const ovSec = (i, body) => { if (!body.replace(/\s/g, "")) return ""; const [name, own, what] = OV_STEPS[i];
   return `<section class="ov-sec" id="ov-s${i + 1}" aria-labelledby="ov-h${i + 1}"><div class="ov-sh"><span class="ov-n">${i + 1}</span><h3 id="ov-h${i + 1}">${esc(name)}</h3>
     <span class="ov-who">${own.includes("*") ? "mọi vai trò" : own.map((a) => agentTag(a, 18)).join(" ")}</span><span class="fresh">${esc(what)}</span></div>${body}</section>`; };
@@ -999,6 +1022,7 @@ function pageOverview() {
     M.needFc != null ? `- Dự báo: còn ~${M.remFc} point, vận tốc ${M.vel} point/sprint (${velTxt(M.V)}) → cần ~${M.needFc} sprint, lịch còn ${M.leftSp.length} → xong khoảng ${yy(M.fc)}${late ? ` (trễ ~${M.needFc - M.leftSp.length} sprint)` : ""}${M.finishAdj ? `; đã nhân hệ số chia task x${M.factor.toFixed(1)} cho story chưa chia, giữ ước lượng sơ bộ thì ${yy(M.finish)}` : ""}` : "",
     `- Chỉ số thành công: ${metrics.map((m) => `${m.text} → ${m.cur}`).join("; ")}`,
     `- Chất lượng: ${M.p12.length} bug P1/P2 mở, ${M.bugs.length} bug mở; ${M.acCov}/${M.acAll} AC có test E2E; CI develop ${M.ci ? (M.ci.conclusion || M.ci.status) : "—"}`,
+    DATA && DATA.tokens && DATA.tokens.runs ? `- Token agent đến nay: ${fmtTok(DATA.tokens.total)} token qua ${DATA.tokens.runs} lượt (từ ${ddmm(DATA.tokens.since)}); chi phí thật là phí gói Claude cố định ${usd(planOf().usdMonth)}/tháng` : "",
     `- Yêu cầu mới đang xử lý: ${reqOpen.map((r) => `${r.id} ${r.title}`).join("; ") || "không"}`,
     `- Rủi ro: ${(C.risks || []).map((r, i) => `${i + 1}. ${r.risk.split(/\.\s/)[0].slice(0, 110)}`).join("; ")}`,
     `- Chờ CTO: ${M.RV.ready} sẵn sàng chấm / ${M.RV.n} ai-review${rvRest(M.RV) ? ` (${rvRest(M.RV)})` : ""}, ${M.qs} câu hỏi`].filter(Boolean).join("\n").replace(/`/g, "");
@@ -1098,7 +1122,7 @@ function pageOverview() {
       <tbody>${roles.map((r) => { const m = M.T.filter((t) => t.agent === r.agent && isWork(t)), o = m.filter((t) => t.status !== "Closed"), cs = M.cur ? m.filter((t) => sprintOfT(t) === M.cur.name) : [];
         return `<tr><td class="nw">${agentTag(r.agent, 20)}</td><td class="nw">${ownerHtml(r)}${r.day ? `<div class="fresh">duyệt ${esc(r.day)}</div>` : ""}</td><td class="n">${o.length}</td><td class="n">${(() => { const r2 = rvSum(o.filter((t) => classify(t) === "review")); return r2.n ? `${r2.n} (${r2.ready})` : "0"; })()}</td>
         <td class="n">${o.filter((t) => ["blocked", "fix"].includes(classify(t))).length}</td><td class="n">${m.length - o.length}</td><td class="n">${cs.length ? `${cs.filter((t) => t.status === "Closed").length}/${cs.length}` : "—"}</td></tr>`; }).join("") || '<tr><td colspan="7" class="empty">Đang tải vai trò…</td></tr>'}</tbody></table></div>
-      <p><a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint theo vai trò</a> <a class="btn" href="#/r-sprint">${IC("flag")}Báo cáo sprint</a></p>`, "role owner duyệt cột Chờ CTO chấm vào ngày cố định")].join("") : "";
+      <p><a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint theo vai trò</a> <a class="btn" href="#/r-sprint">${IC("flag")}Báo cáo sprint</a></p>`, "role owner duyệt cột Chờ CTO chấm vào ngày cố định"), ovTokens(M, today)].join("") : "";
 
   /* ----- 5. Kết quả hiện tại ----- */
   const js = O.code.js || [], jsT = js.reduce((a, f) => a + f.bytes, 0), jsMax = js.reduce((m, f) => (f.bytes > m.bytes ? f : m), { bytes: 0, name: "" });
@@ -1716,6 +1740,7 @@ const GUIDE = {
       ["3. Kế hoạch xử lý", ["Lộ trình: giai đoạn (pha 0, sprint), mốc G1, lên Canvas, eval, dự báo; vạch đỏ là hôm nay.",
         "Kế hoạch theo story: point sơ bộ (SRS) và point chốt sau khi Tech Lead chia task, task FE/BE/QA, sprint. Ngân sách giờ người, rủi ro và cách xử lý."]],
       ["4. Tiến độ vận hành", ["Point, ticket, PR merge, vận tốc, ticket sẵn sàng chấm, bug; burn-up; ticket tạo/đóng tích luỹ; point theo pha/sprint; tiến độ từng story theo giai đoạn; vận hành theo vai trò (role owner, đang mở, ai-review và số sẵn sàng chấm, bị chặn, đã xong, sprint hiện tại)."]],
+      ["4. Tiến độ vận hành · token", ["**Token agent đã dùng đến nay**: tổng token mọi lượt agent từ lượt đầu tiên (input + output + cache ghi; cache đọc tính riêng), theo agent, lũy kế theo ngày, theo giai đoạn kèm token / point hoàn thành. Lượt trước 04/11 Orchestrator chưa ghi token — dashboard tính lại từ transcript Claude Code trên máy theo session_id. Chi phí thật là phí gói Claude cố định; USD quy đổi chỉ để so sánh."]],
       ["5. Kết quả hiện tại", ["Story bàn giao, AC có test E2E, block/template, JS so với 8 KB/file, phiên bản theme; CI develop, checklist Theme Store và Canvas, bug mở; danh sách block, template, file test."]],
       ["6. Kết quả khi hoàn thành", ["Chỉ số thành công trong PRD và charter: mục tiêu ↔ số hiện tại ↔ trạng thái.", "Dự báo ngày xong theo vận tốc; sản phẩm bàn giao, tiêu chí nghiệm thu G5, cổng đã ký."]],
     ],
@@ -2876,9 +2901,9 @@ function velocity(T = DATA ? DATA.tickets : []) {
 const PLAN_KIND = { session: "phiên 5 giờ", weekly_all: "tuần · mọi model", weekly_scoped: "tuần" };
 const limName = (x) => `${PLAN_KIND[x.kind] || x.kind}${x.label ? " " + x.label : ""}`;
 /* token một lượt = input + output + cache ghi (modelUsage, mọi model); cache đọc tính riêng */
-const tokOf = (r) => (r && r.usage && r.usage.total != null ? r.usage.total : r && typeof r.tokens === "number" ? r.tokens : null);
+const tokOf = (r) => (r && r.usage && r.usage.total != null ? r.usage.total : null);   // trường tokens cũ của Orchestrator chỉ là output_tokens — không dùng
 const fmtTok = (v) => (v == null ? "—" : v >= 1e6 ? `${(v / 1e6).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}M` : v >= 1e3 ? `${Math.round(v / 1e3).toLocaleString("vi-VN")}k` : String(v));
-const tokTitle = (r) => { const u = r && r.usage; return u ? `input ${(u.input || 0).toLocaleString("vi-VN")} · output ${(u.output || 0).toLocaleString("vi-VN")} · cache ghi ${(u.cache_write || 0).toLocaleString("vi-VN")} · cache đọc ${(u.cache_read || 0).toLocaleString("vi-VN")}${r.cost_usd != null ? ` · quy đổi giá API ~${usd(r.cost_usd)} (không phải hoá đơn)` : ""}` : "lượt chưa ghi token (Orchestrator bản cũ)"; };
+const tokTitle = (r) => { const u = r && r.usage; return u ? `${u.src === "transcript" ? "tính lại từ transcript · " : ""}input ${(u.input || 0).toLocaleString("vi-VN")} · output ${(u.output || 0).toLocaleString("vi-VN")} · cache ghi ${(u.cache_write || 0).toLocaleString("vi-VN")} · cache đọc ${(u.cache_read || 0).toLocaleString("vi-VN")}${r.cost_usd != null ? ` · quy đổi giá API ~${usd(r.cost_usd)} (không phải hoá đơn)` : ""}` : "lượt chưa có số token (transcript không còn trên máy)"; };
 const p2 = (n) => String(n).padStart(2, "0");
 const resetTxt = (iso) => { const t = new Date(iso); if (!iso || isNaN(t)) return "—"; const h = (t - Date.now()) / 36e5;
   return `${["CN", "T2", "T3", "T4", "T5", "T6", "T7"][t.getDay()]} ${p2(t.getDate())}/${p2(t.getMonth() + 1)} ${p2(t.getHours())}:${p2(t.getMinutes())}${h > 0 ? ` (còn ${h < 1 ? Math.max(1, Math.round(h * 60)) + " phút" : h < 48 ? Math.round(h) + " giờ" : Math.round(h / 24) + " ngày"})` : ""}`; };
@@ -2972,13 +2997,14 @@ function barChart(id, cats, series, o = {}) {
 }
 /* Đường (1+ series), đường nét đứt cho mốc/lý tưởng */
 function lineChart(id, cats, series, o = {}) {
+  const FMT = (v, u) => (o.fmt ? (v == null ? "—" : o.fmt(v) + (u || "")) : fmtV(v, u));
   later(() => {
     const el = $(id); if (!el) return;
     const svg = el.querySelector("svg"), W = svg.clientWidth || 700, H = o.h || 220, pl = 36, pr = 44, pt = 12, pb = 26, n = cats.length;
     const max = Math.max(1, ...series.flatMap((s) => s.values.filter((v) => v != null))), step = niceStep(max / 4), top = Math.ceil(max / step) * step;
     const x = (i) => pl + ((W - pl - pr) * i) / Math.max(1, n - 1), y = (v) => H - pb - ((H - pb - pt) * v) / top;
     let g = "";
-    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${fmtV(v)}</text>`;
+    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${FMT(v)}</text>`;
     const every = Math.max(1, Math.ceil(n / Math.max(2, Math.floor((W - pl - pr) / 52))));
     cats.forEach((c, i) => { if (i % every === 0) g += `<text class="axis" x="${x(i)}" y="${H - 8}" text-anchor="middle">${esc(c.short || c.label)}</text>`; });
     series.forEach((s) => {
@@ -2986,15 +3012,15 @@ function lineChart(id, cats, series, o = {}) {
       g += `<polyline points="${p.map((q) => q.join(",")).join(" ")}" fill="none" stroke="var(${s.color})" stroke-width="${s.dash ? 1.5 : 2}" ${s.dash ? 'stroke-dasharray="5 4"' : ""} stroke-linejoin="round"/>`;
       const last = p[p.length - 1], lv = s.values.filter((v) => v != null).slice(-1)[0];
       if (s.all) s.values.forEach((v, i) => { if (v == null) return; const ty = y(v) - 9 < pt + 8 ? y(v) + 17 : y(v) - 9, an = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
-        g += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${x(i) + (an === "start" ? 6 : an === "end" ? -6 : 0)}" y="${ty}" text-anchor="${an}">${fmtV(v, o.unit)}</text>`; });
-      else if (!s.dash) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${last[0] + 7}" y="${last[1] + 4}">${fmtV(lv)}</text>`;
+        g += `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${x(i) + (an === "start" ? 6 : an === "end" ? -6 : 0)}" y="${ty}" text-anchor="${an}">${FMT(v, o.unit)}</text>`; });
+      else if (!s.dash) g += `<circle cx="${last[0]}" cy="${last[1]}" r="4" fill="var(${s.color})" stroke="var(--surface)" stroke-width="2"/><text class="axis vl" x="${last[0] + 7}" y="${last[1] + 4}">${FMT(lv)}</text>`;
     });
     g += `<line class="cross" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-dasharray="2 3" style="display:none"/>`;
     cats.forEach((c, i) => (g += `<rect x="${x(i) - (W - pl - pr) / Math.max(1, n - 1) / 2}" y="${pt}" width="${(W - pl - pr) / Math.max(1, n - 1)}" height="${H - pb - pt}" fill="transparent" data-i="${i}"/>`));
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
     const cross = svg.querySelector(".cross");
     hoverTip(el, svg, (i) => { cross.style.display = ""; cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
-      return `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${fmtV(s.values[i], o.unit)}`).join(""); }, () => (cross.style.display = "none"));
+      return `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${FMT(s.values[i], o.unit)}`).join(""); }, () => (cross.style.display = "none"));
   });
   return `${legendOf(series)}<div class="chart" id="${id}"><svg role="img" aria-label="${esc(o.aria || "")}" style="height:${o.h || 220}px"></svg><div class="tip"></div></div>${tableView(cats, series, o.unit)}`;
 }
