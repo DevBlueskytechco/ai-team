@@ -42,7 +42,7 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Không đọc, in, hay chép nội dung `.env`. Không `gh secret`. Không publish/xoá theme, không push develop/main trực tiếp, không force push.
 - `gh` chạy bằng tài khoản CTO (ops/env.sh unset GH_TOKEN). Orchestrator tự dùng AGENT_GH_TOKEN cho commit/push/PR của agent.
 - Lệnh chạy lâu (run_next, ci_watch) chạy nền rồi chờ thông báo, không poll bằng sleep.
-- Lighthouse chưa chặn merge tới cuối TE-2 (CTO 31/10); theme-check, preview, e2e phải pass.
+- Check chặn merge: theme-check, preview, e2e, lighthouse (Lighthouse chặn từ 04/11/2026, CTO chốt sau khi TE-2 xong). Danh sách ở `required_checks` trong orchestrator/config.yaml.
 - Trả lời tiếng Việt, giọng dev, ngắn; tên task cụ thể; JS là việc BE.
 
 ## Khi lỗi

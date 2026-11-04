@@ -4,7 +4,7 @@
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
 n="$1"; label="$2"; scores="$3"; reason="${4:-}"; R="$REPO_THEME"
-for c in theme-check preview e2e; do
+for c in theme-check preview e2e lighthouse; do
   st=$(gh pr checks "$n" -R "$R" --json name,bucket --jq ".[] | select(.name==\"$c\") | .bucket" 2>/dev/null | head -1)
   [ "$st" = "pass" ] || { echo "Dừng: check $c = ${st:-không có} (cần pass)"; exit 1; }
 done
