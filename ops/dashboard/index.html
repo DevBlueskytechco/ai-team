@@ -850,7 +850,8 @@ function renderInfoInner(box) {
   else {
     const pg = PROJECT.pages.find((x) => x.id === PAGE);
     if (!pg) { box.innerHTML = '<div class="empty">Không có dữ liệu trang này trong project.json.</div>'; return; }
-    const rows = pg.rows.filter((r) => match(Q[PAGE], r));
+    const dmy = (x) => { const m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(x || "")); return m ? `${m[3]}${m[2]}${m[1]}` : ""; };
+    const rows = pg.rows.filter((r) => match(Q[PAGE], r)).map((r, i) => [r, i]).sort((a, b) => (PAGE === "decisions" ? dmy(b[0][0]).localeCompare(dmy(a[0][0])) || b[1] - a[1] : a[1] - b[1])).map((x) => x[0]);
     box.innerHTML = (PAGE === "agents" ? `<div class="page-head"><h2>Agent</h2><span class="fresh">10 agent · sơ đồ vận hành và phạm vi</span></div>${diagramAgents()}${agentFlowBlock()}<h3 class="sub">Phạm vi từng agent</h3>` : "") +
       `<div class="page-head"><h2 ${PAGE === "agents" ? 'hidden' : ""}>${esc(pg.title)}</h2>${searchBox(PAGE, "Tìm trong " + pg.title)}<span class="fresh">${rows.length}/${pg.rows.length} dòng</span></div>
       <div class="tablewrap"><table class="info"><thead><tr>${pg.columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
@@ -860,7 +861,7 @@ function renderInfoInner(box) {
       ${pg.note ? `<p class="note">${esc(pg.note)}</p>` : ""}`;
   }
   const live = ["t-list", "t-board", "story"].includes(PAGE);
-  box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
+  box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file là trang tự tải lại${PAGE === "decisions" ? "; quyết định mới nhất ở trên" : ""}.`}</p>`);
   bindSearch();
 }
 
@@ -1764,11 +1765,11 @@ const GUIDE = {
     src: ["Ticket nội bộ (trường sprint, nhãn quy trình, PR/CI); role owner và ngày duyệt từ trang Vai trò."], terms: ["Role owner", "ai-review", "Câu hỏi", "Sprint"] },
   links: { t: "Links", who: "Cả team", what: "Các đường dẫn của dự án: repo, PR, CI, store, Figma, tài liệu.",
     parts: [["Bảng", ["Nhóm, tên, link, ghi chú. Bấm link để mở ở tab mới."]]], do: ["Gõ vào ô tìm để lọc."],
-    src: ["ops/dashboard/project.json (chuyển từ file Excel thông tin dự án) — sửa file rồi tải lại trang."], terms: ["Preview"] },
+    src: ["ops/dashboard/project.json (chuyển từ file Excel thông tin dự án) — sửa file là trang tự tải lại."], terms: ["Preview"] },
   accounts: { t: "Tài khoản & biến", who: "CTO, DevOps (người)", what: "Danh sách biến môi trường và tài khoản dự án dùng: dùng cho việc gì, lưu ở đâu, ai giữ.",
     parts: [["Bảng", ["Tên biến/tài khoản, dùng cho, nơi lưu, người giữ, ghi chú. Trang chỉ có tên — không có giá trị bí mật."]]],
     do: ["Gõ vào ô tìm để lọc.", "Kiểm biến nào đang thiếu ở trang Việc chờ tôi → Thiết lập dự án và môi trường."],
-    src: ["ops/dashboard/project.json — sửa file rồi tải lại trang."], terms: [] },
+    src: ["ops/dashboard/project.json — sửa file là trang tự tải lại; quyết định mới nhất ở trên."], terms: [] },
   roles: { t: "Vai trò", who: "CTO, role owner",
     what: "9 vai của team agent: ai là role owner, duyệt ngày nào, đang có bao nhiêu việc, và lối vào kiến thức của từng agent.",
     parts: [
@@ -3363,8 +3364,11 @@ function drawActivity(d) {
     <td>${r.kind === "run" ? status("warning", "đang chạy") : runChip(r)}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Không có lượt chạy trong khung.</td></tr>';
 }
 
+let PROJECT_MT = null;
 function render(d) {
   DATA = d;
+  if (PROJECT_MT != null && d.project_mtime && d.project_mtime !== PROJECT_MT) { PROJECT_MT = d.project_mtime; loadProject(); toast("project.json đổi — đã tải lại trang thông tin"); return; }
+  PROJECT_MT = d.project_mtime || PROJECT_MT;
   renderMenu();
   $("fresh").textContent = `Ticket${d.backend && d.backend !== "local" ? " (" + d.backend + ")" : ""}: ${ago(d.tickets_at)} · GitHub: ${ago(d.gh_at)}`;
   document.querySelector(".conn").title = $("fresh").textContent;

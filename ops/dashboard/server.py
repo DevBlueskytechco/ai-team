@@ -411,12 +411,17 @@ def poll_plan():
         except Exception as e: STATE["errors"]["plan"] = str(e)[:200]
         time.sleep(n * 60)
 
+def project_mtime():
+    """mtime của ops/dashboard/project.json — đổi (sửa file, áp patch) thì dashboard tự tải lại trang thông tin, không cần F5."""
+    try: return int(os.path.getmtime(os.path.join(HERE, "project.json")))
+    except OSError: return 0
+
 def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
-    s.update({"live": read_live(), "runs": runs[-500:], "tokens": token_summary(runs), "plan": plan_info(), "approvals": AP.pending(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+    s.update({"live": read_live(), "runs": runs[-500:], "tokens": token_summary(runs), "plan": plan_info(), "approvals": AP.pending(), "project_mtime": project_mtime(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
               "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
               "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
     return s
