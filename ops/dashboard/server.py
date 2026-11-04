@@ -454,6 +454,7 @@ def ticket_write(action, d):
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
+    def handle_error(self, *a): pass   # trình duyệt ngắt SSE/keep-alive (ConnectionReset, BrokenPipe) là bình thường — không in traceback ra terminal
     def _local_ok(self):
         """Chống web khác gọi vào localhost: Host phải là localhost/127.0.0.1, có header X-Efitco (form/ảnh từ site lạ không đặt được)."""
         host = (self.headers.get("Host") or "").split(":")[0]
@@ -593,7 +594,14 @@ class H(BaseHTTPRequestHandler):
                 return
         return self._send(404, '{"error":"not found"}')
 
+class Server(ThreadingHTTPServer):
+    daemon_threads = True
+    def handle_error(self, request, client_address):
+        import sys; e = sys.exc_info()[1]
+        if isinstance(e, (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, TimeoutError)): return
+        super().handle_error(request, client_address)
+
 if __name__ == "__main__":
     for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup, poll_plan, poll_tokens): threading.Thread(target=f, daemon=True).start()
     print(f"Dashboard Efitco: http://localhost:{PORT}  (Ctrl+C để dừng)")
-    ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()
+    Server(("127.0.0.1", PORT), H).serve_forever()
