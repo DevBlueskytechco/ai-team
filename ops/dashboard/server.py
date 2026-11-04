@@ -274,6 +274,13 @@ def req_write(act, d):
     if act == "save": return req_detail(RQ.save(d, UI_USER))
     if act == "status": return req_detail(RQ.set_status(str(d.get("id") or ""), str(d.get("status") or ""), UI_USER, str(d.get("note") or "")[:200]))
     if act == "archive": RQ.archive(str(d.get("id") or "")); return {"ok": True}
+    if act == "ticket":   # tạo ticket thực hiện từ yêu cầu, gắn nhãn REQ-xxxx
+        import ticket_local as L
+        r = RQ.get(str(d.get("id") or "")); f = RQ.impl_ticket(r, d)
+        t = L.create(f["title"], type="task", agent=f["agent"], side=f["side"], points=f["points"], body=f["body"], parent=f["parent"],
+                     labels=f["labels"], priority=f["priority"], due_date=f["due_date"], sprint=f["sprint"], by=UI_USER)
+        RQ.note(r["id"], f"tạo ticket thực hiện {t['key']}", UI_USER); load_tickets(); VERSION["n"] += 1
+        return req_detail(r["id"]) | {"created": t["key"]}
     if act == "analyze":
         import ticket_local as L
         r = RQ.get(str(d.get("id") or "")); agent = str(d.get("agent") or RQ.DEFAULT_ANALYST.get(r["source"], "po"))

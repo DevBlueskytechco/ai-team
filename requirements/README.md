@@ -26,6 +26,14 @@ Vòng đời:
 1. **Mới** — vừa nạp.
 2. **Đang phân tích** — ticket ai-draft cho PO (change_request), BA (srs) hoặc Tech Lead (adr). Agent ghi
    `drafts/<agent>/<ticket>/impact.md` với `## Tóm tắt`, `## Ảnh hưởng`, `## Kiến thức cho <agent>: <tiêu đề>`,
-   `## Sửa skill <tên>: <tóm tắt>`, `## Ticket cần tạo`. Dashboard đọc file này để CTO nạp kiến thức bằng một nút.
+   `## Sửa skill <tên>: <tóm tắt>`, `## Ticket cần tạo` (mỗi dòng `- ` một ticket, ghi FE/BE và `N point` nếu biết).
+   Dashboard đọc file này để CTO nạp kiến thức và tạo ticket thực hiện bằng một nút.
 3. **Đang áp dụng** — Orchestrator nối yêu cầu vào prompt agent bị ảnh hưởng mỗi lượt (tối đa 6.000 ký tự), tính vào agent_version.
 4. **Đã áp dụng** — nội dung đã vào skill/kiến thức, thôi nạp. **Không áp dụng** — bỏ.
+
+Nối với Agile/Scrum:
+- Ticket thực hiện tạo từ trang chi tiết yêu cầu (đề xuất trong impact.md hoặc form nhanh) gắn nhãn `REQ-xxxx`, parent = story đầu tiên,
+  ưu tiên/hạn lấy từ yêu cầu; Dev FE/BE gắn `ai-draft`. Form Tạo ticket cũng có ô Yêu cầu dự án và Sprint.
+- Quản lý dự án → Kế hoạch sprint: đưa ticket từ product backlog vào sprint (lọc theo yêu cầu, story, vai trò), xem sức chứa từng vai trò.
+- Quản lý dự án → Bảng sprint: mỗi hàng một vai trò, cột theo giai đoạn; role owner duyệt cột "Chờ CTO chấm" vào ngày duyệt.
+- Orchestrator chạy ticket ai-draft của sprint hiện tại trước.
