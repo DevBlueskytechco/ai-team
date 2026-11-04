@@ -8,6 +8,7 @@ Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ từ localhost, cần header X-Efitco
   - gh CLI (tài khoản CTO)                              PR mở + CI, CI develop                                   — mỗi 60s
   - Kiểm môi trường (biến .env có/không, claude, shopify CLI, gh, theme sạch)  trang Việc chờ tôi           — mỗi 10 phút
+  - Kiến thức agent: ai-team/knowledge (CTO nạp, ghi qua POST /api/knowledge/*) + theme-efitco/.claude (định nghĩa, skill, quy tắc, agent-memory) — đọc khi mở trang
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
 import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re, shutil
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -20,6 +21,7 @@ RAW = os.path.join(ROOT, "evals", "raw")
 REPO = os.environ.get("REPO_THEME", "DevBlueskytechco/theme-efitco")
 PORT = int(os.environ.get("DASHBOARD_PORT", "8787"))
 sys.path.insert(0, os.path.join(ROOT, "mcp"))
+sys.path.insert(0, os.path.join(ROOT, "orchestrator")); import knowledge as KN   # kiến thức agent (ai-team/knowledge + theme .claude)
 os.environ.pop("GH_TOKEN", None)
 
 try:
@@ -255,6 +257,12 @@ def read_rubrics():
         out[f[:-5]] = {"pass_threshold": float(m.group(1)) if m else 0.8, "criteria": crit}
     return out
 
+def knowledge_detail(agent):
+    txt, used, skipped = KN.prompt_for(agent)
+    return {"agent": agent, "items": KN.items(agent), "shared": KN.items(KN.SHARED) if agent != KN.SHARED else [], "current": KN.current(agent),
+            "prompt": {"text": txt, "chars": len(txt), "used": [f"{x['agent']}/{x['id']}" for x in used], "skipped": [f"{x['agent']}/{x['id']}" for x in skipped]},
+            "archived": KN.archived_count(agent), "limit": KN.LIMIT, "kinds": KN.KINDS, "body_max": KN.BODY_MAX}
+
 def roles_merged():
     """Bảng Vai trò = project.json (mặc định) đè bởi giá trị CTO sửa trên dashboard (data/tickets.db meta roles)."""
     import ticket_local as L
@@ -365,8 +373,22 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith("/api/ticket/"): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith(("/api/ticket/", "/api/knowledge/")): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
+        if u.path.startswith("/api/knowledge/"):   # nạp / sửa / tắt / lưu trữ kiến thức agent — chỉ CTO trên localhost
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                if n > 120_000: return self._send(413, '{"error":"quá lớn"}')
+                d = json.loads(self.rfile.read(n) or b"{}"); act = u.path.rsplit("/", 1)[-1]; ag = str(d.get("agent") or "")
+                if act == "save":
+                    kid = KN.save(ag, d.get("title"), d.get("body"), d.get("kind") or "kinh-nghiem", d.get("priority") or "thuong",
+                                  d.get("status") or "active", d.get("source") or "", UI_USER, d.get("id") or None)
+                elif act == "status": kid = KN.set_status(ag, str(d.get("id") or ""), "off" if d.get("status") == "off" else "active", UI_USER)
+                elif act == "archive": kid = KN.archive(ag, str(d.get("id") or ""))
+                else: return self._send(404, '{"error":"not found"}')
+                return self._send(200, json.dumps({"ok": True, "id": kid, "detail": knowledge_detail(ag)}, ensure_ascii=False))
+            except (ValueError, TypeError) as e:
+                return self._send(400, json.dumps({"error": str(e)}, ensure_ascii=False))
         if u.path == "/api/setup/recheck":
             return self._send(200, json.dumps({"items": setup_checks(), "at": SETUP["at"]}, ensure_ascii=False))
         if u.path == "/api/roles/update":
@@ -413,6 +435,10 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/api/roles":
             try: return self._send(200, json.dumps(roles_merged(), ensure_ascii=False))
             except Exception as e: return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
+        if u.path == "/api/knowledge":   # ?agent=dev-fe → chi tiết; không có → số liệu mọi agent
+            ag = (parse_qs(u.query).get("agent") or [""])[0]
+            try: return self._send(200, json.dumps(knowledge_detail(ag) if ag else KN.summary(), ensure_ascii=False))
+            except ValueError as e: return self._send(404, json.dumps({"error": str(e)}, ensure_ascii=False))
         if u.path == "/api/rubrics":
             return self._send(200, json.dumps(read_rubrics(), ensure_ascii=False))
         if u.path == "/api/raci":   # agent → loại việc được nhận (orchestrator/raci.yaml)
