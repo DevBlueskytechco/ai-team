@@ -17,6 +17,12 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Thao tác: `python3 ops/ticket.py show|close|reopen|label|comment|children|backup|export`; CTO dùng dashboard menu Ticket.
 - Không sửa trực tiếp file .db bằng sqlite3; luôn qua ops/ticket.py hoặc mcp/ticket_local.py để có lịch sử.
 
+## Yêu cầu dự án
+- Yêu cầu từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi Shopify, khách hàng: dashboard menu Quản lý dự án; lưu `requirements/REQ-xxxx.md` (commit vào ai-team).
+- Vòng đời: Mới → Đang phân tích (ticket ai-draft cho PO change_request / BA srs / Tech Lead adr, agent ghi `drafts/<agent>/<key>/impact.md`) → Đang áp dụng → Đã áp dụng / Không áp dụng.
+- Orchestrator nối yêu cầu Đang áp dụng vào prompt agent bị ảnh hưởng (tối đa 6.000 ký tự) và cộng vào agent_version. Xem: `python3 orchestrator/requirements.py list|prompt <agent>`.
+- Đề xuất "## Kiến thức cho <agent>" trong impact.md: CTO nạp vào kho kiến thức trên trang chi tiết yêu cầu; "## Sửa skill": CTO sửa skill bằng PR. Chỉ đổi trạng thái yêu cầu khi CTO yêu cầu.
+
 ## Kiến thức agent
 - CTO nạp kinh nghiệm/quy tắc/checklist cho từng agent ở dashboard (Vai trò → cột Kiến thức, hoặc menu Kiến thức agent). Lưu ở `knowledge/<agent>/*.md`, `knowledge/_chung/` cho mọi agent; commit vào ai-team để giữ lịch sử.
 - Orchestrator nối mục đang bật vào prompt agent mỗi lượt (tối đa 12.000 ký tự, ưu tiên cao trước) và cộng vào agent_version. Xem đúng phần agent nhận: `python3 orchestrator/knowledge.py prompt <agent>`.

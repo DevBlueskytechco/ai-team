@@ -8,6 +8,7 @@ Nguồn dữ liệu (không lộ bí mật ra trình duyệt):
   - Ghi ticket từ giao diện (menu Ticket): POST /api/ticket/* — chỉ từ localhost, cần header X-Efitco
   - gh CLI (tài khoản CTO)                              PR mở + CI, CI develop                                   — mỗi 60s
   - Kiểm môi trường (biến .env có/không, claude, shopify CLI, gh, theme sạch)  trang Việc chờ tôi           — mỗi 10 phút
+  - Yêu cầu dự án: ai-team/requirements (CTO nạp, POST /api/req/*), đề xuất từ drafts/<agent>/<key>/impact.md của ticket phân tích
   - Kiến thức agent: ai-team/knowledge (CTO nạp, ghi qua POST /api/knowledge/*) + theme-efitco/.claude (định nghĩa, skill, quy tắc, agent-memory) — đọc khi mở trang
 Đẩy dữ liệu xuống trình duyệt bằng Server-Sent Events (/events) khi có thay đổi."""
 import os, sys, json, time, threading, subprocess, hashlib, datetime, html, re, shutil
@@ -22,6 +23,7 @@ REPO = os.environ.get("REPO_THEME", "DevBlueskytechco/theme-efitco")
 PORT = int(os.environ.get("DASHBOARD_PORT", "8787"))
 sys.path.insert(0, os.path.join(ROOT, "mcp"))
 sys.path.insert(0, os.path.join(ROOT, "orchestrator")); import knowledge as KN   # kiến thức agent (ai-team/knowledge + theme .claude)
+import requirements as RQ   # yêu cầu dự án (ai-team/requirements)
 os.environ.pop("GH_TOKEN", None)
 
 try:
@@ -257,11 +259,38 @@ def read_rubrics():
         out[f[:-5]] = {"pass_threshold": float(m.group(1)) if m else 0.8, "criteria": crit}
     return out
 
+def req_meta():
+    return {"sources": RQ.SOURCES, "statuses": RQ.STATUSES, "prios": RQ.PRIOS, "analysts": RQ.ANALYSTS, "default_analyst": RQ.DEFAULT_ANALYST,
+            "limit": RQ.LIMIT, "body_max": RQ.BODY_MAX}
+
+def req_detail(id):
+    r = RQ.get(id)
+    kn = [x for a in KN.AGENTS + [KN.SHARED] for x in KN.items(a) if id in (x.get("source") or "")]
+    return {"req": r, "proposals": RQ.proposals(r), "knowledge": kn, **req_meta(),
+            "prompt_agents": ([a for a in KN.AGENTS if not r["agents"] or a in r["agents"]] if r["status"] == "ap-dung" else [])}
+
+def req_write(act, d):
+    """Nạp / sửa / đổi trạng thái / giao phân tích / lưu trữ yêu cầu dự án — chỉ CTO trên localhost."""
+    if act == "save": return req_detail(RQ.save(d, UI_USER))
+    if act == "status": return req_detail(RQ.set_status(str(d.get("id") or ""), str(d.get("status") or ""), UI_USER, str(d.get("note") or "")[:200]))
+    if act == "archive": RQ.archive(str(d.get("id") or "")); return {"ok": True}
+    if act == "analyze":
+        import ticket_local as L
+        r = RQ.get(str(d.get("id") or "")); agent = str(d.get("agent") or RQ.DEFAULT_ANALYST.get(r["source"], "po"))
+        title, body = RQ.analysis_ticket(r, agent)
+        t = L.create(title, type="task", agent=agent, task_type=RQ.ANALYSTS[agent], body=body, parent=(r["stories"][0] if r["stories"] else None),
+                     labels=["ai-draft"], priority={"cao": "high", "vua": "medium", "thap": "low"}[r["priority"]], due_date=r["due"] or None, by=UI_USER)
+        RQ.add_ticket(r["id"], t["key"], UI_USER, agent); load_tickets(); VERSION["n"] += 1
+        return req_detail(r["id"])
+    raise ValueError("thao tác không hỗ trợ")
+
 def knowledge_detail(agent):
     txt, used, skipped = KN.prompt_for(agent)
+    rq, rq_used, rq_skip = RQ.prompt_for(agent) if agent != KN.SHARED else ("", [], [])
     return {"agent": agent, "items": KN.items(agent), "shared": KN.items(KN.SHARED) if agent != KN.SHARED else [], "current": KN.current(agent),
             "prompt": {"text": txt, "chars": len(txt), "used": [f"{x['agent']}/{x['id']}" for x in used], "skipped": [f"{x['agent']}/{x['id']}" for x in skipped]},
-            "archived": KN.archived_count(agent), "limit": KN.LIMIT, "kinds": KN.KINDS, "body_max": KN.BODY_MAX}
+            "archived": KN.archived_count(agent), "limit": KN.LIMIT, "kinds": KN.KINDS, "body_max": KN.BODY_MAX,
+            "req_prompt": {"text": rq, "chars": len(rq), "used": [{"id": r["id"], "title": r["title"]} for r in rq_used], "skipped": [r["id"] for r in rq_skip], "limit": RQ.LIMIT}}
 
 def roles_merged():
     """Bảng Vai trò = project.json (mặc định) đè bởi giá trị CTO sửa trên dashboard (data/tickets.db meta roles)."""
@@ -373,8 +402,16 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith(("/api/ticket/", "/api/knowledge/")): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith(("/api/ticket/", "/api/knowledge/", "/api/req/")): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
+        if u.path.startswith("/api/req/"):
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                if n > 200_000: return self._send(413, '{"error":"quá lớn"}')
+                d = json.loads(self.rfile.read(n) or b"{}")
+                return self._send(200, json.dumps(req_write(u.path.rsplit("/", 1)[-1], d), ensure_ascii=False, default=str))
+            except (ValueError, TypeError, KeyError) as e:
+                return self._send(400, json.dumps({"error": str(e).strip("'")}, ensure_ascii=False))
         if u.path.startswith("/api/knowledge/"):   # nạp / sửa / tắt / lưu trữ kiến thức agent — chỉ CTO trên localhost
             try:
                 n = int(self.headers.get("Content-Length") or 0)
@@ -435,6 +472,10 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/api/roles":
             try: return self._send(200, json.dumps(roles_merged(), ensure_ascii=False))
             except Exception as e: return self._send(500, json.dumps({"error": str(e)[:300]}, ensure_ascii=False))
+        if u.path == "/api/req":   # ?id=REQ-0001 → chi tiết (kèm đề xuất từ impact.md); không có → danh sách
+            rid = (parse_qs(u.query).get("id") or [""])[0]
+            try: return self._send(200, json.dumps(req_detail(rid) if rid else {"items": RQ.items(), **req_meta()}, ensure_ascii=False))
+            except ValueError as e: return self._send(404, json.dumps({"error": str(e)}, ensure_ascii=False))
         if u.path == "/api/knowledge":   # ?agent=dev-fe → chi tiết; không có → số liệu mọi agent
             ag = (parse_qs(u.query).get("agent") or [""])[0]
             try: return self._send(200, json.dumps(knowledge_detail(ag) if ag else KN.summary(), ensure_ascii=False))
