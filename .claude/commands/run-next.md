@@ -7,4 +7,4 @@ allowed-tools: Bash(ops/run_next.sh*), Bash(ops/ci_watch.sh*), Bash(ops/pr_repor
 2. Khi xong, đọc phần "Kết quả lượt chạy". Nếu preflight lỗi hoặc `is_error: True`: báo lỗi + nguyên nhân + cách sửa, DỪNG.
 3. Nếu có `pr`: lấy số PR, chạy `ops/ci_watch.sh <số>` ở chế độ nền (chờ CI), rồi làm đúng quy trình /review-pr với PR đó.
 4. Nếu agent không tạo PR (agent không sửa code: QA/Tech Lead/BA): chạy `python3 ops/ticket.py show <key>` và `python3 ops/ticket.py children <story>` khi là task_split; tóm tắt đầu ra cho CTO, đề xuất chấm điểm theo rubrics/<agent>.yaml.
-Không merge, không approve trong lệnh này.
+Không hỏi Yes/No giữa chừng. Merge chỉ khi PR đã có trong sổ duyệt (`python3 ops/approvals.py list`) → `ops/merge_pr.sh <n>`; chưa chốt thì để ở Việc chờ tôi.

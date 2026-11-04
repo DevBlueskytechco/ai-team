@@ -248,6 +248,10 @@ details.ov-more summary{white-space:normal} .ov-leg{flex-wrap:wrap;gap:4px 14px}
 .ibx{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
 .ibx .ttl{font-weight:500;line-height:1.4} .ibx .ttl a.k{font-family:var(--mono);font-size:12.5px;margin-right:6px}
 .ibx .meta{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.5} .ibx .meta .agtag{vertical-align:-3px}
+.apf{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2,var(--surface))}
+.apf label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-2)} .apf label.grow{flex:1 1 220px} .apf label.grow input{flex:1;min-width:0}
+.apf input,.apf select{font:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);max-width:100%}
+.apf .fresh{flex-basis:100%;font-size:12px}
 .ibx .ac{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:440px}
 .ibx .ac .cmd code{font-family:var(--mono);font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
 .ibx-empty{padding:10px 0;border-top:1px solid var(--line)}
@@ -810,9 +814,9 @@ function bindSearch() {
 
 function renderInfo() {
   if (PAGE === "dashboard") return;
-  const box = $("info"), a = document.activeElement, fq = a && a.dataset && a.dataset.q, pos = fq ? a.selectionStart : 0;
+  const box = $("info"), a = document.activeElement, ds = (a && a.dataset) || {}, fq = ds.q ? `[data-q="${ds.q}"]` : ds.apf ? `[data-apf="${ds.apf}"]` : null, pos = fq ? a.selectionStart : 0;
   renderInfoInner(box);
-  if (fq) { const n = box.querySelector(`[data-q="${fq}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+  if (fq) { const n = box.querySelector(fq); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
 }
 
 function renderInfoInner(box) {
@@ -1582,7 +1586,7 @@ const GUIDE = {
     what: "Mọi việc đang chờ CTO làm hoặc thiết lập, tính trực tiếp từ ticket, PR, CI và cấu hình. Việc tự biến mất khi đã xử lý xong.",
     parts: [
       ["Mức ưu tiên", ["**Gấp**: chờ quá 2 ngày, câu hỏi đang chặn ticket khác, CI develop đỏ, thiếu biến môi trường.", "**Cao**: hôm nay là ngày duyệt của vai, PR lỗi check bắt buộc, ticket thiếu loại việc.", "**Thường**: việc còn lại. **Chờ**: hệ thống đang chạy, chưa cần làm gì."]],
-      ["Các nhóm việc", ["**Duyệt PR và chấm**: PR đã đạt check bắt buộc — review rồi merge, chấm, đóng ticket.",
+      ["Các nhóm việc", ["**Duyệt PR và chấm**: PR đã đạt check bắt buộc — xem PR rồi bấm **Chốt merge** (nhãn, điểm rubric, lý do). Chốt xong mục chuyển sang Đang chờ hệ thống; Claude Code đọc sổ duyệt và chạy ops/merge_pr.sh (merge, chấm, đóng ticket) không hỏi Yes/No. PR đang chạy CI cũng chốt trước được — merge khi check đạt. PR có commit mới sau khi chốt thì phải chốt lại; bấm Huỷ chốt nếu đổi ý.",
         "**Trả lời câu hỏi**: câu hỏi agent tạo khi thiếu thông tin.",
         "**Cần bạn quyết định**: PR lỗi check bắt buộc, ticket cần sửa, ai-review mà không có PR, PR đã merge mà ticket chưa đóng, CI develop lỗi, Lighthouse lỗi.",
         "**Thiết lập ticket**: ticket Orchestrator đang bỏ qua (chưa có nhãn, thiếu agent, thiếu/sai loại việc) và ticket quá hạn.",
@@ -1590,7 +1594,7 @@ const GUIDE = {
         "**Có thể chạy tiếp** và **Đang chờ hệ thống**: thu gọn, không tính vào số việc."]],
     ],
     do: ["Bấm nút lệnh để chép: lệnh bắt đầu bằng `/` dán vào Claude Code ở thư mục ai-team; lệnh `python3` chạy trong terminal ai-team.",
-      "Lệnh `/merge-pr` đã điền sẵn tiêu chí rubric của agent với điểm 2 — sửa điểm và lý do trước khi chạy.", "“Kiểm tra lại môi trường” để kiểm ngay thay vì đợi 10 phút.", "Số việc hiện trên menu; đỏ khi có việc gấp."],
+      "Chốt merge điền sẵn tiêu chí rubric của agent với điểm 2 — sửa điểm và lý do trước khi chốt (nhãn khác đạt bắt buộc ghi lý do). Gõ `/merge-pr <n> <nhãn> <điểm> \"<lý do>\"` trong Claude Code cũng là chốt.", "“Kiểm tra lại môi trường” để kiểm ngay thay vì đợi 10 phút.", "Số việc hiện trên menu; đỏ khi có việc gấp."],
     src: ["Ticket nội bộ, PR và CI GitHub, project.json, orchestrator/config.yaml.", "Kiểm môi trường mỗi 10 phút; với biến .env chỉ kiểm có hay không, không đọc giá trị."],
     terms: ["ai-review", "ai-sua", "Câu hỏi", "Check bắt buộc", "Rubric", "Loại việc", "Role owner"] },
   "t-list": { t: "Danh sách ticket", who: "CTO, role owner, người theo dõi tiến độ",
@@ -2036,7 +2040,7 @@ function bindKnowledge() {
 }
 
 /* ===== Việc chờ tôi (CTO): duyệt, trả lời, quyết định, thiết lập — tính trực tiếp từ ticket, PR, CI, cấu hình; tự hết khi đã xử lý ===== */
-const IB_SECS = [["review", "Duyệt PR và chấm", "check", "PR có check bắt buộc đạt — review rồi /merge-pr (merge, chấm, đóng ticket)"],
+const IB_SECS = [["review", "Duyệt PR và chấm", "check", "PR có check bắt buộc đạt — xem PR rồi bấm Chốt merge (nhãn, điểm, lý do); Claude Code merge, chấm, đóng ticket không hỏi lại"],
   ["answer", "Trả lời câu hỏi", "send", "agent hỏi khi thiếu thông tin — trả lời bằng comment rồi đóng ticket câu hỏi"],
   ["decide", "Cần bạn quyết định", "flag", "CI lỗi, ticket cần sửa, ai-review không có PR, PR đã merge mà ticket chưa đóng, yêu cầu dự án mới hoặc đã phân tích xong"],
   ["ticket", "Thiết lập ticket", "tag", "ticket Orchestrator đang bỏ qua vì thiếu nhãn, agent hoặc loại việc; ticket quá hạn"],
@@ -2045,6 +2049,10 @@ const IB_SECS = [["review", "Duyệt PR và chấm", "check", "PR có check bắ
   ["wait", "Đang chờ hệ thống", "activity", "agent đang chạy, CI đang chạy, ticket chờ ticket khác — chưa cần làm gì"]];
 const IB_COUNTED = ["review", "answer", "decide", "ticket", "setup"];
 const IB_OPEN = {};   // trạng thái mở/đóng các khối thu gọn — giữ qua mỗi lần trang tự cập nhật
+/* Sổ duyệt CTO (ops/approvals.py): PR đã chốt merge → Claude Code chạy ops/merge_pr.sh, không hỏi Yes/No */
+let AP_FORM = null;   // form Chốt merge đang mở { pr, key, agent, label, scores, reason } — giữ qua mỗi lần trang tự cập nhật
+const apOf = (n) => ((DATA && DATA.approvals) || []).find((a) => a.kind === "merge" && a.ref === String(n));
+const AP_LABEL = { dat: "đạt", sua_nhe: "sửa nhẹ", sua_nang: "sửa nặng", loai: "loại" };
 let IB_CHECKING = false;
 const IB_PRI = { 3: ["critical", "Gấp"], 2: ["warning", "Cao"], 1: ["none", "Thường"], 0: ["none", "Chờ"] };
 const ageD = (iso) => (iso ? Math.max(0, (Date.now() - new Date(iso)) / 864e5) : 0);
@@ -2064,9 +2072,12 @@ function inboxItems() {
       const pr = prOf(t.key), mg = (d.merged || []).find((p) => p.branch === `feature/ai-${t.key}`);
       if (pr) {
         const gate = prGate(pr), prMin = ageD(pr.created) * 1440, rr2 = rerunCmd(pr);
-        if (gate === "pass") add({ ...base, sec: "review", pri: age >= over ? 3 : rr && rr.day === today ? 2 : 1,
+        const ap = apOf(pr.number);
+        if (ap) add({ ...base, sec: "wait", pri: 0, why: `PR #${pr.number} · CTO đã chốt ${esc(AP_LABEL[ap.label] || ap.label || "")} lúc ${esc(ap.at.slice(11, 16))} ${esc(ap.at.slice(8, 10))}/${esc(ap.at.slice(5, 7))} (${esc(ap.via)}) — ${gate === "pass" ? "Claude Code chạy ops/merge_pr.sh, không hỏi lại" : "merge khi check bắt buộc đạt"}`,
+          acts: [["cmd", `ops/merge_pr.sh ${pr.number}`], ["unapprove", pr.number], ["link", pr.url, `PR #${pr.number}`]] });
+        else if (gate === "pass") add({ ...base, sec: "review", pri: age >= over ? 3 : rr && rr.day === today ? 2 : 1,
           why: `PR #${pr.number} · check bắt buộc đạt · chờ ${ageTxt(age)}${age >= over ? ` (quá ${over} ngày)` : ""}${owner}`,
-          acts: [["cmd", `/review-pr ${pr.number}`], ["cmd", `/merge-pr ${pr.number} dat "${scoreTpl(t.agent)}" "<lý do>"`], ["link", pr.url, `PR #${pr.number}`]] });
+          acts: [["approve", pr.number, t.key, t.agent], ["cmd", `/review-pr ${pr.number}`], ["link", pr.url, `PR #${pr.number}`]], form: pr.number });
         else if (gate === "fail") add({ ...base, sec: "decide", pri: 2,
           why: `PR #${pr.number}: check bắt buộc lỗi (${esc(badChecks(pr, FAILS).join(", ") || "xem PR")}) — đọc log: lỗi môi trường (Shopify 502, timeout) thì chạy lại, lỗi code thì trả ai-sua`,
           acts: [["link", pr.url + "/checks", "Xem check"], ...(rr2 ? [["cmd", rr2]] : []), ["cmd", `python3 ops/ticket.py label ${t.key} ai-sua`]] });
@@ -2078,7 +2089,8 @@ function inboxItems() {
           acts: [["link", pr.url + "/checks", "Xem check"], ...(rr2 ? [["cmd", rr2]] : [])] });
         else if (gate === "none" && prMin > 15) add({ ...base, sec: "decide", pri: 1, why: `PR #${pr.number} mở ${Math.round(prMin)} phút chưa có check nào — workflow CI có chạy không?`,
           acts: [["link", pr.url + "/checks", "Xem check"]] });
-        else add({ ...base, sec: "wait", pri: 0, why: gate === "none" ? `PR #${pr.number} chờ CI khởi chạy` : `PR #${pr.number} đang chạy CI`, acts: [["link", pr.url, `PR #${pr.number}`]] });
+        else add({ ...base, sec: "wait", pri: 0, why: gate === "none" ? `PR #${pr.number} chờ CI khởi chạy` : `PR #${pr.number} đang chạy CI — có thể chốt trước, Claude Code merge khi check đạt`,
+          acts: [["approve", pr.number, t.key, t.agent], ["link", pr.url, `PR #${pr.number}`]], form: pr.number });
       } else if (mg) add({ ...base, sec: "decide", pri: 2, why: `PR #${mg.number} đã merge nhưng ticket chưa chấm, chưa đóng (merge ngoài /merge-pr?)`,
         acts: [["cmd", `python3 orchestrator/review.py ${t.key} dat --scores "${scoreTpl(t.agent)}" --by cto --reason "<lý do>"`], ["cmd", `python3 ops/ticket.py close ${t.key} "[cto] PR #${mg.number} đã merge"`]] });
       else add({ ...base, sec: "decide", pri: age >= over ? 2 : 1, why: `nhãn ai-review nhưng không có PR mở hay đã merge · ${ageTxt(age)} — cho agent chạy lại hoặc đóng ticket`,
@@ -2169,10 +2181,18 @@ function pageInbox() {
     ["Có thể chạy", cnt("run"), "ticket sẵn sàng cho agent"]];
   const actHtml = (a) => a[0] === "cmd" ? `<button type="button" class="btn sm cmd" data-cmd="${esc(a[1])}" title="Chép lệnh: ${esc(a[1])}">${IC("copy")}<code>${esc(a[1])}</code></button>`
     : a[0] === "link" ? `<a class="btn sm" href="${esc(a[1])}"${/^https?:/.test(a[1]) ? ' target="_blank" rel="noopener"' : ""}>${IC(a[3] || (/^https?:/.test(a[1]) ? "link" : "edit"))}${esc(a[2])}</a>`
+    : a[0] === "approve" ? (canWrite() ? `<button type="button" class="btn sm" data-apopen="${a[1]}" data-key="${esc(a[2])}" data-agent="${esc(a[3] || "")}">${IC("check")}Chốt merge</button>` : "")
+    : a[0] === "unapprove" ? (canWrite() ? `<button type="button" class="btn sm" data-apcancel="${a[1]}">${IC("x")}Huỷ chốt</button>` : "")
     : `<span class="fresh">${esc(a[1])}</span>`;
+  const apForm = (n) => { const f = AP_FORM; if (!f || String(f.pr) !== String(n)) return "";
+    return `<div class="apf" role="group" aria-label="Chốt merge PR #${esc(n)}"><label>Nhãn <select data-apf="label">${Object.entries(AP_LABEL).map(([k, l]) => `<option value="${k}" ${f.label === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label>Điểm rubric <input data-apf="scores" value="${esc(f.scores)}" size="40" title="k=0|1|2, cách nhau dấu phẩy — theo rubrics/${esc(f.agent || "agent")}.yaml"></label>
+      <label class="grow">Lý do <input data-apf="reason" value="${esc(f.reason)}" placeholder="1 dòng, ghi vào PR và ticket"></label>
+      <button type="button" class="btn sm primary" data-apsave="${esc(n)}">${IC("check")}Chốt</button><button type="button" class="btn sm" data-apclose>Thôi</button>
+      <span class="fresh">Chốt xong Claude Code tự merge (squash), chấm điểm, đóng ticket — không hỏi Yes/No. PR có commit mới sau khi chốt thì phải chốt lại.</span></div>`; };
   const row = (x) => `<div class="ibx"><div class="pr">${status(...IB_PRI[x.pri])}</div>
     <div class="bd"><div class="ttl">${x.key ? `<a class="k" href="#/t/${esc(x.key)}">${esc(x.key)}</a>` : ""}${esc(x.title)}</div>
-      <div class="meta">${x.agent ? agentTag(x.agent, 16) + " · " : ""}${x.why}</div></div>
+      <div class="meta">${x.agent ? agentTag(x.agent, 16) + " · " : ""}${x.why}</div>${x.form ? apForm(x.form) : ""}</div>
     <div class="ac">${(x.acts || []).map(actHtml).join("")}</div></div>`;
   const sec = ([id, name, icon, sub]) => { const it = all.filter((x) => x.sec === id).sort((a, b) => b.pri - a.pri || b.age - a.age);
     if (id === "wait" && !it.length) return "";
@@ -2187,7 +2207,7 @@ function pageInbox() {
     ${IB_SECS.map(sec).join("")}
     <details class="ibx-sec" data-ib="env" ${IB_OPEN.env ? "open" : ""}><summary class="fresh">Môi trường: ${okN.length}/${(setup.items || []).length} mục đạt${setup.at ? ` · kiểm ${ago(setup.at)}` : " · chưa kiểm"}</summary>
       <ul class="fresh" style="margin:6px 0 0 18px">${okN.map((x) => `<li>${esc(x.text)}</li>`).join("") || "<li>—</li>"}</ul></details>
-    <p class="note">Lệnh bắt đầu bằng / gõ trong Claude Code ở thư mục ai-team; lệnh python3 chạy trong terminal ai-team. Bấm nút lệnh để chép. Agent không tự qua cổng: merge, chấm, đóng ticket chỉ khi bạn chạy.</p>`;
+    <p class="note">Lệnh bắt đầu bằng / gõ trong Claude Code ở thư mục ai-team; lệnh python3 chạy trong terminal ai-team. Bấm nút lệnh để chép. Agent không tự qua cổng: merge, chấm, đóng ticket chỉ khi bạn chốt — bấm Chốt merge ở đây (hoặc gõ /merge-pr); Claude Code đọc sổ duyệt (python3 ops/approvals.py list) và chạy ops/merge_pr.sh, không hỏi Yes/No lại.</p>`;
 }
 function bindInbox() {
   document.querySelectorAll("#info [data-cmd]").forEach((b) => (b.onclick = async () => {
@@ -2195,6 +2215,23 @@ function bindInbox() {
     catch (e) { const ta = document.createElement("textarea"); ta.value = b.dataset.cmd; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); toast("Đã chép: " + b.dataset.cmd); } catch (x) { toast("Không chép được, chọn và chép tay", true); } ta.remove(); }
   }));
   document.querySelectorAll("#info details[data-ib]").forEach((dt) => (dt.ontoggle = () => (IB_OPEN[dt.dataset.ib] = dt.open)));
+  const apPost = async (path, body) => { const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: JSON.stringify(body) });
+    const j = await res.json(); if (!res.ok) throw new Error(j.error || res.status); if (DATA) DATA.approvals = j.pending; return j; };
+  document.querySelectorAll("#info [data-apopen]").forEach((b) => (b.onclick = () => { const n = b.dataset.apopen;
+    AP_FORM = AP_FORM && String(AP_FORM.pr) === n ? null : { pr: n, key: b.dataset.key, agent: b.dataset.agent, label: "dat", scores: scoreTpl(b.dataset.agent), reason: "" };
+    renderInfo(); const f = document.querySelector('#info [data-apf="reason"]'); if (f) f.focus(); }));
+  document.querySelectorAll("#info [data-apf]").forEach((el) => (el.oninput = el.onchange = () => { if (AP_FORM) AP_FORM[el.dataset.apf] = el.value; }));
+  document.querySelectorAll("#info [data-apclose]").forEach((b) => (b.onclick = () => { AP_FORM = null; renderInfo(); }));
+  document.querySelectorAll("#info [data-apsave]").forEach((b) => (b.onclick = async () => { const f = AP_FORM; if (!f) return;
+    if (!/^[^=,\s]+=[0-2](,\s*[^=,\s]+=[0-2])*$/.test(f.scores.trim())) return toast("Điểm dạng tiêu_chí=0|1|2, cách nhau dấu phẩy", true);
+    if (f.label !== "dat" && !f.reason.trim()) return toast("Nhãn khác đạt cần ghi lý do", true);
+    b.disabled = true;
+    try { await apPost("/api/approve", { kind: "merge", ref: f.pr, key: f.key, label: f.label, scores: f.scores.trim(), reason: f.reason.trim() });
+      AP_FORM = null; toast(`Đã chốt merge PR #${f.pr} (${AP_LABEL[f.label]}) — Claude Code sẽ merge, không hỏi lại`); renderMenu(); renderInfo(); }
+    catch (e) { b.disabled = false; toast("Chốt lỗi: " + e.message, true); } }));
+  document.querySelectorAll("#info [data-apcancel]").forEach((b) => (b.onclick = async () => { b.disabled = true;
+    try { await apPost("/api/approve/cancel", { kind: "merge", ref: b.dataset.apcancel }); toast(`Đã huỷ chốt PR #${b.dataset.apcancel}`); renderMenu(); renderInfo(); }
+    catch (e) { b.disabled = false; toast("Huỷ chốt lỗi: " + e.message, true); } }));
   const r = $("ibxRecheck");
   if (r) r.onclick = async () => { IB_CHECKING = true; r.disabled = true; r.lastChild.textContent = "Đang kiểm…";
     try { const res = await fetch("/api/setup/recheck", { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: "{}" });

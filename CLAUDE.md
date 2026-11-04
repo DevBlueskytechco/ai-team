@@ -7,9 +7,9 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - `/status` — ticket, PR, CI, preflight.
 - `/run-next [ES1-Txx]` — agent làm 1 ticket, chờ PR + CI, review sơ bộ.
 - `/review-pr <n>` — review đầy đủ, đề xuất điểm + lệnh merge.
-- `/merge-pr <n> <nhãn> <scores> "<lý do>"` — CTO đồng ý merge.
+- `/merge-pr <n> <nhãn> <scores> "<lý do>"` — CTO chốt merge (hook ghi sổ duyệt). Chốt được cả ở dashboard → Việc chờ tôi → Chốt merge.
 - `/apply-patch <file> <theme|aiteam|pr:n> "<tiêu đề>"` — áp patch từ Claude chat.
-- `/sprint [n]` — chạy liên tiếp tối đa n ticket, dừng ở mỗi PR chờ duyệt.
+- `/sprint [n]` — chạy liên tiếp tối đa n ticket; PR chưa được chốt thì để ở Việc chờ tôi, làm ticket khác.
 - `/dashboard` — mở dashboard web local http://localhost:8787 (hoặc chạy `ops/dashboard.sh` ở terminal riêng).
 
 ## Ticket
@@ -39,9 +39,16 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Chỉ thêm/sửa/tắt/lưu trữ khi CTO yêu cầu: `python3 orchestrator/knowledge.py add|off|on|archive ...`. Không xoá file kiến thức (lưu trữ = chuyển vào `_archive/`).
 - Định nghĩa agent và skill ở `../theme-efitco/.claude/` sửa bằng PR, không qua kho kiến thức.
 
+## Chạy liên tục (auto mode, CTO 04/11/2026)
+- Việc đã có quy tắc trong file này thì làm luôn, không hỏi Yes/No. Việc cần CTO quyết: để ở Việc chờ tôi (PR sẵn sàng chấm tự hiện; việc khác tạo câu hỏi `[Q]` gán CTO) rồi làm việc khác không phụ thuộc — không dừng chờ.
+- Merge: chỉ PR có trong sổ duyệt `python3 ops/approvals.py list` (CTO bấm Chốt merge ở Việc chờ tôi, hoặc gõ /merge-pr) → `ops/merge_pr.sh <n>`. Script tự lấy nhãn/điểm/lý do theo sổ, chờ đủ check bắt buộc; PR có commit mới sau khi chốt thì từ chối → CTO chốt lại. Đầu mỗi bước của /sprint, /run-next và khi rảnh: xem sổ, có PR đã chốt mà check đạt thì merge ngay.
+- Push: chỉ nhánh làm việc (feature/ai-*, fix/*, patch/*, test/*, qa/*), ghi rõ nhánh đích: `ops/push_branch.sh [-C <repo>] <nhánh>` hoặc `git push origin HEAD:<nhánh>`. Hook `ops/hooks/guard_bash.py` chặn push develop/main, force push, xoá nhánh, merge/approve trực tiếp, publish/xoá theme, store khác hoa-qua-nhap-khau, đọc .env — bị chặn thì đổi cách làm theo lý do hook trả về, không hỏi CTO.
+- Lệnh ngắn, mỗi lệnh một việc; không ghép nhiều bước có biến ($W, $R, $(…)) vào một lệnh — dùng script ops/ (đã allow sẵn) để auto mode chạy ngay, không bị classifier chặn.
+- Không sửa `.claude/settings*.json`, `ops/hooks/`, `ops/approvals.py`, `data/approvals.jsonl` (deny) — CTO đổi bằng patch. Không đóng ticket, không chấm điểm ngoài ops/merge_pr.sh (deny).
+
 ## Quy tắc cứng
 - Mọi thao tác qua script trong `ops/`. Không tự viết lệnh gh/git thay script khi script đã có.
-- KHÔNG approve/merge PR, KHÔNG đóng ticket, KHÔNG chấm điểm nếu CTO chưa gõ /merge-pr hoặc nói rõ "merge".
+- KHÔNG approve/merge PR, KHÔNG đóng ticket, KHÔNG chấm điểm khi CTO chưa chốt trong sổ duyệt (Việc chờ tôi → Chốt merge, hoặc CTO gõ /merge-pr). CTO chỉ nói "merge" trong chat thì nhắc CTO bấm Chốt merge hoặc gõ /merge-pr.
 - Không đọc, in, hay chép nội dung `.env`. Không `gh secret`. Không publish/xoá theme, không push develop/main trực tiếp, không force push.
 - `gh` chạy bằng tài khoản CTO (ops/env.sh unset GH_TOKEN). Orchestrator tự dùng AGENT_GH_TOKEN cho commit/push/PR của agent.
 - Lệnh chạy lâu (run_next, ci_watch) chạy nền rồi chờ thông báo, không poll bằng sleep.
@@ -50,6 +57,6 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 
 ## Khi lỗi
 - preflight lỗi → báo dòng lỗi + cách sửa, dừng.
-- Shopify 502 / CI lỗi môi trường → `gh run rerun <run> --failed` (hỏi CTO trước).
-- Check bị huỷ (cancelled, thường do concurrency) hoặc chạy quá 45 phút → chạy lại CI (`gh run rerun <run>`, hỏi CTO trước), không trả ai-sua. Dashboard có nút chép lệnh đúng run id.
+- Shopify 502 / CI lỗi môi trường → tự `gh run rerun <run> --failed -R DevBlueskytechco/theme-efitco`, không hỏi CTO; tối đa 2 lần mỗi run (`gh run view <run> --json attempt`, attempt ≥ 3 thì thôi) — vẫn lỗi thì để ở Việc chờ tôi.
+- Check bị huỷ (cancelled, thường do concurrency) hoặc chạy quá 45 phút → tự chạy lại CI (`gh run rerun <run>`, cùng giới hạn 2 lần), không trả ai-sua. Dashboard có nút chép lệnh đúng run id.
 - Agent chạm max_turns hoặc is_error → tóm tắt result, đề xuất chạy lại hay chia nhỏ ticket.

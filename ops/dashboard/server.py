@@ -27,6 +27,7 @@ sys.path.insert(0, os.path.join(ROOT, "orchestrator")); import knowledge as KN  
 import requirements as RQ   # yêu cầu dự án (ai-team/requirements)
 import overview as OV       # tổng quan dự án (ops/dashboard/overview.py)
 import plan_usage as PU     # hạn mức gói Claude (orchestrator/plan_usage.py)
+sys.path.insert(0, os.path.join(ROOT, "ops")); import approvals as AP   # sổ duyệt CTO (ops/approvals.py)
 os.environ.pop("GH_TOKEN", None)
 
 try:
@@ -415,7 +416,7 @@ def snapshot():
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
-    s.update({"live": read_live(), "runs": runs[-500:], "tokens": token_summary(runs), "plan": plan_info(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+    s.update({"live": read_live(), "runs": runs[-500:], "tokens": token_summary(runs), "plan": plan_info(), "approvals": AP.pending(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
               "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
               "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
     return s
@@ -459,7 +460,7 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/roles/update", "/api/setup/recheck", "/api/plan/refresh") and not u.path.startswith(("/api/ticket/", "/api/knowledge/", "/api/req/")): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update", "/api/setup/recheck", "/api/plan/refresh", "/api/approve", "/api/approve/cancel") and not u.path.startswith(("/api/ticket/", "/api/knowledge/", "/api/req/")): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
         if u.path.startswith("/api/req/"):
             try:
@@ -481,6 +482,23 @@ class H(BaseHTTPRequestHandler):
                 elif act == "archive": kid = KN.archive(ag, str(d.get("id") or ""))
                 else: return self._send(404, '{"error":"not found"}')
                 return self._send(200, json.dumps({"ok": True, "id": kid, "detail": knowledge_detail(ag)}, ensure_ascii=False))
+            except (ValueError, TypeError) as e:
+                return self._send(400, json.dumps({"error": str(e)}, ensure_ascii=False))
+        if u.path in ("/api/approve", "/api/approve/cancel"):   # CTO chốt merge ở Việc chờ tôi → sổ duyệt; Claude Code chạy ops/merge_pr.sh không hỏi lại
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                if n > 20_000: return self._send(413, '{"error":"quá lớn"}')
+                d = json.loads(self.rfile.read(n) or b"{}"); kind, ref = str(d.get("kind") or ""), str(d.get("ref") or "").lstrip("#")
+                if kind != "merge" or not ref.isdigit(): raise ValueError("chỉ chốt merge PR: kind=merge, ref=<số PR>")
+                if u.path.endswith("/cancel"): AP.cancel(kind, ref, UI_USER)
+                else:
+                    label, scores, reason = d.get("label"), str(d.get("scores") or "").replace(" ", ""), str(d.get("reason") or "").strip()[:500]
+                    if label not in ("dat", "sua_nhe", "sua_nang", "loai"): raise ValueError("nhãn phải là dat|sua_nhe|sua_nang|loai")
+                    if not re.fullmatch(r"[^=,\s]+=[0-2](,[^=,\s]+=[0-2])*", scores): raise ValueError("điểm dạng tiêu_chí=0|1|2, cách nhau dấu phẩy")
+                    if label != "dat" and not reason: raise ValueError("nhãn khác đạt cần lý do")
+                    AP.record(kind, ref, UI_USER, "dashboard", label=label, scores=scores, reason=reason, key=str(d.get("key") or ""))
+                VERSION["n"] += 1
+                return self._send(200, json.dumps({"ok": True, "pending": AP.pending()}, ensure_ascii=False))
             except (ValueError, TypeError) as e:
                 return self._send(400, json.dumps({"error": str(e)}, ensure_ascii=False))
         if u.path == "/api/plan/refresh":   # đọc lại hạn mức gói ngay (tối thiểu 2 phút giữa 2 lần)

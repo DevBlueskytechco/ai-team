@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-# Duyệt + merge PR agent, chấm điểm, đóng ticket. CHỈ chạy sau khi CTO đồng ý.
-# ops/merge_pr.sh <số PR> <dat|sua_nhe|sua_nang|loai> "<scores k=v,...>" "<lý do>"
+# Duyệt + merge PR agent, chấm điểm, đóng ticket. CHỈ chạy khi CTO đã chốt trong sổ duyệt (ops/approvals.py):
+# dashboard → Việc chờ tôi → "Chốt merge", hoặc CTO gõ /merge-pr. Có sổ thì chạy luôn, không hỏi Yes/No.
+# ops/merge_pr.sh <số PR> [<dat|sua_nhe|sua_nang|loai> "<scores k=v,...>" "<lý do>"]   — nhãn/điểm/lý do lấy theo sổ khi CTO đã ghi
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
-n="$1"; label="$2"; scores="$3"; reason="${4:-}"; R="$REPO_THEME"
+n="${1#\#}"; R="$REPO_THEME"
+last=$(gh api "repos/$R/pulls/$n/commits" --jq '.[-1].commit.committer.date' 2>/dev/null)
+appr=$(python3 "$AI_TEAM/ops/approvals.py" require merge "$n" ${last:+--after "$last"}) || exit 1
+jf() { python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get(sys.argv[2]) or "")' "$appr" "$1"; }
+label=$(jf label); scores=$(jf scores); reason=$(jf reason)
+label="${label:-${2:-}}"; scores="${scores:-${3:-}}"; reason="${reason:-${4:-}}"
+[ -n "$label" ] && [ -n "$scores" ] || { echo "Dừng: sổ duyệt PR #$n thiếu nhãn/điểm — CTO chốt lại ở Việc chờ tôi"; exit 1; }
+echo "CTO đã chốt PR #$n: $label · $scores · $reason ($(jf via) $(jf at))"
 for c in theme-check preview e2e lighthouse; do
   st=$(gh pr checks "$n" -R "$R" --json name,bucket --jq ".[] | select(.name==\"$c\") | .bucket" 2>/dev/null | head -1)
   [ "$st" = "pass" ] || { echo "Dừng: check $c = ${st:-không có} (cần pass)"; exit 1; }
@@ -28,4 +36,5 @@ if [ -n "$tid" ]; then
   python3 "$AI_TEAM/orchestrator/review.py" "$tid" "$label" --scores "$scores" --by cto --reason "$reason"
   python3 "$AI_TEAM/ops/ticket.py" close "$key" "[cto] PR #$n merge. Review $label. $reason"
 fi
+python3 "$AI_TEAM/ops/approvals.py" done merge "$n" "merged $label"
 git -C "$THEME" checkout -q develop && git -C "$THEME" pull -q --ff-only && echo "develop đã cập nhật"

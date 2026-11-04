@@ -630,6 +630,11 @@
      "04/11/2026",
      "Ngân sách agent theo hạn mức gói Claude Max của CTO (200 USD/tháng cố định): cảnh báo 80%, dừng giao việc khi hết phiên 5 giờ hoặc tuần ≥ 90%; theo dõi token agent, cost_usd chỉ là quy đổi giá API. Thay quyết định 2.000 USD/tháng ngày 22/10",
      "orchestrator/config.yaml, CLAUDE.md"
+    ],
+    [
+     "04/11/2026",
+     "Claude Code ở ai-team chạy auto mode không hỏi Yes/No với việc đã có quy tắc; việc cần CTO quyết nằm ở Việc chờ tôi. Merge chỉ khi CTO chốt trong sổ duyệt (nút Chốt merge hoặc gõ /merge-pr); hook chặn push develop/main, force push, merge trực tiếp, publish theme; CI bị huỷ/lỗi môi trường tự chạy lại tối đa 2 lần",
+     "CLAUDE.md, .claude/settings.json, ops/hooks/, ops/approvals.py"
     ]
    ],
    "note": ""
