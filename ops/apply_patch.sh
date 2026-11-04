@@ -12,9 +12,12 @@ if [[ "$target" == pr:* ]]; then
   git push -q && echo "Đã đẩy lên $br (PR #$n)"; git checkout -q develop; exit 0
 fi
 case "$target" in theme) dir="$THEME"; base=develop;; aiteam) dir="$AI_TEAM"; base=main;; *) echo "target phải là theme|aiteam|pr:<n>"; exit 1;; esac
+# merge thẳng vào develop/main (--admin) = việc CTO chốt: CTO gõ /apply-patch thì hook đã ghi sổ (ops/approvals.py), chạy luôn không hỏi
+python3 "$AI_TEAM/ops/approvals.py" require patch "$(basename "$p")" >/dev/null || exit 1
 cd "$dir" && git checkout -q "$base" && git pull -q --ff-only || exit 1
 b="patch/$(basename "$p" .patch)-$(date +%H%M%S)"; git checkout -q -b "$b"
 git am -3 < "$p" || { git am --abort; git checkout -q "$base"; git branch -D "$b"; echo "Dừng: patch không áp được"; exit 1; }
 if [ "$target" = theme ]; then shopify theme check --fail-level error >/dev/null 2>&1 || { echo "Dừng: theme check lỗi"; shopify theme check | tail -20; exit 1; }; fi
 git push -q -u origin "$b" && url=$(gh pr create -B "$base" -t "$title" -b "Patch từ Claude (CTO áp qua ops/apply_patch.sh)") && echo "$url"
-gh pr merge "$url" --squash --delete-branch --admin && git checkout -q "$base" && git pull -q --ff-only && echo "Đã merge vào $base"
+gh pr merge "$url" --squash --delete-branch --admin && git checkout -q "$base" && git pull -q --ff-only && echo "Đã merge vào $base" \
+  && python3 "$AI_TEAM/ops/approvals.py" done patch "$(basename "$p")" "$url"

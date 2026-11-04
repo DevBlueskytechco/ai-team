@@ -9,48 +9,81 @@
       "Bash(python3 ops/status.py*)",
       "Bash(python3 ops/ticket.py show*)",
       "Bash(python3 ops/ticket.py children*)",
+      "Bash(python3 ops/ticket.py comment*)",
+      "Bash(python3 ops/ticket.py label*)",
+      "Bash(python3 ops/ticket.py reopen*)",
+      "Bash(python3 ops/ticket.py backup*)",
+      "Bash(python3 ops/ticket.py export*)",
+      "Bash(python3 ops/approvals.py list*)",
+      "Bash(python3 ops/approvals.py require*)",
+      "Bash(python3 orchestrator/plan_usage.py*)",
       "Bash(ops/run_next.sh*)",
       "Bash(ops/pr_report.sh*)",
       "Bash(ops/ci_watch.sh*)",
+      "Bash(ops/push_branch.sh*)",
+      "Bash(ops/merge_pr.sh*)",
+      "Bash(ops/apply_patch.sh*)",
+      "Bash(ops/dashboard.sh*)",
       "Bash(source ops/env.sh*)",
       "Bash(gh pr view*)",
       "Bash(gh pr list*)",
       "Bash(gh pr checks*)",
       "Bash(gh pr diff*)",
+      "Bash(gh pr comment*)",
       "Bash(gh run view*)",
       "Bash(gh run list*)",
+      "Bash(gh run rerun*)",
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
-      "Bash(shopify theme check*)",
-      "Bash(ops/dashboard.sh*)",
-      "Bash(python3 ops/ticket.py backup*)",
-      "Bash(python3 ops/ticket.py export*)"
+      "Bash(git fetch*)",
+      "Bash(shopify theme check*)"
     ],
-    "ask": [
-      "Bash(ops/merge_pr.sh*)",
-      "Bash(ops/apply_patch.sh*)",
-      "Bash(python3 ops/ticket.py close*)",
-      "Bash(python3 ops/ticket.py comment*)",
-      "Bash(python3 orchestrator/review.py*)",
-      "Bash(git push*)",
-      "Bash(gh pr merge*)",
-      "Bash(gh pr review*)",
-      "Bash(python3 ops/ticket.py reopen*)",
-      "Bash(python3 ops/ticket.py label*)",
-      "Bash(python3 ops/ticket.py init*)"
-    ],
+    "ask": [],
     "deny": [
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(git push origin develop*)",
       "Bash(git push origin main*)",
+      "Bash(gh pr merge*)",
+      "Bash(gh pr review*)",
+      "Bash(python3 orchestrator/review.py*)",
+      "Bash(python3 ops/ticket.py close*)",
+      "Bash(python3 ops/ticket.py init*)",
       "Bash(shopify theme publish*)",
       "Bash(shopify theme delete*)",
       "Bash(shopify theme push --live*)",
       "Bash(gh secret*)",
       "Bash(rm -rf*)",
-      "Read(./.env)"
+      "Read(./.env)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/settings.local.json)",
+      "Write(./.claude/settings.json)",
+      "Write(./.claude/settings.local.json)",
+      "Edit(./ops/hooks/**)",
+      "Write(./ops/hooks/**)",
+      "Edit(./ops/approvals.py)",
+      "Write(./ops/approvals.py)",
+      "Edit(./data/approvals.jsonl)",
+      "Write(./data/approvals.jsonl)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Monitor",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/guard_bash.py\"", "timeout": 10 }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/cto_command.py\"", "timeout": 10 }
+        ]
+      }
     ]
   }
 }

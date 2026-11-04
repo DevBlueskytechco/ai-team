@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất, hạn mức gói Claude.
+"""Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất, việc CTO đã chốt, hạn mức gói Claude.
 Chạy: source ops/env.sh && python3 ops/status.py"""
 import os, sys, json, subprocess, re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,6 +38,14 @@ print("\n== CI develop gần nhất")
 print("  " + (sh("gh", "run", "list", "-R", "DevBlueskytechco/theme-efitco", "-b", "develop", "-L", "1",
                  "--json", "databaseId,conclusion,status,displayTitle", "--jq",
                  '.[0] | "\\(.databaseId) \\(.status)/\\(.conclusion) \\(.displayTitle)"') or "(không lấy được)"))
+print("\n== CTO đã chốt (sổ duyệt — chạy luôn, không hỏi lại)")
+try:
+    sys.path.insert(0, os.path.join(ROOT, "ops")); import approvals as AP
+    P = AP.pending()
+    for r in P: print(f"  {AP.KIND.get(r['kind'], r['kind'])} {r['ref']}: {r.get('label') or r.get('target') or ''} {r.get('scores') or ''} — chốt {r['at'][:16].replace('T', ' ')} qua {r.get('via')}"
+                      + (f" → ops/merge_pr.sh {r['ref']}" if r["kind"] == "merge" else ""))
+    if not P: print("  (không có)")
+except Exception as e: print(f"  (không đọc được sổ duyệt: {e})")
 print("\n== Gói Claude (hạn mức agent dùng chung với CTO)")
 try:
     import yaml, plan_usage as PU
