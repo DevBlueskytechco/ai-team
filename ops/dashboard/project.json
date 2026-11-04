@@ -7,28 +7,28 @@
    "title": "Khung theme và design token",
    "side": "FE+BE",
    "points": 8,
-   "status": "Đang QA"
+   "status": "Xong"
   },
   {
    "key": "TE-2",
    "title": "Block slideshow (hero) và rich text",
    "side": "FE+BE",
    "points": 8,
-   "status": "Đang làm"
+   "status": "Xong"
   },
   {
    "key": "TE-3",
    "title": "Block featured collection và product card",
    "side": "FE+BE",
    "points": 8,
-   "status": "Đang làm"
+   "status": "Xong"
   },
   {
    "key": "TE-4",
    "title": "Trang sản phẩm",
    "side": "FE+BE",
    "points": 13,
-   "status": "Chưa làm"
+   "status": "Đang làm"
   },
   {
    "key": "TE-5",
@@ -1118,7 +1118,7 @@
     "name": "Sprint 1",
     "start": "2026-11-02",
     "end": "2026-11-15",
-    "goal": ""
+    "goal": "Xong TE-3 và TE-4 (trang sản phẩm FE + BE + QA); CI ổn định: Lighthouse đo thật, test chạy trên dữ liệu store"
    },
    {
     "name": "Sprint 2",
