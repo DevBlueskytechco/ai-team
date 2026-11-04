@@ -6,3 +6,5 @@ ops/__pycache__/
 evals/raw/live/
 evals/raw/_live.json
 data/
+evals/raw/_plan_usage.json
+evals/raw/_plan_event.json

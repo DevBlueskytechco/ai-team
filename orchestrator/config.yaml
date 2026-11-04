@@ -3,8 +3,14 @@ ai_team_dir: .
 claude_bin: claude
 permission_mode: acceptEdits
 max_turns_default: 90   # dev-fe ES1-T14/T15 chạm 60 lượt (30/10)
-budget_usd_month: 2000      # quyết định CTO 22/10/2026; chỉ CTO (Tony Pham) được nới, sửa số này + ghi lý do trong commit
-budget_warn_pct: 80
+# Ngân sách agent (CTO 04/11/2026, thay 2.000 USD/tháng): agent chạy bằng gói Claude của CTO, chi phí thật cố định; giới hạn là hạn mức
+# phiên 5 giờ và tuần Claude tự đo (%), đọc bằng `claude -p /usage`. Chỉ CTO (Tony Pham) đổi các số dưới + ghi lý do trong commit.
+plan_name: "Claude Max · 200 USD/tháng"
+plan_usd_month: 200          # chi phí thật mỗi tháng (gói), không phụ thuộc token
+budget_warn_pct: 80          # cảnh báo khi hạn mức phiên 5 giờ hoặc tuần ≥ mức này
+budget_stop_pct: 90          # Orchestrator không giao việc mới khi hạn mức tuần ≥ mức này (chừa phần cho CTO dùng tay); hết phiên 5 giờ thì chờ reset
+token_budget_week: 0         # trần token agent / 7 ngày (input + output + cache ghi, không tính cache đọc); 0 = không đặt, chỉ theo hạn mức gói
+plan_usage_poll_min: 15      # đọc lại hạn mức gói mỗi N phút (dashboard + trước mỗi lượt); 0 = tắt
 review_overdue_days: 2
 agent_github_login: nextsky-ai-agent   # tài khoản đứng tên PR agent (AGENT_GH_TOKEN); dashboard chỉ tính PR của tài khoản này là PR agent
 required_checks: [theme-check, preview, e2e, lighthouse]   # check chặn merge; lighthouse chặn từ 04/11 (CTO: TE-2 xong, lighthouse đo thật cả 3 trang)

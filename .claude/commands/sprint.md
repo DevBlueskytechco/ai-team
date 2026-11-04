@@ -8,5 +8,5 @@ Lặp tối đa ${ARGUMENTS:-3} lượt:
 2. Làm quy trình /run-next (chạy nền, chờ xong).
 3. Nếu lượt tạo PR: làm quy trình /review-pr. Đề xuất lệnh /merge-pr rồi DỪNG CHỜ CTO — không merge, không chạy ticket kế tiếp có blocked_by vào ticket này.
 4. Nếu lượt không tạo PR (QA/Tech Lead): tóm tắt đầu ra, đề xuất chấm điểm, rồi sang lượt kế tiếp.
-Dừng ngay khi: preflight lỗi, agent is_error, CI lỗi môi trường, ngân sách token ≥ 80%, hoặc gói Claude báo usage limit.
+Dừng ngay khi: preflight lỗi, agent is_error, CI lỗi môi trường, mục Gói Claude của status có CẢNH BÁO/DỪNG (hạn mức phiên 5 giờ hoặc tuần ≥ 80%), hoặc lượt chạy có limit_hit (chạm hạn mức gói).
 Cuối cùng in bảng: ticket đã chạy, PR tạo ra, việc CTO cần làm.

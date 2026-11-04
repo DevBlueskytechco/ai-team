@@ -625,6 +625,11 @@
      "03/11/2026",
      "Ticket nội bộ là nguồn duy nhất (SQLite ai-team/data/tickets.db), quản lý trên dashboard menu Ticket; gỡ toàn bộ tích hợp ticket ngoài",
      "mcp/ticket_local.py, ops/ticket.py"
+    ],
+    [
+     "04/11/2026",
+     "Ngân sách agent theo hạn mức gói Claude Max của CTO (200 USD/tháng cố định): cảnh báo 80%, dừng giao việc khi hết phiên 5 giờ hoặc tuần ≥ 90%; theo dõi token agent, cost_usd chỉ là quy đổi giá API. Thay quyết định 2.000 USD/tháng ngày 22/10",
+     "orchestrator/config.yaml, CLAUDE.md"
     ]
    ],
    "note": ""
