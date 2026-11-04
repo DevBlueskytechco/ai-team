@@ -11,6 +11,7 @@ import os, json, subprocess, datetime, time, re
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 RAW = os.path.join(ROOT, "evals", "raw")
 USAGE, EVENT, RUNS = os.path.join(RAW, "_plan_usage.json"), os.path.join(RAW, "_plan_event.json"), os.path.join(RAW, "_runs.jsonl")
+BACKFILL = os.path.join(RAW, "_token_backfill.json")   # token lượt cũ (trước 04/11 Orchestrator chưa ghi) tính lại từ transcript Claude Code
 KIND = {"session": "phiên 5 giờ", "weekly_all": "tuần · mọi model", "weekly_scoped": "tuần"}
 
 
@@ -117,16 +118,72 @@ def usage_of(out):
     return u if any(u.values()) else None
 
 
+def usage_from_transcripts(paths):
+    """Cộng token từ transcript Claude Code (~/.claude/projects/<thư mục>/<session>.jsonl, kèm subagents/*.jsonl).
+    Mỗi tin nhắn assistant ghi lặp theo từng khối nội dung với cùng message.id → gộp theo id, lấy số lớn nhất."""
+    per = {}
+    for f in paths:
+        try: fh = open(f, encoding="utf-8")
+        except Exception: continue
+        with fh:
+            for i, line in enumerate(fh):
+                if '"usage"' not in line: continue
+                try: ev = json.loads(line)
+                except Exception: continue
+                m = ev.get("message") if isinstance(ev, dict) else None
+                if ev.get("type") != "assistant" or not isinstance(m, dict) or not isinstance(m.get("usage"), dict): continue
+                u, k = m["usage"], f"{f}:{m.get('id') or ev.get('uuid') or i}"
+                cur = per.setdefault(k, [0, 0, 0, 0])
+                for j, key in enumerate(("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens")):
+                    cur[j] = max(cur[j], int(u.get(key) or 0))
+    if not per: return None
+    t = [sum(v[j] for v in per.values()) for j in range(4)]
+    return {"input": t[0], "output": t[1], "cache_write": t[2], "cache_read": t[3], "total": t[0] + t[1] + t[2], "src": "transcript", "messages": len(per)}
+
+
+def backfill(projects_dir=None, force=False):
+    """Bù token cho lượt chưa có usage (Orchestrator trước 04/11 chỉ ghi output_tokens) bằng transcript theo session_id.
+    Kết quả lưu evals/raw/_token_backfill.json {session_id: usage}; chỉ đọc lại transcript khi file đổi. Trả số lượt mới bù được."""
+    import glob
+    base = projects_dir or os.path.expanduser("~/.claude/projects")
+    cache = _rd(BACKFILL) if not force else {}; need, hint = {}, {}
+    if not os.path.exists(RUNS): return 0
+    for l in open(RUNS, encoding="utf-8"):
+        try: r = json.loads(l)
+        except Exception: continue
+        sid = r.get("session_id")
+        if not sid: continue
+        if r.get("transcript"): hint[sid] = r["transcript"]   # dòng do hook Stop của theme ghi: có đường dẫn transcript
+        if r.get("started_at") and not r.get("usage"): need[sid] = True
+    n = 0
+    for sid in need:
+        main = [p for p in [hint.get(sid)] if p and os.path.exists(p)] or glob.glob(os.path.join(base, "*", f"{sid}.jsonl"))
+        if not main: continue
+        files = main + glob.glob(os.path.join(os.path.splitext(main[0])[0], "subagents", "*.jsonl"))
+        sig = [[f, os.path.getmtime(f), os.path.getsize(f)] for f in files]
+        if (cache.get(sid) or {}).get("sig") == sig: continue
+        u = usage_from_transcripts(files)
+        if u: cache[sid] = {**u, "sig": sig}; n += 1
+    if n or force: _wr(BACKFILL, cache)
+    return n
+
+
+def load_backfill(): return _rd(BACKFILL)
+
+
 def tokens_7d():
-    """Token agent 7 ngày gần nhất (lượt có usage)."""
-    since, n = datetime.datetime.now() - datetime.timedelta(days=7), 0
+    """Token agent 7 ngày gần nhất (lượt có usage; lượt cũ lấy số bù từ transcript)."""
+    since, n, bf = datetime.datetime.now() - datetime.timedelta(days=7), 0, None
     if os.path.exists(RUNS):
         for l in open(RUNS, encoding="utf-8"):
             try: r = json.loads(l)
             except Exception: continue
             try: st = datetime.datetime.fromisoformat((r.get("started_at") or "")[:19])
             except Exception: continue
-            if st >= since and r.get("usage"): n += int((r["usage"] or {}).get("total") or 0)
+            if st < since: continue
+            u = r.get("usage")
+            if not u and r.get("session_id"): bf = bf if bf is not None else load_backfill(); u = bf.get(r["session_id"])
+            if u: n += int(u.get("total") or 0)
     return n
 
 

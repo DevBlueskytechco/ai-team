@@ -30,6 +30,7 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 ## Tổng quan dự án
 - Dashboard menu Quản lý dự án → Tổng quan dự án: cho CTO và ban giám đốc xem Yêu cầu → Giải pháp → Kế hoạch → Tiến độ → Kết quả hiện tại → Kết quả khi hoàn thành, lọc theo góc nhìn PO / BA / Tech Lead.
 - Đọc tài liệu theme-efitco ở `origin/develop` (không đọc thư mục làm việc): docs/charter.md, prd.md, srs.md, requirements-map.md, architecture.md, adr/, test-strategy.md, checklist-*.md, drafts/techlead/*/task-split.md, tests/e2e. Xem JSON: `python3 ops/dashboard/overview.py`.
+- Mục Tiến độ có khối Token agent đã dùng đến nay (mọi lượt, theo agent, lũy kế, theo sprint kèm token/point). Lượt trước 04/11 Orchestrator chưa ghi token: dashboard tính lại từ transcript Claude Code theo session_id (evals/raw/_token_backfill.json, không commit).
 - Trang dựa vào tiêu đề mục của tài liệu (charter: Mục tiêu đo được, Phạm vi Trong/Ngoài, Mốc, Ngân sách, Rủi ro "Xử lý:", Tiêu chí thành công; PRD: Tính năng "Must:/Should:/Could:/Won't:", Chỉ số thành công; SRS: "### TE-x — tên", "- ACn"). Đổi mục tiêu, phạm vi, rủi ro bằng PR sửa tài liệu, không sửa trên dashboard.
 
 ## Kiến thức agent

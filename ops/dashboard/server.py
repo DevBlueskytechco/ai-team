@@ -138,8 +138,38 @@ def read_runs():
             try: r = json.loads(l)
             except Exception: continue
             if not r.get("started_at") or not r.get("agent") or str(r.get("agent")).startswith("claude-code"): continue
-            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model", "cost_usd", "tokens", "usage", "limit_hit")})
+            x = {k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model", "cost_usd", "usage", "limit_hit")}
+            if not x["usage"] and r.get("session_id") in BF["d"]:   # lượt trước 04/11: token bù từ transcript (orchestrator/plan_usage.py backfill)
+                x["usage"] = {k: v for k, v in BF["d"][r["session_id"]].items() if k != "sig"}
+            out.append(x)
     return sorted(out, key=lambda r: r.get("started_at") or "")
+
+BF = {"d": {}}   # token bù từ transcript theo session_id — đọc lại khi poll_tokens bù thêm
+
+def poll_tokens():
+    """Bù token cho lượt cũ từ transcript Claude Code (một lần lúc khởi động, sau đó mỗi 10 phút; chỉ đọc transcript đổi)."""
+    BF["d"] = PU.load_backfill()
+    while True:
+        try:
+            if PU.backfill(): BF["d"] = PU.load_backfill(); VERSION["n"] += 1
+        except Exception as e: STATE["errors"]["tokens"] = str(e)[:200]
+        time.sleep(600)
+
+def token_summary(runs):
+    """Tổng token agent từ lượt đầu tiên tới nay (mọi lượt, không cắt 500): tổng, thành phần, theo agent, theo ngày; cost_usd chỉ là quy đổi giá API."""
+    S = {"since": None, "runs": len(runs), "with": 0, "from_transcript": 0, "input": 0, "output": 0, "cache_write": 0, "cache_read": 0, "total": 0,
+         "api_usd": 0.0, "by_agent": {}, "by_day": {}}
+    for r in runs:
+        d = (r.get("started_at") or "")[:10]; S["since"] = S["since"] or d
+        S["api_usd"] += float(r.get("cost_usd") or 0)
+        day = S["by_day"].setdefault(d, [0, 0]); day[1] += 1
+        a = S["by_agent"].setdefault(r.get("agent") or "?", {"total": 0, "runs": 0, "with": 0}); a["runs"] += 1
+        u = r.get("usage")
+        if not u: continue
+        S["with"] += 1; a["with"] += 1; S["from_transcript"] += u.get("src") == "transcript"
+        for k in ("input", "output", "cache_write", "cache_read", "total"): S[k] += int(u.get(k) or 0)
+        a["total"] += int(u.get("total") or 0); day[0] += int(u.get("total") or 0)
+    S["api_usd"] = round(S["api_usd"], 2); return S
 
 def _etime(v):
     """ps etime [[dd-]hh:]mm:ss → giây."""
@@ -385,7 +415,7 @@ def snapshot():
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
-    s.update({"live": read_live(), "runs": runs[-500:], "plan": plan_info(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+    s.update({"live": read_live(), "runs": runs[-500:], "tokens": token_summary(runs), "plan": plan_info(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
               "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
               "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
     return s
@@ -546,6 +576,6 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, '{"error":"not found"}')
 
 if __name__ == "__main__":
-    for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup, poll_plan): threading.Thread(target=f, daemon=True).start()
+    for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup, poll_plan, poll_tokens): threading.Thread(target=f, daemon=True).start()
     print(f"Dashboard Efitco: http://localhost:{PORT}  (Ctrl+C để dừng)")
     ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()
