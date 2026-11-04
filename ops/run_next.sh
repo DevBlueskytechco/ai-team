@@ -12,6 +12,8 @@ last=$(tail -1 evals/raw/_runs.jsonl 2>/dev/null)
 import json,sys
 d=json.loads(sys.argv[1])
 print("\n== Kết quả lượt chạy")
-for k in ("ticket","agent","is_error","num_turns","cost_usd","branch","pushed","pr"): print(f"  {k}: {d.get(k)}")
+for k in ("ticket","agent","is_error","num_turns","tokens","branch","pushed","pr","limit_hit"): print(f"  {k}: {d.get(k)}")
+u = d.get("usage") or {}
+if u: print(f"  token: input {u.get('input',0):,} · output {u.get('output',0):,} · cache ghi {u.get('cache_write',0):,} · cache đọc {u.get('cache_read',0):,}")
 print("  tóm tắt agent:\n" + "\n".join("    "+l for l in (d.get("result") or "").splitlines()[:25]))
 PY

@@ -26,12 +26,13 @@ sys.path.insert(0, os.path.join(ROOT, "mcp"))
 sys.path.insert(0, os.path.join(ROOT, "orchestrator")); import knowledge as KN   # kiến thức agent (ai-team/knowledge + theme .claude)
 import requirements as RQ   # yêu cầu dự án (ai-team/requirements)
 import overview as OV       # tổng quan dự án (ops/dashboard/overview.py)
+import plan_usage as PU     # hạn mức gói Claude (orchestrator/plan_usage.py)
 os.environ.pop("GH_TOKEN", None)
 
 try:
     import yaml; CFG = yaml.safe_load(open(os.path.join(ROOT, "orchestrator", "config.yaml")))
 except Exception:
-    CFG = {"budget_usd_month": 2000, "budget_warn_pct": 80}
+    CFG = {"plan_name": "Gói Claude", "plan_usd_month": 200, "budget_warn_pct": 80, "budget_stop_pct": 90, "token_budget_week": 0, "plan_usage_poll_min": 15}
 
 STATE = {"tickets": [], "prs": [], "merged": [], "ci_develop": [], "tickets_at": None, "gh_at": None, "errors": {}, "backend": None}
 UI_USER = os.environ.get("TICKET_UI_USER", "cto")   # người ghi khi thao tác trên dashboard
@@ -137,7 +138,7 @@ def read_runs():
             try: r = json.loads(l)
             except Exception: continue
             if not r.get("started_at") or not r.get("agent") or str(r.get("agent")).startswith("claude-code"): continue
-            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model", "cost_usd", "tokens")})
+            out.append({k: r.get(k) for k in ("agent", "ticket", "started_at", "ended_at", "duration_s", "num_turns", "is_error", "pr", "branch", "model", "cost_usd", "tokens", "usage", "limit_hit")})
     return sorted(out, key=lambda r: r.get("started_at") or "")
 
 def _etime(v):
@@ -365,20 +366,28 @@ def poll_setup():
             with LOCK: STATE["errors"]["setup"] = str(e)[:200]
         time.sleep(600)
 
-def cost_month(runs):
-    """Chi phí token theo tháng (cost_usd Claude Code báo trong mỗi lượt; chạy gói Max thì là chi phí quy đổi) — cùng cách Orchestrator dừng ở 100%."""
-    m = datetime.date.today().strftime("%Y-%m"); R = [r for r in runs if (r.get("started_at") or "")[:7] == m]
-    return {"month": m, "usd": round(sum(float(r.get("cost_usd") or 0) for r in R), 2), "runs": len(R), "with_cost": sum(1 for r in R if r.get("cost_usd") is not None)}
+def plan_info():
+    """Gói Claude: tên, chi phí thật/tháng, ngưỡng, hạn mức % đọc bằng /usage, sự kiện hạn mức của lượt gần nhất."""
+    c = CFG or {}
+    return {"name": c.get("plan_name", "Gói Claude"), "usd_month": c.get("plan_usd_month"), "warn": c.get("budget_warn_pct", 80), "stop": c.get("budget_stop_pct", 90),
+            "cap_week": int(c.get("token_budget_week") or 0), "poll_min": c.get("plan_usage_poll_min", 15), "usage": PU.load(), "event": PU.load_event()}
+
+def poll_plan():
+    """Đọc hạn mức gói bằng `claude -p /usage` mỗi plan_usage_poll_min phút (endpoint usage giới hạn tần suất — không gọi dày)."""
+    n = int((CFG or {}).get("plan_usage_poll_min", 15) or 0)
+    while n:
+        try: PU.refresh((CFG or {}).get("claude_bin", "claude"), n); VERSION["n"] += 1
+        except Exception as e: STATE["errors"]["plan"] = str(e)[:200]
+        time.sleep(n * 60)
 
 def snapshot():
     runs = read_runs()
     with LOCK:
         s = {k: STATE[k] for k in ("tickets", "prs", "merged", "ci_develop", "tickets_at", "gh_at", "backend")} | {"errors": dict(STATE["errors"])}
     with SETUP_LOCK: setup = {"items": list(SETUP["items"]), "at": SETUP["at"]}
-    s.update({"live": read_live(), "runs": runs[-500:], "cost_month": cost_month(runs), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
+    s.update({"live": read_live(), "runs": runs[-500:], "plan": plan_info(), "server_time": now(), "evals_n": evals_count(), "required_checks": required_checks(),
               "setup": setup, "review_overdue_days": (CFG or {}).get("review_overdue_days", 2),
-              "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent"),
-              "budget": {"usd_month": (CFG or {}).get("budget_usd_month", 2000), "warn_pct": (CFG or {}).get("budget_warn_pct", 80)}})
+              "repo": REPO, "agent_login": (CFG or {}).get("agent_github_login", "nextsky-ai-agent")})
     return s
 
 def ticker():
@@ -420,7 +429,7 @@ class H(BaseHTTPRequestHandler):
         return host in ("localhost", "127.0.0.1") and self.headers.get("X-Efitco") == "1"
     def do_POST(self):
         u = urlparse(self.path)
-        if u.path not in ("/api/roles/update", "/api/setup/recheck") and not u.path.startswith(("/api/ticket/", "/api/knowledge/", "/api/req/")): return self._send(404, '{"error":"not found"}')
+        if u.path not in ("/api/roles/update", "/api/setup/recheck", "/api/plan/refresh") and not u.path.startswith(("/api/ticket/", "/api/knowledge/", "/api/req/")): return self._send(404, '{"error":"not found"}')
         if not self._local_ok(): return self._send(403, json.dumps({"error": "chỉ nhận từ dashboard trên localhost"}))
         if u.path.startswith("/api/req/"):
             try:
@@ -444,6 +453,9 @@ class H(BaseHTTPRequestHandler):
                 return self._send(200, json.dumps({"ok": True, "id": kid, "detail": knowledge_detail(ag)}, ensure_ascii=False))
             except (ValueError, TypeError) as e:
                 return self._send(400, json.dumps({"error": str(e)}, ensure_ascii=False))
+        if u.path == "/api/plan/refresh":   # đọc lại hạn mức gói ngay (tối thiểu 2 phút giữa 2 lần)
+            d = PU.refresh((CFG or {}).get("claude_bin", "claude"), 2); VERSION["n"] += 1
+            return self._send(200, json.dumps(d, ensure_ascii=False))
         if u.path == "/api/setup/recheck":
             return self._send(200, json.dumps({"items": setup_checks(), "at": SETUP["at"]}, ensure_ascii=False))
         if u.path == "/api/roles/update":
@@ -534,6 +546,6 @@ class H(BaseHTTPRequestHandler):
         return self._send(404, '{"error":"not found"}')
 
 if __name__ == "__main__":
-    for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup): threading.Thread(target=f, daemon=True).start()
+    for f in (poll_tickets, poll_gh, ticker, backup_daily, poll_setup, poll_plan): threading.Thread(target=f, daemon=True).start()
     print(f"Dashboard Efitco: http://localhost:{PORT}  (Ctrl+C để dừng)")
     ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()

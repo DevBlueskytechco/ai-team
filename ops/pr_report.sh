@@ -17,5 +17,5 @@ fi
 gh pr diff "$n" -R "$R" > "/tmp/pr-$n.diff" && echo "== Diff: /tmp/pr-$n.diff ($(wc -l < /tmp/pr-$n.diff) dòng)"
 br=$(gh pr view "$n" -R "$R" --json headRefName --jq .headRefName); key="${br#feature/ai-}"
 for f in "$AI_TEAM"/evals/raw/*/"$key".run.json; do
-  [ -f "$f" ] && python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print('== Agent',d['agent'],d['ticket'],'turns',d.get('num_turns'),'cost',d.get('cost_usd'));print(d.get('result','')[:2500])" "$f"
+  [ -f "$f" ] && python3 -c "import json,sys;d=json.load(open(sys.argv[1]));print('== Agent',d['agent'],d['ticket'],'turns',d.get('num_turns'),'token',d.get('tokens')));print(d.get('result','')[:2500])" "$f"
 done

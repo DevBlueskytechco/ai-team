@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất.
+"""Bảng trạng thái sprint: ticket đang mở (sẵn sàng/bị chặn/chờ duyệt), PR mở + CI, CI develop gần nhất, hạn mức gói Claude.
 Chạy: source ops/env.sh && python3 ops/status.py"""
 import os, sys, json, subprocess, re
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,3 +38,11 @@ print("\n== CI develop gần nhất")
 print("  " + (sh("gh", "run", "list", "-R", "DevBlueskytechco/theme-efitco", "-b", "develop", "-L", "1",
                  "--json", "databaseId,conclusion,status,displayTitle", "--jq",
                  '.[0] | "\\(.databaseId) \\(.status)/\\(.conclusion) \\(.displayTitle)"') or "(không lấy được)"))
+print("\n== Gói Claude (hạn mức agent dùng chung với CTO)")
+try:
+    import yaml, plan_usage as PU
+    cfg = yaml.safe_load(open(os.path.join(ROOT, "orchestrator", "config.yaml"), encoding="utf-8")) or {}
+    stop, warns, line = PU.check(cfg)   # số đọc gần nhất (dashboard / Orchestrator đọc định kỳ); đọc ngay: python3 orchestrator/plan_usage.py --refresh
+    print(f"  {line}"); [print(f"  CẢNH BÁO: {w}") for w in warns]
+    if stop: print(f"  DỪNG: {stop}")
+except Exception as e: print(f"  (không đọc được: {e})")

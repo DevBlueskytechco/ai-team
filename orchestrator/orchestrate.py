@@ -15,6 +15,7 @@ THEME = os.path.abspath(os.path.join(ROOT, CFG["theme_dir"]))
 sys.path.insert(0, os.path.join(ROOT, "mcp")); import ticket_server as T
 sys.path.insert(0, HERE); import knowledge as KN   # kiến thức CTO nạp cho agent (ai-team/knowledge)
 import requirements as RQ   # yêu cầu dự án đang áp dụng (ai-team/requirements)
+import plan_usage as PU     # hạn mức gói Claude (phiên 5 giờ, tuần) + token agent
 # Thao tác ticket của chính Orchestrator (comment PR, đổi nhãn, nhắc việc) ghi tên "orchestrator". /run-next chạy trong Claude Code,
 # nơi AI_AGENT=claude-code_<bản>_agent — bỏ đi; agent con vẫn nhận AI_AGENT=<agent> qua env riêng ở run_agent.
 if os.environ.get("AI_AGENT", "").startswith("claude-code"): os.environ.pop("AI_AGENT")
@@ -62,7 +63,7 @@ def stream_agent(cmd, env, key, agent, t, started):
     log = os.path.join(LIVE_DIR, f"{key}.jsonl")
     state = {"ticket": key, "agent": agent, "title": t.get("title"), "started_at": started, "pid": None,
              "turns": 0, "tools": 0, "last": "", "log": os.path.relpath(log, ROOT)}
-    out, err_tail = None, []
+    out, err_tail, rl = None, [], None
     with open(log, "w", encoding="utf-8") as fh:
         p = subprocess.Popen(cmd, cwd=THEME, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         state["pid"] = p.pid; _live_write(state)
@@ -82,6 +83,8 @@ def stream_agent(cmd, env, key, agent, t, started):
                     elif c.get("type") == "text" and c.get("text"):
                         state["last"] = c["text"].strip().replace("\n", " ")[:160]
                 _live_write(state)
+            elif typ == "rate_limit_event":   # gói Claude: allowed / allowed_warning / rejected, kèm % và giờ reset
+                rl = ev.get("rate_limit_info") or {}; state["rate_limit"] = rl; _live_write(state)
             elif typ == "result":
                 out = ev
             if time.time() > deadline:
@@ -93,6 +96,8 @@ def stream_agent(cmd, env, key, agent, t, started):
     _live_write(state)
     if out is None:
         out = {"result": "không có sự kiện result (agent lỗi hoặc quá 60 phút)", "stderr": err_tail, "is_error": True}
+    if rl: out["rate_limit"] = rl
+    if err_tail and "stderr" not in out: out["stderr"] = err_tail
     return out
 
 def run_agent(t):
@@ -133,22 +138,36 @@ def _run_agent(t):
     ended = datetime.datetime.now()
     rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
            "knowledge": [f"{x['agent']}/{x['id']}" for x in kn_used], "requirements": [r["id"] for r in rq_used],
-           "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
+           "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (PU.usage_of(out) or {}).get("total"), "usage": PU.usage_of(out),
+           "rate_limit": out.get("rate_limit"), "limit_hit": PU.limit_of(out),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),
            "started_at": started, "ended_at": ended.isoformat(timespec="seconds"),
            "duration_s": int((ended - datetime.datetime.fromisoformat(started)).total_seconds()), "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
     d = os.path.join(ROOT, "evals/raw", agent); os.makedirs(d, exist_ok=True)
     json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    PU.record_event(rec)
     try: _push_and_pr(rec, t, tid, key, agent, branch, d)
     finally:   # một dòng mỗi lượt, có nhánh / PR / chi phí — dashboard đọc để nối lượt ↔ PR và tính ngân sách tháng
         open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
     cur = T.get(tid)
-    if "ai-review" not in cur.get("labels", []):
-        T.set_label(tid, "ai-review", note=f"orchestrator: agent kết thúc (turns={rec['num_turns']}, cost={rec['cost_usd']}); chưa tự set_label — kiểm tra đầu ra")
+    if "ai-review" not in cur.get("labels", []) and not rec.get("limit_hit"):
+        T.set_label(tid, "ai-review", note=f"orchestrator: agent kết thúc (turns={rec['num_turns']}, token={rec['tokens']}); chưa tự set_label — kiểm tra đầu ra")
     pg_insert(rec); return rec
 
 def _push_and_pr(rec, t, tid, key, agent, branch, d):
     """Commit, push nhánh agent, mở PR (dev-fe, dev-be, devops), gắn ai-review; ghi nhánh / PR vào rec."""
+    if rec.get("limit_hit"):   # chạm hạn mức gói giữa chừng: không push / mở PR, ticket về ai-draft để chạy lại sau reset
+        if branch:
+            rec["branch"] = branch
+            subprocess.run(["git", "add", "-A"], cwd=THEME, check=False)
+            c = subprocess.run(["git", *AGENT_GIT, "commit", "-q", "-m", f"WIP {key}: chạm hạn mức gói Claude, chưa push"], cwd=THEME, check=False, capture_output=True)
+            if c.returncode == 0:   # lượt sau tạo lại nhánh agent từ origin/develop — giữ phần dở ở nhánh cục bộ riêng (không push) để CTO xem
+                rec["wip_branch"] = f"wip/ai-{key}"; subprocess.run(["git", "branch", "-f", rec["wip_branch"], "HEAD"], cwd=THEME, check=False)
+            subprocess.run(["git", "checkout", "-q", "develop"], cwd=THEME, check=False)
+        lim = rec["limit_hit"]
+        T.set_label(tid, "ai-draft", note=f"orchestrator: chạm hạn mức gói Claude ({lim.get('text')}) — chưa push, chạy lại sau reset"
+                    + (f"; phần dở ở nhánh cục bộ {rec['wip_branch']}" if rec.get("wip_branch") else ""))
+        print(f"{key}: chạm hạn mức gói Claude — {lim.get('text')}; ticket về ai-draft"); return
     if branch:
         rec["branch"] = branch
         subprocess.run(["git", "add", "-A"], cwd=THEME, check=False)
@@ -161,7 +180,7 @@ def _push_and_pr(rec, t, tid, key, agent, branch, d):
             link = f"branch {branch}"
             if rec.get("pushed") and agent in ("dev-fe", "dev-be", "devops"):
                 pr = subprocess.run(["gh", "pr", "create", "-B", "develop", "-H", branch, "-t", f"{key}: {t['title'][:200]}",
-                                     "-b", f"Ticket {key}. Agent {rec['agent_version']}, {rec['num_turns']} turns, ~{rec['cost_usd']} USD.\n\n{rec['result'][:3000]}"],
+                                     "-b", f"Ticket {key}. Agent {rec['agent_version']}, {rec['num_turns']} turns, {rec['tokens'] or 0:,} token.\n\n{rec['result'][:3000]}"],
                                     cwd=THEME, capture_output=True, text=True, env=AGENT_GH_ENV)
                 if pr.returncode == 0: link = pr.stdout.strip().splitlines()[-1]; rec["pr"] = link
                 else: print(f"tạo PR lỗi: {pr.stderr[-300:]}")
@@ -213,16 +232,12 @@ def remind_and_budget():
         if (today - datetime.date.fromisoformat(last[:10])).days >= CFG["review_overdue_days"]:
             owner, day = role_of(t["agent"])
             print(f"NHẮC: {t['id']} ở ai-review quá {CFG['review_overdue_days']} ngày — role owner {owner}{f' (duyệt {day})' if day else ''}, agent {t['agent']}")
-    runs = os.path.join(ROOT, "evals/raw/_runs.jsonl"); spent = 0.0
-    if os.path.exists(runs):
-        for l in open(runs, encoding="utf-8"):
-            try: r = json.loads(l)
-            except Exception: continue
-            if (r.get("started_at") or "")[:7] == today.strftime("%Y-%m") and r.get("cost_usd"): spent += float(r["cost_usd"])
-    pct = spent / CFG["budget_usd_month"] * 100
-    print(f"Token tháng này: {spent:.2f} USD ({pct:.0f}% ngân sách)")
-    if pct >= 100: print("DỪNG: chạm 100% ngân sách — chờ người nới"); return False
-    if pct >= CFG["budget_warn_pct"]: print("CẢNH BÁO: ≥ 80% ngân sách")
+    # hạn mức gói Claude (phiên 5 giờ, tuần) + trần token agent — gói không tính tiền theo token
+    if CFG.get("plan_usage_poll_min", 15): PU.refresh(CFG.get("claude_bin", "claude"), CFG.get("plan_usage_poll_min", 15))
+    stop, warns, line = PU.check(CFG)
+    print(f"{CFG.get('plan_name', 'Gói Claude')}: {line}")
+    for w in warns: print(f"CẢNH BÁO: {w}")
+    if stop: print(f"DỪNG: {stop} — chỉ CTO nới (budget_stop_pct, token_budget_week trong orchestrator/config.yaml)"); return False
     return True
 
 SIDE_TYPE = {"fe": "fe_task", "be": "be_task"}

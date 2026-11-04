@@ -531,7 +531,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
 
   <section class="span-6" aria-labelledby="h-runs">
     <h2 id="h-runs">Lượt chạy gần đây</h2>
-    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Turn</th><th class="n">Thời gian</th><th class="n">USD</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
+    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Turn</th><th class="n">Thời gian</th><th class="n" title="input + output + cache ghi">Token</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
   </section>
 
   <section class="span-6" aria-labelledby="h-pr">
@@ -681,7 +681,7 @@ const rvRest = (s) => [s.ci && `${s.ci} chờ CI`, s.bad && `${s.bad} CI lỗi`,
 /* Lượt chạy bất thường: không báo lỗi nhưng dưới 3 turn (agent dừng sớm, tiến trình chết) — không tính là thành công */
 const runOdd = (r) => !r.is_error && r.num_turns != null && r.num_turns < 3;
 const runOk = (r) => !r.is_error && !runOdd(r);
-const runChip = (r) => (r.is_error ? status("critical", "lỗi") : runOdd(r) ? status("serious", `bất thường · ${r.num_turns} turn`) : status("good", "xong"));
+const runChip = (r) => (r.limit_hit ? status("warning", "chạm hạn mức gói") : r.is_error ? status("critical", "lỗi") : runOdd(r) ? status("serious", `bất thường · ${r.num_turns} turn`) : status("good", "xong"));
 /* Tiến độ story = ticket con không tính câu hỏi — dùng chung Dashboard, Story, Tổng quan */
 const storyProg = (key, T = DATA ? DATA.tickets : []) => { const kids = T.filter((t) => t.parent === key), w = kids.filter(isWork), d = w.filter((t) => t.status === "Closed");
   return { kids, w, d, n: w.length, done: d.length, q: kids.length - w.length, pct: w.length ? Math.round((d.length / w.length) * 100) : 0 }; };
@@ -1075,7 +1075,8 @@ function pageOverview() {
       <td class="nw">${Object.entries(s.sides).map(([k, n]) => `<span class="chip">${esc(k)} ${n}</span>`).join(" ") || "—"}</td><td class="nw">${s.sp.length ? esc(s.sp.join(", ")) : '<span class="fresh">chưa xếp</span>'}</td><td class="nw">${status(s.sk, s.sl)}</td></tr>`).join("")}</tbody></table></div>
       <p><a class="btn" href="#/plan">${IC("layers")}Kế hoạch sprint</a> <a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint</a></p>`, ["techlead", "po"], ["docs/srs.md", "drafts/techlead/*/task-split.md", "ticket nội bộ"], "sơ bộ = SRS của BA; chốt = tổng point ticket sau khi Tech Lead chia task FE/BE"),
     ovGrid(ovCard("Ngân sách", `${hbars(Object.entries(bh).map(([k, v]) => ({ label: k, v, text: `${v} giờ` })), { max: bmax })}
-      ${(() => { const bd = budgetOf(); return `<p class="ov-k">Token agent tháng ${esc(mmyy(bd.month))}</p>${hbars([{ label: "Đã dùng", v: bd.usd, text: `${usd(bd.usd)} · ${Math.round(bd.pct)}%`, color: bd.kind === "good" ? "--series-1" : bd.kind === "warning" ? "--warning" : "--critical" }, { label: "Dự báo cuối tháng", v: bd.fc, text: usd(bd.fc), color: bd.fcPct >= 100 ? "--critical" : "--series-2" }], { max: Math.max(bd.budget, bd.fc), mark: (bd.budget * bd.warn) / 100, markLabel: `cảnh báo ${bd.warn}%` })}`; })()}<p class="fresh">${C.budget.total_h ? `Tổng ${C.budget.total_h} giờ người / ${C.budget.weeks} tuần. ` : ""}${esc((C.budget.text.split(/\.\s+/).slice(1).join(". ") || "").slice(0, 220))}</p>`, ["po"], ["docs/charter.md"]),
+      ${(() => { const pl = planOf(); return `<p class="ov-k">Agent chạy bằng ${esc(pl.name)} — chi phí cố định ${esc(usd(pl.usdMonth))}/tháng</p>${planBars(pl)}<p class="fresh">Token agent 7 ngày: ${fmtTok(pl.tok7)}${pl.cap ? ` / trần ${fmtTok(pl.cap)}` : ""} · ${planAt(pl)}</p>`; })()}<p class="fresh">${C.budget.total_h ? `Tổng ${C.budget.total_h} giờ người / ${C.budget.weeks} tuần. ` : ""}${(() => { const S = C.budget.text.split(/\.\s+/).slice(1).map((x) => x.trim().replace(/\.$/, "")).filter(Boolean), old = S.filter((x) => /USD/i.test(x));
+        return esc(S.filter((x) => !old.includes(x)).join(". ").slice(0, 220)) + (old.length ? `</p><p class="fresh">${status("warning", "charter cũ")} docs/charter.md còn ghi ngân sách token theo USD (“${esc(old[0].slice(0, 60))}”) — CTO chốt 04/11 chạy bằng gói Claude Max cố định; PO sửa charter bằng PR.` : ""); })()}</p>`, ["po"], ["docs/charter.md"]),
       ovCard("Rủi ro và cách xử lý", `<div class="tablewrap"><table class="info"><tbody>${C.risks.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${mdi(r.risk)}${r.action ? `<div class="ov-act">${IC("check")} ${mdi(r.action)}</div>` : ""}</td></tr>`).join("")}</tbody></table></div>`, ["po", "techlead"], ["docs/charter.md"])),
   ].join("");
 
@@ -1526,6 +1527,8 @@ const GLOSS = {
   "Sẵn sàng chấm": "Ticket ai-review có PR mà mọi check bắt buộc đã đạt. Ticket ai-review còn lại chia: chờ CI, CI lỗi, cần chạy lại CI (bị huỷ hoặc chạy quá lâu), không có PR.",
   "CI bị huỷ": "Check kết thúc cancelled — thường do lượt CI khác cùng nhóm concurrency huỷ, hoặc huỷ tay. Không phải lỗi code: chạy lại CI, không trả ai-sua.",
   "Yêu cầu dự án": "Yêu cầu từ ban giám đốc, quản lý sản phẩm, CTO, Shopify, khách hàng (REQ-xxxx). Đang áp dụng thì Orchestrator nạp vào prompt agent bị ảnh hưởng.",
+  "Hạn mức gói": "Gói Claude Max/Pro không tính tiền theo token: trả cố định mỗi tháng, giới hạn là hạn mức phiên 5 giờ và hạn mức tuần (mọi model, có khi riêng một model) — Claude đo bằng %, xem bằng /usage. Agent dùng chung hạn mức với CTO; hết hạn mức thì lượt chạy bị chặn tới giờ reset.",
+  "Token agent": "Token một lượt agent = input + output + cache ghi, cộng mọi model (kể cả subagent). Cache đọc tính riêng vì lượt nào cũng đọc lại ngữ cảnh. cost_usd Claude Code báo chỉ là quy đổi theo giá API, không phải hoá đơn.",
 };
 const GUIDE = {
   dashboard: { t: "Dashboard", who: "CTO, role owner, cả team",
@@ -1533,7 +1536,7 @@ const GUIDE = {
     parts: [
       ["Ô số liệu đầu trang", ["**Đang chạy**: ticket + agent + thời gian chạy; “Orchestrator đẩy code, mở PR” khi agent đã xong và đang đẩy code.",
         "**Sẵn sàng chạy**: ticket ai-draft đủ điều kiện giao agent; dòng dưới là số ticket đang bị chặn bởi ticket khác.",
-        "**Chờ CTO**: ticket sẵn sàng chấm (PR có mọi check bắt buộc đạt) + câu hỏi chờ trả lời; dòng dưới là ticket ai-review còn lại: chờ CI, CI lỗi, cần chạy lại CI, không có PR.", "**PR mở**: PR đang mở, bao nhiêu đang chạy CI, lỗi, cần chạy lại (bị huỷ hoặc chạy quá 45 phút).", "**CI develop**: lần chạy gần nhất trên develop; đỏ nhiều lần liên tiếp thì ghi số lần và từ khi nào.", "**Token tháng**: chi phí token tháng này (cost_usd Claude Code báo mỗi lượt) so với ngân sách, dự báo cuối tháng; ≥ 80% hiện cảnh báo, Orchestrator dừng ở 100%.",
+        "**Chờ CTO**: ticket sẵn sàng chấm (PR có mọi check bắt buộc đạt) + câu hỏi chờ trả lời; dòng dưới là ticket ai-review còn lại: chờ CI, CI lỗi, cần chạy lại CI, không có PR.", "**PR mở**: PR đang mở, bao nhiêu đang chạy CI, lỗi, cần chạy lại (bị huỷ hoặc chạy quá 45 phút).", "**CI develop**: lần chạy gần nhất trên develop; đỏ nhiều lần liên tiếp thì ghi số lần và từ khi nào.", "**Gói Claude**: % hạn mức tuần (mọi model) của gói Claude Max agent dùng chung với CTO; dòng dưới là phiên 5 giờ, giờ reset tuần, token agent 7 ngày. ≥ 80% hiện cảnh báo; Orchestrator dừng giao việc khi hết phiên 5 giờ hoặc tuần ≥ 90%. Chi phí thật cố định mỗi tháng, không tính theo token.",
         "**CI develop**: kết quả CI gần nhất của nhánh develop; Lighthouse lỗi ghi “không chặn”."]],
       ["Lịch duyệt hôm nay", ["Vai có ngày duyệt cố định là hôm nay, role owner và số ticket chờ chấm của vai đó.", "Link “Việc chờ tôi” mở danh sách mọi việc chờ CTO; “Sửa lịch duyệt” mở trang Vai trò."]],
       ["Hoạt động agent · thời gian thực", ["Mỗi làn là một agent; tên kèm trạng thái (rảnh, đang chạy, số ticket sẵn sàng/bị chặn/chờ chấm).",
@@ -1550,7 +1553,7 @@ const GUIDE = {
     do: ["Bấm key ticket hoặc số PR để mở chi tiết.", "Đổi khung thời gian ở khối Hoạt động agent và kỳ ở khối Kết quả vận hành.", "Mở “Việc chờ tôi” để xử lý việc CTO theo thứ tự ưu tiên."],
     src: ["Ticket nội bộ (ai-team/data/tickets.db): đọc lại ngay khi đổi, kiểm mỗi 2 giây.", "Lượt chạy và agent đang chạy (ai-team/evals/raw): mỗi 2 giây.",
       "GitHub (PR, CI): mỗi 60 giây, 20 giây khi CI đang chạy, và ngay khi một lượt agent kết thúc.", "Header hiện lần cập nhật gần nhất của ticket và GitHub."],
-    terms: ["ai-draft", "ai-review", "Check bắt buộc", "Lượt chạy", "Turn", "Orchestrator", "Story"] },
+    terms: ["ai-draft", "ai-review", "Check bắt buộc", "Lượt chạy", "Turn", "Orchestrator", "Story", "Hạn mức gói", "Token agent"] },
   inbox: { t: "Việc chờ tôi", who: "CTO (và người được CTO giao xử lý)",
     what: "Mọi việc đang chờ CTO làm hoặc thiết lập, tính trực tiếp từ ticket, PR, CI và cấu hình. Việc tự biến mất khi đã xử lý xong.",
     parts: [
@@ -1628,10 +1631,12 @@ const GUIDE = {
     parts: [
       ["Ô số liệu", ["Ticket hoàn thành (ticket/tuần, point), cycle time trung vị, PR agent mở → merge, lượt agent và % thành công, thời gian một lượt (trung vị, TB turn), câu hỏi phát sinh trên mỗi ticket xong."]],
       ["Biểu đồ", ["Thông lượng theo ngày/tuần; phân bố cycle time; lượt chạy theo agent (thành công/lỗi); point và cycle time theo agent.", "Bảng chỉ số theo agent, gồm số câu hỏi agent đã tạo."]],
+      ["Gói Claude", ["% hạn mức phiên 5 giờ, tuần (mọi model) và tuần theo model, giờ reset; vạch là ngưỡng cảnh báo. Bấm “Đọc lại hạn mức gói” để lấy số mới (server tự đọc mỗi plan_usage_poll_min phút).",
+        "Token agent 7 ngày theo agent, theo ngày, theo thành phần (input, output, cache ghi, cache đọc) và ticket tốn token nhất. Số USD quy đổi giá API chỉ để so sánh — chi phí thật là phí gói cố định."]],
     ],
     do: ["Chọn kỳ 7/14/30 ngày hoặc toàn dự án.", "“In / lưu PDF”."],
-    src: ["Ticket nội bộ, lượt chạy, PR agent. Lượt chạy trước 03/11 chưa ghi thời lượng; PR patch/fix/ci của CTO không tính."],
-    terms: ["Cycle time", "Lượt chạy", "Turn", "Point", "Câu hỏi"] },
+    src: ["Ticket nội bộ, lượt chạy, PR agent. Lượt chạy trước 03/11 chưa ghi thời lượng; PR patch/fix/ci của CTO không tính. Hạn mức gói: claude -p /usage (evals/raw/_plan_usage.json); token: modelUsage mỗi lượt (từ 04/11)."],
+    terms: ["Cycle time", "Lượt chạy", "Turn", "Point", "Câu hỏi", "Hạn mức gói", "Token agent"] },
   "r-quality": { t: "Chất lượng", who: "CTO, role owner",
     what: "Chất lượng đầu ra của agent theo kết quả CTO chấm và điểm rubric — để biết agent nào, tiêu chí nào cần cải thiện.",
     parts: [
@@ -2089,13 +2094,15 @@ function inboxItems() {
       why: `check bắt buộc hiện là ${esc(req.join(", "))} — check khác lỗi chỉ để biết; muốn chặn thì thêm vào required_checks`,
       acts: [["link", ci.url, "Xem CI"], ["text", "bật chặn: thêm vào required_checks trong orchestrator/config.yaml"]] });
   }
-  // ngân sách token tháng
-  { const bd = budgetOf(d);
-    if (bd.pct >= bd.warn) add({ title: `Token tháng ${mmyy(bd.month)}: ${usd(bd.usd)} / ${usd(bd.budget)} (${Math.round(bd.pct)}%)`, sec: "decide", pri: bd.pct >= 100 ? 3 : 2,
-      why: bd.pct >= 100 ? "Orchestrator đã dừng giao việc (chạm 100% ngân sách) — chỉ CTO nới: sửa budget_usd_month trong orchestrator/config.yaml và ghi lý do trong commit"
-        : `vượt ngưỡng cảnh báo ${bd.warn}% · dự báo cuối tháng ~${usd(bd.fc)} — cân nhắc model_override (vd qa: sonnet) hoặc giảm lượt chạy lại`, acts: [["link", "#/r-perf", "Xem chi phí"]] });
-    else if (bd.fcPct >= 100 && bd.runs >= 5) add({ title: `Dự báo token tháng ${mmyy(bd.month)} vượt ngân sách: ~${usd(bd.fc)} / ${usd(bd.budget)}`, sec: "decide", pri: 1,
-      why: `đã dùng ${usd(bd.usd)} (${Math.round(bd.pct)}%) sau ${new Date().getDate()} ngày — Orchestrator sẽ dừng khi chạm 100%`, acts: [["link", "#/r-perf", "Xem chi phí"]] }); }
+  // hạn mức gói Claude (agent dùng chung với CTO)
+  { const pl = planOf(d), see = ["link", "#/r-perf", "Xem gói Claude"];
+    if (pl.stopWhy) add({ title: `Orchestrator ngừng giao việc mới: ${pl.stopWhy}`, sec: "decide", pri: 3,
+      why: `${pl.hit ? `lượt ${esc(pl.E.ticket)} (${esc(pl.E.agent)}) bị chặn giữa chừng — không push, ticket về ai-draft, chạy lại sau giờ reset. ` : ""}Agent dùng chung hạn mức gói với CTO; chỉ CTO nới budget_stop_pct / token_budget_week trong orchestrator/config.yaml`, acts: [see] });
+    else if (pl.warns.length) add({ title: `Gói Claude: ${pl.warns.join(" · ")} ≥ ngưỡng cảnh báo ${pl.warn}%`, sec: "decide", pri: 2,
+      why: `${pl.week ? `tuần reset ${resetTxt(pl.week.resets_at)} · ` : ""}Orchestrator dừng khi tuần ≥ ${pl.stop}% — hạ model qa/writer bằng model_override (vd sonnet), giảm lượt chạy lại, chừa phần cho CTO`, acts: [see] });
+    if (!pl.fresh) add({ title: pl.L.length ? `Số hạn mức gói Claude đã cũ (${Math.round(pl.age / 60)} giờ)` : "Chưa đọc được hạn mức gói Claude", sec: "setup", pri: 1,
+      why: `${pl.err ? esc(pl.err) + " — " : ""}Orchestrator không biết còn bao nhiêu hạn mức nên chỉ dừng khi lượt agent bị chặn. Kiểm ở terminal: claude -p /usage (Claude Code đăng nhập gói Max, bản có /usage)`,
+      acts: [["cmd", "claude -p /usage"], see] }); }
   // PR trên nhánh agent nhưng đứng tên tài khoản khác (thiếu AGENT_GH_TOKEN khi chạy, hoặc CTO tự mở) — CTO không tự duyệt được PR của mình
   if (AGENT_LOGIN()) (d.prs || []).filter((p) => /^feature\/ai-/.test(p.branch) && p.author && p.author !== AGENT_LOGIN()).forEach((p) => add({ key: p.branch.replace("feature/ai-", ""), title: `PR #${p.number} đứng tên ${p.author}, không phải ${AGENT_LOGIN()}`,
     sec: "setup", pri: 1, why: "Orchestrator chỉ tự mở PR (đứng tên agent) cho dev-fe, dev-be, devops; PR mở tay đứng tên người mở — không tính là PR agent và CTO không tự duyệt được PR của mình. Nếu là lượt agent tự mở thì kiểm AGENT_GH_TOKEN trong .env khi chạy /run-next",
@@ -2863,14 +2870,48 @@ function velocity(T = DATA ? DATA.tickets : []) {
   const done = T.filter((t) => isWork(t) && pts(t) > 0 && t.status === "Closed" && dOnly(t.closed_at) >= from && dOnly(t.closed_at) <= to);
   return { v: done.reduce((a, t) => a + pts(t), 0), n: done.length, days, from, to };
 }
-/* Chi phí token tháng (cost_usd Claude Code báo mỗi lượt; chạy gói Max là chi phí quy đổi) so với budget_usd_month — Orchestrator dừng ở 100% */
-function budgetOf(d = DATA) {
-  const B = (d && d.budget) || { usd_month: 2000, warn_pct: 80 }, C = (d && d.cost_month) || { usd: 0, runs: 0, with_cost: 0, month: todayKey().slice(0, 7) };
-  const now = new Date(), dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(), day = now.getDate(), p = B.usd_month ? (C.usd / B.usd_month) * 100 : 0, fc = (C.usd / day) * dim;
-  return { ...C, budget: B.usd_month, warn: B.warn_pct, pct: p, fc, fcPct: B.usd_month ? (fc / B.usd_month) * 100 : 0, kind: p >= 100 ? "critical" : p >= B.warn_pct ? "warning" : "good" };
+/* Gói Claude (Max/Pro) agent dùng chung với CTO: chi phí thật cố định plan_usd_month, không tính theo token.
+   Giới hạn là hạn mức phiên 5 giờ và tuần (% Claude đo; server đọc bằng `claude -p /usage` → evals/raw/_plan_usage.json).
+   cost_usd mỗi lượt chỉ là quy đổi theo giá API — để so sánh. Cùng luật dừng với orchestrator/plan_usage.py check(). */
+const PLAN_KIND = { session: "phiên 5 giờ", weekly_all: "tuần · mọi model", weekly_scoped: "tuần" };
+const limName = (x) => `${PLAN_KIND[x.kind] || x.kind}${x.label ? " " + x.label : ""}`;
+/* token một lượt = input + output + cache ghi (modelUsage, mọi model); cache đọc tính riêng */
+const tokOf = (r) => (r && r.usage && r.usage.total != null ? r.usage.total : r && typeof r.tokens === "number" ? r.tokens : null);
+const fmtTok = (v) => (v == null ? "—" : v >= 1e6 ? `${(v / 1e6).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}M` : v >= 1e3 ? `${Math.round(v / 1e3).toLocaleString("vi-VN")}k` : String(v));
+const tokTitle = (r) => { const u = r && r.usage; return u ? `input ${(u.input || 0).toLocaleString("vi-VN")} · output ${(u.output || 0).toLocaleString("vi-VN")} · cache ghi ${(u.cache_write || 0).toLocaleString("vi-VN")} · cache đọc ${(u.cache_read || 0).toLocaleString("vi-VN")}${r.cost_usd != null ? ` · quy đổi giá API ~${usd(r.cost_usd)} (không phải hoá đơn)` : ""}` : "lượt chưa ghi token (Orchestrator bản cũ)"; };
+const p2 = (n) => String(n).padStart(2, "0");
+const resetTxt = (iso) => { const t = new Date(iso); if (!iso || isNaN(t)) return "—"; const h = (t - Date.now()) / 36e5;
+  return `${["CN", "T2", "T3", "T4", "T5", "T6", "T7"][t.getDay()]} ${p2(t.getDate())}/${p2(t.getMonth() + 1)} ${p2(t.getHours())}:${p2(t.getMinutes())}${h > 0 ? ` (còn ${h < 1 ? Math.max(1, Math.round(h * 60)) + " phút" : h < 48 ? Math.round(h) + " giờ" : Math.round(h / 24) + " ngày"})` : ""}`; };
+function planOf(d = DATA) {
+  const P = (d && d.plan) || {}, U = P.usage || {}, L = U.limits || [], warn = P.warn ?? 80, stop = P.stop ?? 90, cap = P.cap_week || 0;
+  const age = U.at ? (Date.now() - new Date(U.at)) / 6e4 : null, fresh = L.length > 0 && age != null && age <= 180;
+  const gone = (x) => !!(x && x.resets_at && new Date(x.resets_at) <= Date.now());   // đã qua giờ reset: % cũ không còn đúng
+  const pc = (x) => (gone(x) ? 0 : Number((x && x.percent) || 0)), sess = L.find((x) => x.kind === "session"), week = L.find((x) => x.kind === "weekly_all");
+  const R = (d && d.runs) || [], since = Date.now() - 7 * 864e5, R7 = R.filter((r) => new Date(r.started_at) >= since), m = todayKey().slice(0, 7);
+  const tok7 = R7.reduce((a, r) => a + (tokOf(r) || 0), 0), noTok7 = R7.filter((r) => tokOf(r) == null).length;
+  const apiUsd = R.filter((r) => (r.started_at || "").slice(0, 7) === m).reduce((a, r) => a + (Number(r.cost_usd) || 0), 0);
+  const E = P.event || {}, hit = E.limit_hit && (E.resets_ts || 0) * 1000 > Date.now() && (!U.at || (E.at || "") > U.at) ? E : null;
+  let stopWhy = null; const warns = [];
+  if (fresh && sess && pc(sess) >= 100) stopWhy = `hết hạn mức phiên 5 giờ — reset ${resetTxt(sess.resets_at)}`;
+  if (fresh && week && pc(week) >= stop) stopWhy = stopWhy || `hạn mức tuần ${Math.round(pc(week))}% ≥ ${stop}% (chừa phần cho CTO) — reset ${resetTxt(week.resets_at)}`;
+  if (hit) stopWhy = stopWhy || `lượt ${E.ticket} chạm hạn mức (${(E.limit_hit || {}).kind || "gói"}) — chờ reset ${resetTxt(new Date(E.resets_ts * 1000).toISOString())}`;
+  if (cap && tok7 >= cap) stopWhy = stopWhy || `token agent 7 ngày ${fmtTok(tok7)} chạm trần token_budget_week ${fmtTok(cap)}`;
+  if (fresh) L.filter((x) => pc(x) >= warn).forEach((x) => warns.push(`${limName(x)} ${Math.round(pc(x))}%`));
+  if (cap && tok7 < cap && tok7 >= (cap * warn) / 100) warns.push(`token agent 7 ngày ${Math.round((tok7 * 100) / cap)}% trần`);
+  const kind = stopWhy ? "critical" : warns.length ? "warning" : fresh ? "good" : "none";
+  const col = (v) => (v >= 100 || v >= stop ? "--critical" : v >= warn ? "--warning" : "--series-1");
+  const chip = stopWhy ? "dừng" : warns.length === 1 ? warns[0].replace(/^tuần · mọi model/, "tuần").replace(/^tuần (?=\S+ \d)/, "") : warns.length ? `${warns.length} mức ≥ ${warn}%` : "";
+  return { name: P.name || "Gói Claude", usdMonth: P.usd_month ?? 200, warn, stop, cap, U, L, fresh, age, sess, week, pc, gone, chip, tok7, noTok7, R7, apiUsd, month: m, E, hit, stopWhy, warns, kind, col, err: U.error };
 }
 const usd = (v) => `${(Math.round((v || 0) * 100) / 100).toLocaleString("vi-VN")} USD`;
 const mmyy = (m) => `${m.slice(5, 7)}/${m.slice(0, 4)}`;
+/* thanh % hạn mức gói (phiên 5 giờ, tuần, tuần theo model) — dùng ở Hiệu suất, Tổng quan dự án */
+const planBars = (pl) => { if (!pl.L.length) return `<div class="empty">Chưa đọc được hạn mức gói${pl.err ? `: ${esc(pl.err)}` : ""}. Kiểm ở terminal: <code>claude -p /usage</code></div>`;
+  const rs = {}; pl.L.forEach((x) => { const k = x.resets_at || "?"; (rs[k] ||= []).push(PLAN_KIND[x.kind] === "tuần" ? x.label || "tuần" : limName(x)); });
+  return hbars(pl.L.map((x) => ({ label: limName(x), v: pl.pc(x), text: pl.gone(x) ? "đã reset" : `${Math.round(pl.pc(x))}%`, color: pl.col(pl.pc(x)), title: `${limName(x)}: ${x.percent}% — reset ${resetTxt(x.resets_at)}` })),
+    { max: 100, mark: pl.warn, markLabel: `cảnh báo ${pl.warn}% · Orchestrator dừng khi tuần ≥ ${pl.stop}% hoặc phiên 5 giờ hết` })
+    + `<p class="fresh" style="margin-top:4px">Reset: ${Object.entries(rs).map(([k, n]) => `${esc(n.join(", "))} ${esc(new Date(k) <= Date.now() ? "đã qua " + resetTxt(k) + " — chờ đọc lại" : resetTxt(k))}`).join(" · ")}</p>`; };
+const planAt = (pl) => (pl.U.at ? `đọc lúc ${esc(new Date(pl.U.at).toLocaleString("vi-VN"))}${pl.fresh ? "" : " — số cũ"}${pl.U.error && pl.L.length ? ` · lần đọc gần nhất lỗi: ${esc(pl.U.error)}` : ""}` : "chưa đọc lần nào");
 /* PR của lượt chạy: Orchestrator ghi từ 05/11; lượt cũ tìm theo nhánh feature/ai-<ticket> */
 const runPr = (r) => r.pr || ((((DATA && DATA.prs) || []).concat((DATA && DATA.merged) || [])).find((p) => p.branch === `feature/ai-${r.ticket}`) || {}).url || null;
 const velTxt = (V) => `point đóng ${V.days} ngày gần nhất (${ddmm(V.from)}–${ddmm(V.to)})`;
@@ -2913,7 +2954,7 @@ function barChart(id, cats, series, o = {}) {
     const gw = (W - pl - pr) / Math.max(1, cats.length), ns = series.length, bw = Math.max(3, Math.min(o.bw || 26, (gw - 10 - (ns - 1) * 2) / ns));
     const y = (v) => H - pb - ((H - pb - pt) * v) / top;
     let g = "";
-    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${fmtV(v)}</text>`;
+    for (let v = 0; v <= top + 1e-9; v += step) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${pl - 6}" y="${y(v) + 3}" text-anchor="end">${(o.fmt || fmtV)(v)}</text>`;
     const every = Math.max(1, Math.ceil(cats.length / Math.max(2, Math.floor((W - pl - pr) / (o.lw || 56)))));
     cats.forEach((c, i) => {
       const cx = pl + i * gw + gw / 2, x0 = cx - (ns * bw + (ns - 1) * 2) / 2;
@@ -2925,7 +2966,7 @@ function barChart(id, cats, series, o = {}) {
       if (c.av && isAgent(c.av)) g += `<image href="/static/agent-${c.av}.svg" x="${cx - 9}" y="${H - pb + 6}" width="18" height="18"/>`;
     });
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.style.height = H + "px"; svg.innerHTML = g;
-    hoverTip(el, svg, (i) => `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${fmtV(s.values[i], o.unit)}`).join(""));
+    hoverTip(el, svg, (i) => `<b>${esc(cats[i].label)}</b>` + series.map((s) => `<br>${esc(s.name)}: ${o.fmt ? o.fmt(s.values[i]) + (o.unit || "") : fmtV(s.values[i], o.unit)}`).join(""));
   });
   return `${legendOf(series)}<div class="chart" id="${id}"><svg role="img" aria-label="${esc(o.aria || "")}" style="height:${o.h || 200}px"></svg><div class="tip"></div></div>${tableView(cats, series, o.unit)}`;
 }
@@ -3028,19 +3069,34 @@ function pageRWeek() {
 }
 
 /* ---------- 2. Hiệu suất ---------- */
-/* Chi phí token tháng hiện tại: đã dùng / dự báo so với ngân sách, theo agent, theo ngày, ticket tốn nhất */
-function perfCost() {
-  const bd = budgetOf(), R = ((DATA && DATA.runs) || []).filter((r) => (r.started_at || "").slice(0, 7) === bd.month), withC = R.filter((r) => r.cost_usd != null);
-  const byA = {}, byT = {}; withC.forEach((r) => { byA[r.agent] = (byA[r.agent] || 0) + r.cost_usd; const k = r.ticket || "—"; (byT[k] ||= { k, a: r.agent, n: 0, v: 0 }); byT[k].n++; byT[k].v += r.cost_usd; });
-  const days = daysOf(bd.month + "-01", todayKey()), max = Math.max(bd.budget, bd.fc);
-  const top = Object.values(byT).sort((a, b) => b.v - a.v).slice(0, 8);
-  return `<div class="rgrid">${card(`Chi phí token tháng ${mmyy(bd.month)}`, `${hbars([{ label: "Đã dùng", v: bd.usd, text: `${usd(bd.usd)} · ${Math.round(bd.pct)}%`, color: bd.kind === "good" ? "--series-1" : bd.kind === "warning" ? "--warning" : "--critical" },
-      { label: "Dự báo cuối tháng", v: bd.fc, text: usd(bd.fc), color: bd.fcPct >= 100 ? "--critical" : "--series-2" }, { label: "Ngân sách", v: bd.budget, text: usd(bd.budget), color: "--line" }], { max, mark: (bd.budget * bd.warn) / 100, markLabel: `cảnh báo ${bd.warn}%` })}
-      <p class="fresh" style="margin-top:8px">${bd.runs} lượt trong tháng${bd.with_cost < bd.runs ? `, ${bd.runs - bd.with_cost} lượt chưa ghi chi phí` : ""}. Số liệu là cost_usd Claude Code báo; chạy bằng gói Max thì là chi phí quy đổi, không phải hoá đơn. Orchestrator cảnh báo ở ${bd.warn}%, dừng ở 100% (orchestrator/config.yaml).</p>
-      ${hbars(Object.entries(byA).sort((a, b) => b[1] - a[1]).map(([a, v]) => ({ label: a, icon: a, v, text: usd(v) })))}`, "không theo kỳ báo cáo ở trên — luôn là tháng hiện tại")}
-    ${card("Chi phí theo ngày và ticket tốn nhất", `${barChart("rpCost", days.map((x) => ({ label: x, short: ddmm(x) })), [{ name: "USD", color: "--series-1", values: days.map((x) => Math.round(withC.filter((r) => dayKey(r.started_at) === x).reduce((a, r) => a + r.cost_usd, 0) * 100) / 100) }], { aria: "Chi phí token theo ngày trong tháng", unit: " USD" })}
-      <div class="tablewrap"><table class="info"><thead><tr><th>Ticket</th><th>Agent</th><th class="n">Lượt</th><th class="n">USD</th></tr></thead><tbody>${top.map((x) => `<tr><td class="k"><a href="#/t/${esc(x.k)}">${esc(x.k)}</a></td><td class="nw">${agentTag(x.a, 16)}</td><td class="n">${x.n}</td><td class="n">${(Math.round(x.v * 100) / 100).toLocaleString("vi-VN")}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có lượt nào ghi chi phí trong tháng.</td></tr>'}</tbody></table></div>`)}</div>`;
+/* Gói Claude: % hạn mức phiên 5 giờ / tuần (luôn là số mới nhất, không theo kỳ báo cáo) + token agent 7 ngày theo agent, ngày, thành phần, ticket */
+function perfPlan() {
+  const pl = planOf(), W = pl.R7.filter((r) => tokOf(r) != null), byA = {}, byT = {}, part = { input: 0, output: 0, cache_write: 0, cache_read: 0 };
+  W.forEach((r) => { const v = tokOf(r); byA[r.agent] = (byA[r.agent] || 0) + v; const k = r.ticket || "—"; (byT[k] ||= { k, a: r.agent, n: 0, v: 0 }); byT[k].n++; byT[k].v += v;
+    Object.keys(part).forEach((p) => (part[p] += Number((r.usage || {})[p]) || 0)); });
+  const days = daysOf(addDays(todayKey(), -6), todayKey()), top = Object.values(byT).sort((a, b) => b.v - a.v).slice(0, 8);
+  const eu = pl.U.extra_usage, last = pl.E && pl.E.limit_hit ? pl.E : null;
+  return `<div class="rgrid">${card(`${pl.name} · hạn mức`, `${planBars(pl)}
+      <p class="fresh" style="margin-top:8px">${planAt(pl)}. Chi phí thật: <b>${esc(usd(pl.usdMonth))}/tháng cố định</b>, không tính theo token. Orchestrator cảnh báo ở ${pl.warn}%, ngừng giao việc khi hết phiên 5 giờ hoặc tuần ≥ ${pl.stop}% (chừa phần cho CTO)${pl.cap ? `, hoặc token agent 7 ngày chạm ${fmtTok(pl.cap)}` : ""} — orchestrator/config.yaml.</p>
+      ${pl.stopWhy ? `<p>${status("critical", "Orchestrator ngừng giao việc")} ${esc(pl.stopWhy)}</p>` : ""}
+      ${last ? `<p class="fresh">Lượt gần nhất chạm hạn mức: <a href="#/t/${esc(last.ticket)}">${esc(last.ticket)}</a> ${agentTag(last.agent, 16)} lúc ${esc(new Date(last.at).toLocaleString("vi-VN"))} — ${esc((last.limit_hit || {}).text || "")}</p>` : ""}
+      ${eu && eu.is_enabled ? `<p class="fresh">Extra usage đang bật: đã dùng ${esc(String(eu.used_credits ?? "?"))} / ${esc(String(eu.monthly_limit ?? "?"))} ${esc(eu.currency || "")} — lượt vượt hạn mức gói sẽ tính tiền thêm.</p>` : ""}
+      <p class="fresh">Quy đổi theo giá API tháng ${mmyy(pl.month)}: ~${esc(usd(pl.apiUsd))} — chỉ để so sánh, không phải hoá đơn.</p>
+      <p><button class="btn" type="button" data-plan-refresh>${IC("reopen")}Đọc lại hạn mức gói</button></p>`, "số mới nhất, không theo kỳ báo cáo ở trên")}
+    ${card("Token agent 7 ngày", `${pl.cap ? hbars([{ label: "Đã dùng / trần tuần", v: pl.tok7, text: `${fmtTok(pl.tok7)} / ${fmtTok(pl.cap)}`, color: pl.col((pl.tok7 * 100) / pl.cap) }], { max: Math.max(pl.cap, pl.tok7), mark: (pl.cap * pl.warn) / 100, markLabel: `cảnh báo ${pl.warn}%` }) : `<p class="ov-k" style="margin-top:0">${fmtTok(pl.tok7)} token · ${W.length} lượt${pl.noTok7 ? ` · ${pl.noTok7} lượt chưa ghi token` : ""}</p>`}
+      ${hbars(Object.entries(byA).sort((a, b) => b[1] - a[1]).map(([a, v]) => ({ label: a, icon: a, v, text: fmtTok(v) })))}
+      <p class="ov-k">Thành phần</p>${hbars([["Input", "input"], ["Output", "output"], ["Cache ghi", "cache_write"], ["Cache đọc (tính riêng)", "cache_read"]].map(([l, k]) => ({ label: l, v: part[k], text: fmtTok(part[k]), color: k === "cache_read" ? "--line" : "--series-2" })))}`, "token = input + output + cache ghi, mọi model kể cả subagent")}</div>
+    ${card("Token theo ngày và ticket tốn token nhất · 7 ngày", `${barChart("rpTok", days.map((x) => ({ label: x, short: ddmm(x) })), [{ name: "Token", color: "--series-1", values: days.map((x) => W.filter((r) => dayKey(r.started_at) === x).reduce((a, r) => a + tokOf(r), 0)) }], { aria: "Token agent theo ngày, 7 ngày gần nhất", unit: " token", fmt: fmtTok })}
+      <div class="tablewrap"><table class="info"><thead><tr><th>Ticket</th><th>Agent</th><th class="n">Lượt</th><th class="n">Token</th></tr></thead><tbody>${top.map((x) => `<tr><td class="k"><a href="#/t/${esc(x.k)}">${esc(x.k)}</a></td><td class="nw">${agentTag(x.a, 16)}</td><td class="n">${x.n}</td><td class="n">${fmtTok(x.v)}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có lượt nào ghi token trong 7 ngày.</td></tr>'}</tbody></table></div>`)}`;
 }
+/* Đọc lại hạn mức gói ngay (server gọi claude -p /usage; tối thiểu 2 phút giữa 2 lần) */
+document.addEventListener("click", async (e) => { const b = e.target.closest && e.target.closest("[data-plan-refresh]"); if (!b) return;
+  b.disabled = true; b.lastChild.textContent = "Đang đọc…";
+  try { const res = await fetch("/api/plan/refresh", { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: "{}" });
+    const j = await res.json(); if (!res.ok) throw new Error(j.error || res.status);
+    if (DATA) { DATA.plan = { ...(DATA.plan || {}), usage: j }; route(); }
+    toast(j.limits && j.limits.length ? `Hạn mức gói: ${j.limits.map((x) => `${limName(x)} ${x.resets_at && new Date(x.resets_at) <= Date.now() ? "đã reset" : Math.round(Number(x.percent) || 0) + "%"}`).join(" · ")}${j.error ? " (lần đọc này lỗi, giữ số cũ)" : ""}` : "Chưa đọc được: " + (j.error || "không rõ lỗi"), !(j.limits && j.limits.length)); }
+  catch (x) { toast("Đọc hạn mức gói lỗi: " + x.message, true); b.disabled = false; b.lastChild.textContent = "Đọc lại hạn mức gói"; } });
 function pageRPerf() {
   const n = Number(Q.rper ?? 14), { from, to } = periodRange(n), T = DATA ? DATA.tickets : [], R = (DATA ? DATA.runs : []).filter((r) => inRange(dayKey(r.started_at), from, to));
   const M = (DATA ? DATA.merged || [] : []).filter((p) => isAgentPR(p) && inRange(dayKey(p.mergedAt), from, to)), K = tByKey();
@@ -3074,7 +3130,7 @@ function pageRPerf() {
       ${card("Point hoàn thành theo agent", hbars(st.filter((x) => x.pts).sort((a, b) => b.pts - a.pts).map((x) => ({ label: x.a, icon: x.a, v: x.pts, text: `${x.pts} point · ${x.done} ticket` }))))}
     </div>
     ${card("Cycle time trung vị theo agent", hbars(st.filter((x) => x.cyc != null).sort((a, b) => b.cyc - a.cyc).map((x) => ({ label: x.a, icon: x.a, v: x.cyc, text: fmtH(x.cyc) })), {}), "càng ngắn càng tốt; tính trên ticket đóng trong kỳ")}
-    ${perfCost()}
+    ${perfPlan()}
     <h3 class="sub">Bảng chỉ số theo agent</h3>
     <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Thành công</th><th class="n">Trung vị/lượt</th><th class="n">TB turn</th><th class="n">Ticket xong</th><th class="n">Point</th><th class="n">Cycle time</th><th class="n" title="Câu hỏi agent tạo ra khi thiếu thông tin">Câu hỏi đã tạo</th></tr></thead>
       <tbody>${st.map((x) => `<tr><td class="nw">${agentTag(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
@@ -3232,7 +3288,7 @@ function drawActivity(d) {
     const r = items[+b.dataset.k];
     b.onmousemove = (e) => { tip.innerHTML = `<b>${esc(r.ticket || "")}</b> · ${esc(r.agent)}<br>Bắt đầu ${esc(r.st.toLocaleString("vi-VN"))}<br>` +
         (r.kind === "run" ? `Đang chạy ${dur(Math.round((now - r.st) / 1000))}${r.phase === "push" ? " · Orchestrator đẩy code" : ""}` : r.en ? `Thời lượng ${dur(Math.round((r.en - r.st) / 1000))}` : "Chưa ghi thời lượng") +
-        `${r.num_turns != null ? ` · ${r.num_turns} turn` : ""}<br>${r.kind === "err" ? "Kết quả: lỗi" : r.kind === "odd" ? "Kết quả: bất thường (dưới 3 turn)" : r.kind === "run" ? "" : "Kết quả: xong"}${runPr(r) ? " · có PR" : ""}${r.cost_usd != null ? ` · ${usd(r.cost_usd)}` : ""}`;
+        `${r.num_turns != null ? ` · ${r.num_turns} turn` : ""}<br>${r.kind === "err" ? "Kết quả: lỗi" : r.kind === "odd" ? "Kết quả: bất thường (dưới 3 turn)" : r.kind === "run" ? "" : "Kết quả: xong"}${runPr(r) ? " · có PR" : ""}${tokOf(r) != null ? ` · ${fmtTok(tokOf(r))} token` : ""}${r.limit_hit ? " · chạm hạn mức gói" : ""}`;
       tip.style.display = "block"; const bx = el.getBoundingClientRect();
       tip.style.left = Math.min(e.clientX - bx.left + 12, bx.width - tip.offsetWidth - 4) + "px"; tip.style.top = Math.max(0, e.clientY - bx.top - tip.offsetHeight - 8) + "px"; };
     b.onmouseleave = () => (tip.style.display = "none");
@@ -3274,12 +3330,13 @@ function render(d) {
     ["Chờ CTO", RV.ready + groups.question.length, `${RV.ready} sẵn sàng chấm · ${groups.question.length} câu hỏi${rvMore ? ` · ai-review còn: ${rvMore}` : ""}`],
     ["PR mở", d.prs.length, `${ciRun} đang chạy CI · ${ciBad} CI lỗi${ciRe ? ` · ${ciRe} cần chạy lại` : ""}`],
     ["CI develop", "", ""],
-    ["Token tháng", "", ""],
+    ["Gói Claude", "", ""],
   ];
-  const bd = budgetOf(d);
+  const pl = planOf(d);
   $("kpis").innerHTML = k.map(([l, v, s], i) => {
-    if (i === 5) return `<div class="kpi"><div class="l">Token tháng ${esc(mmyy(bd.month))}</div><div class="v">${bd.kind === "good" ? "" : `<span style="font-size:15px">${status(bd.kind, Math.round(bd.pct) + "%")}</span> `}${esc(usd(bd.usd))}</div>
-      <div class="s" title="cost_usd Claude Code báo mỗi lượt; Orchestrator dừng ở 100% ngân sách">${Math.round(bd.pct)}% / ${esc(usd(bd.budget))} · dự báo cuối tháng ~${esc(usd(bd.fc))}${bd.with_cost < bd.runs ? ` · ${bd.runs - bd.with_cost} lượt chưa ghi chi phí` : ""}</div></div>`;
+    if (i === 5) { const wk = pl.week, sub = `${pl.sess ? `phiên 5 giờ ${pl.gone(pl.sess) ? "đã reset" : Math.round(pl.pc(pl.sess)) + "%"} · ` : ""}${wk ? `reset tuần ${resetTxt(wk.resets_at)} · ` : pl.fresh ? "" : "chưa đọc được hạn mức gói · "}agent 7 ngày ${fmtTok(pl.tok7)} token${pl.cap ? ` / ${fmtTok(pl.cap)}` : ""}`;
+      return `<div class="kpi"><div class="l">${esc(pl.name)}</div><div class="v">${pl.kind === "good" || pl.kind === "none" ? "" : `<span style="font-size:15px">${status(pl.kind, pl.chip)}</span> `}${wk ? `${Math.round(pl.pc(wk))}%<span style="font-size:13px;font-weight:500"> tuần</span>` : `${fmtTok(pl.tok7)}<span style="font-size:13px;font-weight:500"> token</span>`}</div>
+      <div class="s" title="${esc(`${pl.stopWhy ? "Orchestrator ngừng giao việc: " + pl.stopWhy + ". " : ""}Hạn mức gói Claude ${planAt(pl).replace(/<[^>]+>/g, "")}. Chi phí thật cố định ${usd(pl.usdMonth)}/tháng; token = input + output + cache ghi.`)}">${esc(sub)}</div></div>`; }
     if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle + (ciInfo ? " · " + ciInfo : "") : "")}">${ci ? `${red && red.n > 1 ? `từ ${esc(ago(red.since))} · ` : ""}${ciInfo ? esc(ciInfo) + " · " : ""}${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s" title="${esc(s)}">${esc(s)}</div></div>`;
   }).join("");
@@ -3309,8 +3366,8 @@ function render(d) {
       pass: "CTO /review-pr → /merge-pr", none: "chờ CI khởi chạy" };
     const fl = d.prs.filter((p) => p.branch.startsWith("feature/ai-"));
     $("live").innerHTML = `<div class="empty" style="padding-top:0">${status("none", "Không có agent nào đang chạy")}${last ? ` · Lượt gần nhất <b>${esc(last.ticket)}</b> ${agentTag(last.agent, 16)}
-        bắt đầu ${esc((last.started_at || "").slice(5, 16).replace("T", " "))}${last.duration_s != null ? ` · ${dur(last.duration_s)}` : ""} · ${last.is_error || runOdd(last) ? runChip(last) : status("good", "agent xong")}
-        ${runPr(last) ? ` · <a href="${esc(runPr(last))}" target="_blank" rel="noopener">PR #${esc(String(runPr(last)).split("/").pop())}</a>` : ""}${last.cost_usd != null ? ` · ${esc(usd(last.cost_usd))}` : ""}` : ""}</div>
+        bắt đầu ${esc((last.started_at || "").slice(5, 16).replace("T", " "))}${last.duration_s != null ? ` · ${dur(last.duration_s)}` : ""} · ${last.limit_hit || last.is_error || runOdd(last) ? runChip(last) : status("good", "agent xong")}
+        ${runPr(last) ? ` · <a href="${esc(runPr(last))}" target="_blank" rel="noopener">PR #${esc(String(runPr(last)).split("/").pop())}</a>` : ""}${tokOf(last) != null ? ` · <span title="${esc(tokTitle(last))}">${fmtTok(tokOf(last))} token</span>` : ""}` : ""}</div>
       ${fl.length ? `<div class="inflight"><div class="fresh" style="margin:6px 0 4px">Đang xử lý sau agent (${fl.length} PR mở)</div><div class="tablewrap"><table class="info"><tbody>${fl.map((p) => {
         const key = p.branch.replace("feature/ai-", ""), g = prGate(p), rr = ["fail", "cancelled", "stuck"].includes(g) ? rerunCmd(p) : null;
         return `<tr><td class="k"><a href="#/t/${esc(key)}">${esc(key)}</a></td><td class="nw"><a href="${esc(p.url)}" target="_blank" rel="noopener">PR #${p.number}</a></td>
@@ -3354,7 +3411,7 @@ function render(d) {
   const R = d.runs;
   $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
     <td>${runPr(r) ? `<a href="${esc(runPr(r))}" target="_blank" rel="noopener" title="Mở PR">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${agentTag(r.agent)}</td>
-    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td><td class="n">${r.cost_usd != null ? (Math.round(r.cost_usd * 100) / 100).toLocaleString("vi-VN") : "—"}</td>
+    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td><td class="n" title="${esc(tokTitle(r))}">${fmtTok(tokOf(r))}</td>
     <td>${runChip(r)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">Chưa có lượt chạy.</td></tr>';
 
   // Hiệu quả theo agent
