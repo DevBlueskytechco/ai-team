@@ -160,8 +160,22 @@ def list(label=None, agent=None, status=None, type=None, sprint=None):
     return [{k: t.get(k) for k in ("id", "key", "title", "type", "agent", "side", "status", "labels", "points", "sprint", "priority")} for t in rows]
 
 
+def current_sprint(day=None):
+    """Tên sprint chứa ngày `day` (mặc định hôm nay) theo lịch ops/dashboard/project.json (scrum.sprints); ngoài lịch → None."""
+    d = (day or datetime.date.today()).isoformat() if not isinstance(day, str) else day
+    try:
+        S = json.load(open(os.path.join(ROOT, "ops", "dashboard", "project.json"), encoding="utf-8"))["scrum"]["sprints"]
+        return next((x["name"] for x in S if x["start"] <= d <= x["end"]), None)
+    except Exception: return None
+
+
+_AUTO = object()
+
+
 def create(title, type="task", agent=None, side=None, points=None, body="", parent=None, blocked_by=None, labels=None, r_codes=None,
-           task_type=None, priority="none", sprint=None, due_date=None, by=None):
+           task_type=None, priority="none", sprint=_AUTO, due_date=None, by=None):
+    if sprint is _AUTO:   # không truyền sprint: việc agent làm (ai-draft, task/bug, không phải [Q]) vào sprint hiện tại; câu hỏi, việc người làm ở backlog
+        sprint = current_sprint() if "ai-draft" in (labels or []) and (type or "task") in ("task", "bug") and not str(title or "").lstrip().startswith("[Q]") else None
     f = {"title": (title or "").strip(), "type": type or "task", "agent": agent or None, "side": side or None, "points": points,
          "body": body or "", "parent": parent or None, "blocked_by": blocked_by or [], "labels": labels or [], "r_codes": r_codes or [],
          "task_type": task_type or None, "priority": priority or "none", "sprint": sprint or None, "due_date": due_date or None}

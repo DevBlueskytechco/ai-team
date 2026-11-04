@@ -57,7 +57,7 @@ section{background:var(--surface);border:1px solid var(--line);border-radius:10p
 section h2{font-size:13px;margin:0 0 10px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-4{grid-column:span 4}
 @media (max-width:1100px){.span-8,.span-6,.span-4{grid-column:span 12}}
-.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:12px 16px 32px}header{padding:10px 16px}}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
@@ -160,6 +160,7 @@ nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot
   body.guide-open .gd-toc,body.guide-open .gd-top .btn,body.guide-open .gd-sel{display:none!important} body.guide-open .gd-body{display:block} body.guide-open .gd-main{overflow:visible;padding:0}
   body.guide-open .gd-main>section{break-inside:avoid-page}}
 .pl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;margin-bottom:14px} .pl-grid .rcardx{margin:0}
+.pl-fill{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
 .pl-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px} .pl-tools input[type=search]{min-width:160px}
 .pl-tbl tr.grp td{background:var(--surface-2);font-size:12.5px} .pl-tbl tr.sel td{background:var(--chip)} .pl-tbl td.ttl{min-width:200px} .pl-tbl td.ph{min-width:96px} .pl-tbl td.ph .status{white-space:normal;align-items:flex-start} .pl-tbl input[type=checkbox]{width:auto;margin:0}
 .sb-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px} table.sb{border-collapse:collapse;min-width:1180px;width:100%}
@@ -530,7 +531,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
 
   <section class="span-6" aria-labelledby="h-runs">
     <h2 id="h-runs">Lượt chạy gần đây</h2>
-    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Turn</th><th class="n">Thời gian</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
+    <div class="tablewrap"><table><thead><tr><th>Lúc</th><th>Ticket</th><th>Agent</th><th class="n">Turn</th><th class="n">Thời gian</th><th class="n">USD</th><th>KQ</th></tr></thead><tbody id="runs"></tbody></table></div>
   </section>
 
   <section class="span-6" aria-labelledby="h-pr">
@@ -915,7 +916,7 @@ function ovModel() {
     const [sk, sl] = storyState(kids), sides = {};
     work.forEach((t) => { const k = t.side ? t.side.toUpperCase() : ({ "dev-fe": "FE", "dev-be": "BE", qa: "QA", techlead: "Tech Lead", designer: "Designer", ba: "BA", po: "PO", devops: "DevOps", writer: "Writer" })[t.agent] || "khác"; sides[k] = (sides[k] || 0) + 1; });
     return { ...s, kids, work, done, left, srs, sk, sl, G, sides, cov: c, acN: srs ? srs.acs.length : 0, covN: c && srs ? srs.acs.filter((a) => c.acs.has(a.id)).length : 0,
-      sp: [...new Set(work.filter((t) => t.sprint).map((t) => t.sprint))], rough: srs && srs.est != null ? srs.est : s.points || 0,
+      sp: [...new Set(work.map(sprintOfT).filter(Boolean))], rough: srs && srs.est != null ? srs.est : s.points || 0,
       ptsAll: work.reduce((a, t) => a + pts(t), 0), ptsDone: done.reduce((a, t) => a + pts(t), 0), leftPts: left.reduce((a, t) => a + pts(t), 0), leftNoPt: left.filter((t) => !pts(t)).length,
       lastDone: work.length && done.length === work.length ? done.map((t) => dOnly(t.closed_at)).sort().slice(-1)[0] : null, firstDay: kids.map((t) => dOnly(t.created_at)).sort()[0] || null,
       moscow: moscow[s.key] || "", split: split[s.key] || null, prs: prBy[s.key] || [] };
@@ -1073,7 +1074,8 @@ function pageOverview() {
       <td>${s.work.length ? `<b>${s.ptsAll}</b> point${s.leftNoPt ? ` <span class="fresh">(${s.leftNoPt} ticket chưa point)</span>` : ""}` : '<span class="fresh">chưa chia</span>'}${s.split ? `<div class="fresh">${esc(s.split.estimate.replace(/^Ước lượng chốt\s*[^:]*:\s*/, "").split(/\s[—–-]\s|\.\s/)[0].slice(0, 90))} — <a href="#/t/${esc(s.split.ticket)}">${esc(s.split.ticket)}</a></div>` : ""}</td>
       <td class="nw">${Object.entries(s.sides).map(([k, n]) => `<span class="chip">${esc(k)} ${n}</span>`).join(" ") || "—"}</td><td class="nw">${s.sp.length ? esc(s.sp.join(", ")) : '<span class="fresh">chưa xếp</span>'}</td><td class="nw">${status(s.sk, s.sl)}</td></tr>`).join("")}</tbody></table></div>
       <p><a class="btn" href="#/plan">${IC("layers")}Kế hoạch sprint</a> <a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint</a></p>`, ["techlead", "po"], ["docs/srs.md", "drafts/techlead/*/task-split.md", "ticket nội bộ"], "sơ bộ = SRS của BA; chốt = tổng point ticket sau khi Tech Lead chia task FE/BE"),
-    ovGrid(ovCard("Ngân sách", `${hbars(Object.entries(bh).map(([k, v]) => ({ label: k, v, text: `${v} giờ` })), { max: bmax })}<p class="fresh">${C.budget.total_h ? `Tổng ${C.budget.total_h} giờ người / ${C.budget.weeks} tuần. ` : ""}${esc((C.budget.text.split(/\.\s+/).slice(1).join(". ") || "").slice(0, 220))}</p>`, ["po"], ["docs/charter.md"]),
+    ovGrid(ovCard("Ngân sách", `${hbars(Object.entries(bh).map(([k, v]) => ({ label: k, v, text: `${v} giờ` })), { max: bmax })}
+      ${(() => { const bd = budgetOf(); return `<p class="ov-k">Token agent tháng ${esc(mmyy(bd.month))}</p>${hbars([{ label: "Đã dùng", v: bd.usd, text: `${usd(bd.usd)} · ${Math.round(bd.pct)}%`, color: bd.kind === "good" ? "--series-1" : bd.kind === "warning" ? "--warning" : "--critical" }, { label: "Dự báo cuối tháng", v: bd.fc, text: usd(bd.fc), color: bd.fcPct >= 100 ? "--critical" : "--series-2" }], { max: Math.max(bd.budget, bd.fc), mark: (bd.budget * bd.warn) / 100, markLabel: `cảnh báo ${bd.warn}%` })}`; })()}<p class="fresh">${C.budget.total_h ? `Tổng ${C.budget.total_h} giờ người / ${C.budget.weeks} tuần. ` : ""}${esc((C.budget.text.split(/\.\s+/).slice(1).join(". ") || "").slice(0, 220))}</p>`, ["po"], ["docs/charter.md"]),
       ovCard("Rủi ro và cách xử lý", `<div class="tablewrap"><table class="info"><tbody>${C.risks.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${mdi(r.risk)}${r.action ? `<div class="ov-act">${IC("check")} ${mdi(r.action)}</div>` : ""}</td></tr>`).join("")}</tbody></table></div>`, ["po", "techlead"], ["docs/charter.md"])),
   ].join("");
 
@@ -1092,7 +1094,7 @@ function pageOverview() {
         [{ name: "Hoàn thành", color: "--series-1", values: M.SP.filter((x) => x.start <= today).map((x) => sprintReport(x, M.T).dp) }], { aria: "Point hoàn thành theo pha và sprint", labels: true, lw: 70, unit: " point" }),
         `sprint đang chạy tính tới hôm nay · vận tốc dùng cho dự báo = ${velTxt(M.V)}`)),
     card("Vận hành theo vai trò", `<div class="tablewrap"><table class="info"><thead><tr><th>Vai trò</th><th>Role owner</th><th class="n">Đang mở</th><th class="n">ai-review (sẵn sàng)</th><th class="n">Bị chặn / cần sửa</th><th class="n">Đã xong</th><th class="n">${M.cur ? esc(M.cur.name) : "Sprint"}</th></tr></thead>
-      <tbody>${roles.map((r) => { const m = M.T.filter((t) => t.agent === r.agent && isWork(t)), o = m.filter((t) => t.status !== "Closed"), cs = M.cur ? m.filter((t) => t.sprint === M.cur.name) : [];
+      <tbody>${roles.map((r) => { const m = M.T.filter((t) => t.agent === r.agent && isWork(t)), o = m.filter((t) => t.status !== "Closed"), cs = M.cur ? m.filter((t) => sprintOfT(t) === M.cur.name) : [];
         return `<tr><td class="nw">${agentTag(r.agent, 20)}</td><td class="nw">${ownerHtml(r)}${r.day ? `<div class="fresh">duyệt ${esc(r.day)}</div>` : ""}</td><td class="n">${o.length}</td><td class="n">${(() => { const r2 = rvSum(o.filter((t) => classify(t) === "review")); return r2.n ? `${r2.n} (${r2.ready})` : "0"; })()}</td>
         <td class="n">${o.filter((t) => ["blocked", "fix"].includes(classify(t))).length}</td><td class="n">${m.length - o.length}</td><td class="n">${cs.length ? `${cs.filter((t) => t.status === "Closed").length}/${cs.length}` : "—"}</td></tr>`; }).join("") || '<tr><td colspan="7" class="empty">Đang tải vai trò…</td></tr>'}</tbody></table></div>
       <p><a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint theo vai trò</a> <a class="btn" href="#/r-sprint">${IC("flag")}Báo cáo sprint</a></p>`, "role owner duyệt cột Chờ CTO chấm vào ngày cố định")].join("") : "";
@@ -1165,6 +1167,10 @@ let PL_SEL = new Set(), PL_BUSY = false;
 const spList = () => ((PROJECT && PROJECT.scrum && PROJECT.scrum.sprints) || []);
 const spCur = () => { const d = todayKey(); return spList().find((s) => s.start <= d && d <= s.end) || null; };
 const spPick = (q) => { const L = spList(), c = spCur(); return L.find((s) => s.name === Q[q]) || c || L[L.length - 1] || null; };
+/* Sprint của ticket = trường sprint (CTO xếp ở Kế hoạch sprint; ticket agent mới tự vào sprint hiện tại). Ticket đã đóng chưa có trường này
+   tính theo ngày đóng; ticket mở chưa có là backlog. Dùng chung Kế hoạch sprint, Bảng sprint, Báo cáo sprint, Tổng quan dự án. */
+const sprintByDate = (d) => (d ? (spList().find((x) => x.start <= d && d <= x.end) || {}).name || null : null);
+const sprintOfT = (t) => t.sprint || (t.status === "Closed" ? sprintByDate(dOnly(t.closed_at)) : null);
 const reqOf = (t) => (t.labels || []).filter((l) => /^REQ-\d+$/.test(l));
 const reqChip = (t) => reqOf(t).map((r) => `<a class="chip" href="#/req/${esc(r)}" title="Yêu cầu dự án ${esc(r)}">${esc(r)}</a>`).join("");
 const roleName = (a) => (a ? (roleRow(a) && roleRow(a).role) || a : "Người làm");
@@ -1178,14 +1184,15 @@ function pagePlan() {
   if (!PROJECT || !DATA) return '<div class="empty">Đang tải…</div>';
   const sp = spPick("plsp"); if (!sp) return '<div class="empty">project.json chưa có lịch sprint (scrum.sprints).</div>';
   const T = DATA.tickets, today = todayKey(), K = tByKey();
-  const inSp = T.filter((t) => t.sprint === sp.name), open = T.filter((t) => t.status !== "Closed" && isWork(t));
+  const inSp = T.filter((t) => sprintOfT(t) === sp.name), open = T.filter((t) => t.status !== "Closed" && isWork(t));
+  const nosp = open.filter((t) => !t.sprint), prev = spList()[spList().indexOf(sp) - 1], carry = prev ? open.filter((t) => t.sprint === prev.name) : [];
   const fs = Q.plstory || "", fa = Q.plag || "", fr = Q.plreq || "";
   const back = open.filter((t) => t.sprint !== sp.name && (!fs || t.parent === fs) && (!fa || (fa === "-" ? !t.agent : t.agent === fa)) && (!fr || reqOf(t).includes(fr)) && match(Q.pl, [t.key, t.title, t.agent, ...(t.labels || [])]));
   const P = (a) => a.reduce((x, t) => x + pts(t), 0), done = inSp.filter((t) => t.status === "Closed");
   const past = spList().filter((s) => s.end < sp.start), V = velocity(T), vel = V.v || null;
   const noPt = inSp.filter((t) => isWork(t) && t.status !== "Closed" && !pts(t)).length;
   const days = daysOf(sp.start, sp.end), dayN = today < sp.start ? 0 : today > sp.end ? days.length : days.indexOf(today) + 1;
-  const tiles = [["Point trong sprint", P(inSp), `${inSp.length} ticket gán ${sp.name}`], ["Đã xong", P(done), `${done.length} ticket đóng`],
+  const tiles = [["Point trong sprint", P(inSp), `${inSp.length} ticket trong ${sp.name}`], ["Đã xong", P(done), `${done.length} ticket đóng`],
     ["Còn lại", P(inSp) - P(done), `${inSp.length - done.length} ticket mở${noPt ? ` · ${noPt} chưa có point` : ""}`],
     ["Vận tốc", vel == null ? "—" : vel + " point", `${velTxt(V)} — sức chứa gợi ý`],
     ["Backlog đang mở", open.filter((t) => t.sprint !== sp.name).length, `${P(open.filter((t) => t.sprint !== sp.name))} point chưa vào sprint`],
@@ -1207,7 +1214,10 @@ function pagePlan() {
       <span class="fresh">mục tiêu: ${sp.goal ? esc(sp.goal) : '<span class="noown">chưa ghi — sửa project.json scrum.sprints</span>'}</span><span class="spacer"></span>
       <a class="btn" href="#/sprint-board">${IC("kanban")}Bảng sprint theo vai trò</a><a class="btn" href="#/r-sprint" onclick="Q.sprint=''">${IC("flag")}Báo cáo sprint</a></div>
     ${repTiles(tiles)}
-    ${!inSp.length ? `<p class="note">${status("warning", "Chưa có ticket nào gán " + sp.name)} Chọn ticket ở Product backlog rồi bấm “Đưa vào ${esc(sp.name)}”. Orchestrator chạy ticket của sprint hiện tại trước; báo cáo sprint vẫn tính theo ngày tạo/đóng ticket.</p>` : ""}
+    ${sp.end >= today && (carry.length || nosp.length) ? `<div class="pl-fill">${!inSp.some((t) => t.status !== "Closed") ? status("warning", `${sp.name} chưa có ticket đang mở`) : ""}
+      ${carry.length ? `<button class="btn" type="button" data-plfill="carry">${IC("layers")}Chuyển ${carry.length} ticket chưa xong của ${esc(prev.name)} sang ${esc(sp.name)}</button>` : ""}
+      ${nosp.length ? `<button class="btn${inSp.some((t) => t.status !== "Closed") ? "" : " primary"}" type="button" data-plfill="nosp">${IC("plus")}Đưa ${nosp.length} ticket đang mở chưa có sprint vào ${esc(sp.name)}</button>` : ""}
+      <span class="fresh">Ticket agent mới (ai-draft) tự vào sprint hiện tại; câu hỏi, việc người làm ở backlog. Orchestrator chạy ticket của sprint hiện tại trước.</span></div>` : ""}
     <div class="pl-grid">
       <div class="rcardx"><h3>Product backlog (${back.length})</h3>
         <div class="pl-tools">${searchBox("pl", "Tìm key, tên, nhãn")}
@@ -1236,6 +1246,10 @@ function bindPlan() {
   document.querySelectorAll("#info [data-plall]").forEach((c) => (c.onchange = () => { document.querySelectorAll(`#info [data-plk][data-side="${c.dataset.plall}"]`).forEach((x) => (c.checked ? PL_SEL.add(x.dataset.plk) : PL_SEL.delete(x.dataset.plk))); renderInfo(); }));
   const sp = spPick("plsp"); if (!sp) return;
   const bi = $("plIn"), bo = $("plOut");
+  document.querySelectorAll("#info [data-plfill]").forEach((b) => (b.onclick = async () => {
+    const L = spList(), prev = L[L.indexOf(sp) - 1], open = DATA.tickets.filter((t) => t.status !== "Closed" && isWork(t));
+    const ks = (b.dataset.plfill === "carry" ? open.filter((t) => prev && t.sprint === prev.name) : open.filter((t) => !t.sprint)).map((t) => t.key);
+    if (!ks.length) return; b.disabled = true; await moveSprint(ks, sp.name); renderInfo(); }));
   if (bi) bi.onclick = async () => { const ks = [...PL_SEL].filter((k) => K[k] && K[k].sprint !== sp.name); if (!ks.length) return; bi.disabled = true; await moveSprint(ks, sp.name); renderInfo(); };
   if (bo) bo.onclick = async () => { const ks = [...PL_SEL].filter((k) => K[k] && K[k].sprint === sp.name); if (!ks.length) return; bo.disabled = true; await moveSprint(ks, null); renderInfo(); };
 }
@@ -1243,7 +1257,7 @@ const SB_COLS = [["ready", "Sẵn sàng"], ["blocked", "Bị chặn"], ["running
 function pageSprintBoard() {
   if (!PROJECT || !DATA) return '<div class="empty">Đang tải…</div>';
   const sp = spPick("sbsp"); if (!sp) return '<div class="empty">project.json chưa có lịch sprint.</div>';
-  const all = Q.sball === "1", T = DATA.tickets.filter((t) => all ? (t.status !== "Closed" || t.sprint === sp.name) : t.sprint === sp.name), today = DOW[new Date().getDay()];
+  const all = Q.sball === "1", T = DATA.tickets.filter((t) => all ? (t.status !== "Closed" || sprintOfT(t) === sp.name) : sprintOfT(t) === sp.name), today = DOW[new Date().getDay()];
   const lanes = [...AGENT_IDS, "-"].map((a) => ({ a, ts: T.filter((t) => (t.agent || "-") === a) })).filter((x) => x.ts.length);
   const cardOf = (t) => `<a class="sb-card" href="#/t/${esc(t.key)}"><span class="k">${esc(t.key)}</span>${t.points ? ` <span class="chip">${t.points} pt</span>` : ""}${reqChip(t)}${ciStageChip(t)}<div class="tt">${esc(cutW(t.title, 90))}</div></a>`;
   const P = (a) => a.reduce((x, t) => x + pts(t), 0);
@@ -1405,7 +1419,7 @@ function pageReqDetail() {
           <form id="rqTk" class="rq-tk"><input name="title" maxlength="300" placeholder="Tên ticket cụ thể: file, số lượng, phạm vi" required>
             <select name="agent" aria-label="Vai trò">${opt("", "", "— người làm")}${WORK_AGENTS.map((a) => opt(a, "", roleName(a))).join("")}</select>
             <input name="points" type="number" min="0" max="100" placeholder="point" aria-label="Point">
-            <select name="sprint" aria-label="Sprint">${opt("", "", "backlog")}${spList().map((x) => opt(x.name, "", x.name + (cs && x.name === cs.name ? " (hiện tại)" : ""))).join("")}</select>
+            <select name="sprint" aria-label="Sprint">${opt("", cs ? cs.name : "", "backlog")}${spList().map((x) => opt(x.name, cs ? cs.name : "", x.name + (cs && x.name === cs.name ? " (hiện tại)" : ""))).join("")}</select>
             <button class="btn" type="submit">${IC("plus")}Tạo ticket thực hiện</button></form>
           <p class="fresh">Ticket gắn nhãn ${esc(r.id)}, story ${esc(r.stories[0] || "—")}; Dev FE/BE được gắn ai-draft để Orchestrator chạy, vai trò khác cần đặt loại việc trong ticket.</p></div>
         <div class="tsec"><h3>Kiến thức đã nạp từ yêu cầu này (${kn.length})</h3>
@@ -1519,7 +1533,7 @@ const GUIDE = {
     parts: [
       ["Ô số liệu đầu trang", ["**Đang chạy**: ticket + agent + thời gian chạy; “Orchestrator đẩy code, mở PR” khi agent đã xong và đang đẩy code.",
         "**Sẵn sàng chạy**: ticket ai-draft đủ điều kiện giao agent; dòng dưới là số ticket đang bị chặn bởi ticket khác.",
-        "**Chờ CTO**: ticket sẵn sàng chấm (PR có mọi check bắt buộc đạt) + câu hỏi chờ trả lời; dòng dưới là ticket ai-review còn lại: chờ CI, CI lỗi, cần chạy lại CI, không có PR.", "**PR mở**: PR đang mở, bao nhiêu đang chạy CI, lỗi, cần chạy lại (bị huỷ hoặc chạy quá 45 phút).", "**CI develop**: lần chạy gần nhất trên develop; đỏ nhiều lần liên tiếp thì ghi số lần và từ khi nào.",
+        "**Chờ CTO**: ticket sẵn sàng chấm (PR có mọi check bắt buộc đạt) + câu hỏi chờ trả lời; dòng dưới là ticket ai-review còn lại: chờ CI, CI lỗi, cần chạy lại CI, không có PR.", "**PR mở**: PR đang mở, bao nhiêu đang chạy CI, lỗi, cần chạy lại (bị huỷ hoặc chạy quá 45 phút).", "**CI develop**: lần chạy gần nhất trên develop; đỏ nhiều lần liên tiếp thì ghi số lần và từ khi nào.", "**Token tháng**: chi phí token tháng này (cost_usd Claude Code báo mỗi lượt) so với ngân sách, dự báo cuối tháng; ≥ 80% hiện cảnh báo, Orchestrator dừng ở 100%.",
         "**CI develop**: kết quả CI gần nhất của nhánh develop; Lighthouse lỗi ghi “không chặn”."]],
       ["Lịch duyệt hôm nay", ["Vai có ngày duyệt cố định là hôm nay, role owner và số ticket chờ chấm của vai đó.", "Link “Việc chờ tôi” mở danh sách mọi việc chờ CTO; “Sửa lịch duyệt” mở trang Vai trò."]],
       ["Hoạt động agent · thời gian thực", ["Mỗi làn là một agent; tên kèm trạng thái (rảnh, đang chạy, số ticket sẵn sàng/bị chặn/chờ chấm).",
@@ -1683,7 +1697,7 @@ const GUIDE = {
       ["Năng lực theo vai trò", ["Mỗi vai trò: role owner và ngày duyệt, số ticket và point trong sprint, đã xong, point xong ở sprint trước, thanh tiến độ."]],
     ],
     do: ["Lập kế hoạch đầu sprint (sprint planning) và điều chỉnh giữa sprint.", "Orchestrator chạy ticket ai-draft của sprint hiện tại trước, rồi mới tới ticket khác.", "Mở Bảng sprint theo vai trò để các vai trò theo dõi việc của mình."],
-    src: ["Trường sprint của ticket nội bộ (sửa cả ở chi tiết ticket); lịch sprint và mục tiêu ở ops/dashboard/project.json.", "Báo cáo sprint vẫn tính theo ngày tạo/đóng ticket trong khoảng sprint."],
+    src: ["Trường sprint của ticket nội bộ (sửa cả ở chi tiết ticket); ticket agent mới (ai-draft) tự vào sprint hiện tại; ticket đã đóng chưa có sprint tính theo ngày đóng. Lịch sprint và mục tiêu ở ops/dashboard/project.json.", "Báo cáo sprint, Bảng sprint, Tổng quan dự án dùng cùng cách tính."],
     terms: ["Sprint", "Sprint backlog", "Point", "Story", "Yêu cầu dự án", "Role owner", "Orchestrator"] },
   overview: { t: "Tổng quan dự án", who: "CTO, ban giám đốc, PO, BA, Tech Lead",
     what: "Toàn bộ dự án trên một trang, đọc từ trên xuống theo 6 bước: Yêu cầu → Giải pháp → Kế hoạch xử lý → Tiến độ vận hành → Kết quả hiện tại → Kết quả khi hoàn thành. Nội dung lấy thẳng từ tài liệu của PO, BA, Tech Lead trên nhánh develop và số liệu ticket, PR, CI.",
@@ -2075,6 +2089,13 @@ function inboxItems() {
       why: `check bắt buộc hiện là ${esc(req.join(", "))} — check khác lỗi chỉ để biết; muốn chặn thì thêm vào required_checks`,
       acts: [["link", ci.url, "Xem CI"], ["text", "bật chặn: thêm vào required_checks trong orchestrator/config.yaml"]] });
   }
+  // ngân sách token tháng
+  { const bd = budgetOf(d);
+    if (bd.pct >= bd.warn) add({ title: `Token tháng ${mmyy(bd.month)}: ${usd(bd.usd)} / ${usd(bd.budget)} (${Math.round(bd.pct)}%)`, sec: "decide", pri: bd.pct >= 100 ? 3 : 2,
+      why: bd.pct >= 100 ? "Orchestrator đã dừng giao việc (chạm 100% ngân sách) — chỉ CTO nới: sửa budget_usd_month trong orchestrator/config.yaml và ghi lý do trong commit"
+        : `vượt ngưỡng cảnh báo ${bd.warn}% · dự báo cuối tháng ~${usd(bd.fc)} — cân nhắc model_override (vd qa: sonnet) hoặc giảm lượt chạy lại`, acts: [["link", "#/r-perf", "Xem chi phí"]] });
+    else if (bd.fcPct >= 100 && bd.runs >= 5) add({ title: `Dự báo token tháng ${mmyy(bd.month)} vượt ngân sách: ~${usd(bd.fc)} / ${usd(bd.budget)}`, sec: "decide", pri: 1,
+      why: `đã dùng ${usd(bd.usd)} (${Math.round(bd.pct)}%) sau ${new Date().getDate()} ngày — Orchestrator sẽ dừng khi chạm 100%`, acts: [["link", "#/r-perf", "Xem chi phí"]] }); }
   // PR trên nhánh agent nhưng đứng tên tài khoản khác (thiếu AGENT_GH_TOKEN khi chạy, hoặc CTO tự mở) — CTO không tự duyệt được PR của mình
   if (AGENT_LOGIN()) (d.prs || []).filter((p) => /^feature\/ai-/.test(p.branch) && p.author && p.author !== AGENT_LOGIN()).forEach((p) => add({ key: p.branch.replace("feature/ai-", ""), title: `PR #${p.number} đứng tên ${p.author}, không phải ${AGENT_LOGIN()}`,
     sec: "setup", pri: 1, why: "Orchestrator chỉ tự mở PR (đứng tên agent) cho dev-fe, dev-be, devops; PR mở tay đứng tên người mở — không tính là PR agent và CTO không tự duyệt được PR của mình. Nếu là lượt agent tự mở thì kiểm AGENT_GH_TOKEN trong .env khi chạy /run-next",
@@ -2517,7 +2538,7 @@ function bindAgentTaskType(form) {
 function pageTNew() {
   if (!canWrite()) return `<div class="page-head"><h2>Tạo ticket</h2></div>${readonlyNote()}`;
   return `<div class="page-head"><h2>Tạo ticket</h2><span class="fresh">Số ticket cấp tự động (ES1-T…). Ticket có agent + nhãn ai-draft sẽ được /run-next nhận.</span></div>
-    <form id="tnew" class="tform" autocomplete="off">${fieldsForm({ type: "task", priority: "none" }, "new")}
+    <form id="tnew" class="tform" autocomplete="off">${fieldsForm({ type: "task", priority: "none", sprint: (spCur() || {}).name || "" }, "new")}
       <div class="actions"><button type="submit" class="btn primary">${IC("plus")}Tạo ticket</button><a class="btn" href="#/t-list">${IC("x")}Huỷ</a></div></form>`;
 }
 function bindTNew() {
@@ -2842,6 +2863,16 @@ function velocity(T = DATA ? DATA.tickets : []) {
   const done = T.filter((t) => isWork(t) && pts(t) > 0 && t.status === "Closed" && dOnly(t.closed_at) >= from && dOnly(t.closed_at) <= to);
   return { v: done.reduce((a, t) => a + pts(t), 0), n: done.length, days, from, to };
 }
+/* Chi phí token tháng (cost_usd Claude Code báo mỗi lượt; chạy gói Max là chi phí quy đổi) so với budget_usd_month — Orchestrator dừng ở 100% */
+function budgetOf(d = DATA) {
+  const B = (d && d.budget) || { usd_month: 2000, warn_pct: 80 }, C = (d && d.cost_month) || { usd: 0, runs: 0, with_cost: 0, month: todayKey().slice(0, 7) };
+  const now = new Date(), dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(), day = now.getDate(), p = B.usd_month ? (C.usd / B.usd_month) * 100 : 0, fc = (C.usd / day) * dim;
+  return { ...C, budget: B.usd_month, warn: B.warn_pct, pct: p, fc, fcPct: B.usd_month ? (fc / B.usd_month) * 100 : 0, kind: p >= 100 ? "critical" : p >= B.warn_pct ? "warning" : "good" };
+}
+const usd = (v) => `${(Math.round((v || 0) * 100) / 100).toLocaleString("vi-VN")} USD`;
+const mmyy = (m) => `${m.slice(5, 7)}/${m.slice(0, 4)}`;
+/* PR của lượt chạy: Orchestrator ghi từ 05/11; lượt cũ tìm theo nhánh feature/ai-<ticket> */
+const runPr = (r) => r.pr || ((((DATA && DATA.prs) || []).concat((DATA && DATA.merged) || [])).find((p) => p.branch === `feature/ai-${r.ticket}`) || {}).url || null;
 const velTxt = (V) => `point đóng ${V.days} ngày gần nhất (${ddmm(V.from)}–${ddmm(V.to)})`;
 const inRange = (d, from, to) => d && d >= from && d <= to;
 const closedIn = (t, from, to) => t.status === "Closed" && inRange(dOnly(t.closed_at), from, to);
@@ -2997,6 +3028,19 @@ function pageRWeek() {
 }
 
 /* ---------- 2. Hiệu suất ---------- */
+/* Chi phí token tháng hiện tại: đã dùng / dự báo so với ngân sách, theo agent, theo ngày, ticket tốn nhất */
+function perfCost() {
+  const bd = budgetOf(), R = ((DATA && DATA.runs) || []).filter((r) => (r.started_at || "").slice(0, 7) === bd.month), withC = R.filter((r) => r.cost_usd != null);
+  const byA = {}, byT = {}; withC.forEach((r) => { byA[r.agent] = (byA[r.agent] || 0) + r.cost_usd; const k = r.ticket || "—"; (byT[k] ||= { k, a: r.agent, n: 0, v: 0 }); byT[k].n++; byT[k].v += r.cost_usd; });
+  const days = daysOf(bd.month + "-01", todayKey()), max = Math.max(bd.budget, bd.fc);
+  const top = Object.values(byT).sort((a, b) => b.v - a.v).slice(0, 8);
+  return `<div class="rgrid">${card(`Chi phí token tháng ${mmyy(bd.month)}`, `${hbars([{ label: "Đã dùng", v: bd.usd, text: `${usd(bd.usd)} · ${Math.round(bd.pct)}%`, color: bd.kind === "good" ? "--series-1" : bd.kind === "warning" ? "--warning" : "--critical" },
+      { label: "Dự báo cuối tháng", v: bd.fc, text: usd(bd.fc), color: bd.fcPct >= 100 ? "--critical" : "--series-2" }, { label: "Ngân sách", v: bd.budget, text: usd(bd.budget), color: "--line" }], { max, mark: (bd.budget * bd.warn) / 100, markLabel: `cảnh báo ${bd.warn}%` })}
+      <p class="fresh" style="margin-top:8px">${bd.runs} lượt trong tháng${bd.with_cost < bd.runs ? `, ${bd.runs - bd.with_cost} lượt chưa ghi chi phí` : ""}. Số liệu là cost_usd Claude Code báo; chạy bằng gói Max thì là chi phí quy đổi, không phải hoá đơn. Orchestrator cảnh báo ở ${bd.warn}%, dừng ở 100% (orchestrator/config.yaml).</p>
+      ${hbars(Object.entries(byA).sort((a, b) => b[1] - a[1]).map(([a, v]) => ({ label: a, icon: a, v, text: usd(v) })))}`, "không theo kỳ báo cáo ở trên — luôn là tháng hiện tại")}
+    ${card("Chi phí theo ngày và ticket tốn nhất", `${barChart("rpCost", days.map((x) => ({ label: x, short: ddmm(x) })), [{ name: "USD", color: "--series-1", values: days.map((x) => Math.round(withC.filter((r) => dayKey(r.started_at) === x).reduce((a, r) => a + r.cost_usd, 0) * 100) / 100) }], { aria: "Chi phí token theo ngày trong tháng", unit: " USD" })}
+      <div class="tablewrap"><table class="info"><thead><tr><th>Ticket</th><th>Agent</th><th class="n">Lượt</th><th class="n">USD</th></tr></thead><tbody>${top.map((x) => `<tr><td class="k"><a href="#/t/${esc(x.k)}">${esc(x.k)}</a></td><td class="nw">${agentTag(x.a, 16)}</td><td class="n">${x.n}</td><td class="n">${(Math.round(x.v * 100) / 100).toLocaleString("vi-VN")}</td></tr>`).join("") || '<tr><td colspan="4" class="empty">Chưa có lượt nào ghi chi phí trong tháng.</td></tr>'}</tbody></table></div>`)}</div>`;
+}
 function pageRPerf() {
   const n = Number(Q.rper ?? 14), { from, to } = periodRange(n), T = DATA ? DATA.tickets : [], R = (DATA ? DATA.runs : []).filter((r) => inRange(dayKey(r.started_at), from, to));
   const M = (DATA ? DATA.merged || [] : []).filter((p) => isAgentPR(p) && inRange(dayKey(p.mergedAt), from, to)), K = tByKey();
@@ -3030,6 +3074,7 @@ function pageRPerf() {
       ${card("Point hoàn thành theo agent", hbars(st.filter((x) => x.pts).sort((a, b) => b.pts - a.pts).map((x) => ({ label: x.a, icon: x.a, v: x.pts, text: `${x.pts} point · ${x.done} ticket` }))))}
     </div>
     ${card("Cycle time trung vị theo agent", hbars(st.filter((x) => x.cyc != null).sort((a, b) => b.cyc - a.cyc).map((x) => ({ label: x.a, icon: x.a, v: x.cyc, text: fmtH(x.cyc) })), {}), "càng ngắn càng tốt; tính trên ticket đóng trong kỳ")}
+    ${perfCost()}
     <h3 class="sub">Bảng chỉ số theo agent</h3>
     <div class="tablewrap"><table class="info"><thead><tr><th>Agent</th><th class="n">Lượt</th><th class="n">Thành công</th><th class="n">Trung vị/lượt</th><th class="n">TB turn</th><th class="n">Ticket xong</th><th class="n">Point</th><th class="n">Cycle time</th><th class="n" title="Câu hỏi agent tạo ra khi thiếu thông tin">Câu hỏi đã tạo</th></tr></thead>
       <tbody>${st.map((x) => `<tr><td class="nw">${agentTag(x.a)}</td><td class="n">${x.runs}</td><td class="n">${pct(x.ok, x.runs)}</td><td class="n">${fmtH(x.dur)}</td><td class="n">${x.turns == null ? "—" : Math.round(x.turns)}</td>
@@ -3078,11 +3123,11 @@ function pageRQuality() {
 }
 
 /* ---------- 5. Báo cáo sprint ---------- */
+/* Phạm vi sprint = ticket có point thuộc sprint (sprintOfT); cam kết = tạo trước ngày bắt đầu, thêm giữa sprint = tạo trong sprint */
 function sprintReport(sp, T) {
   const today = todayKey(), end = today < sp.end ? today : sp.end, W = T.filter((t) => isWork(t) && pts(t) > 0);
-  const committed = W.filter((t) => dOnly(t.created_at) < sp.start && !(t.status === "Closed" && dOnly(t.closed_at) < sp.start));
-  const added = W.filter((t) => createdIn(t, sp.start, sp.end)), scope = committed.concat(added);
-  const done = scope.filter((t) => closedIn(t, sp.start, sp.end)), left = scope.filter((t) => !(t.status === "Closed" && dOnly(t.closed_at) <= end));
+  const scope = W.filter((t) => sprintOfT(t) === sp.name), committed = scope.filter((t) => dOnly(t.created_at) < sp.start), added = scope.filter((t) => dOnly(t.created_at) >= sp.start);
+  const done = scope.filter((t) => t.status === "Closed" && dOnly(t.closed_at) <= sp.end), left = scope.filter((t) => !(t.status === "Closed" && dOnly(t.closed_at) <= end));
   const P = (a) => a.reduce((s, t) => s + pts(t), 0);
   return { committed, added, scope, done, left, cp: P(committed), ap: P(added), dp: P(done), lp: P(left) };
 }
@@ -3092,7 +3137,7 @@ function pageRSprint() {
   const idx = Q.sprint != null && Q.sprint !== "" ? Number(Q.sprint) : (cur >= 0 ? cur : S.sprints.length - 1), sp = S.sprints[idx], r = sprintReport(sp, T);
   const past = S.sprints.filter((s) => s.start <= today), vel = past.map((s) => sprintReport(s, T));
   const other = T.filter((t) => closedIn(t, sp.start, sp.end) && (isQ(t) || !pts(t))).length;
-  const tiles = [["Cam kết đầu sprint", `${r.cp} point`, `${r.committed.length} ticket mở lúc bắt đầu`], ["Thêm giữa sprint", `${r.ap} point`, `${r.added.length} ticket`],
+  const tiles = [["Cam kết đầu sprint", `${r.cp} point`, `${r.committed.length} ticket trong sprint, tạo trước ${ddmm(sp.start)}`], ["Thêm giữa sprint", `${r.ap} point`, `${r.added.length} ticket`],
     ["Hoàn thành", `${r.dp} point`, `${r.done.length} ticket · ${pct(r.dp, r.cp + r.ap)} phạm vi`], ["Còn lại", `${r.lp} point`, today > sp.end ? "chuyển sprint sau" : `${r.left.length} ticket`],
     ["Việc không point đã xong", other, "câu hỏi, chia task, test…"], ["Vận tốc", `${velocity(T).v} point`, velTxt(velocity(T))]];
   const list = (a) => `<div class="tablewrap"><table class="info"><tbody>${a.map((t) => `<tr><td class="k">${tkey(t)}</td><td class="ttl">${esc(t.title)}</td><td class="nw">${agentTag(t.agent)}</td><td class="n">${t.points ?? ""}</td><td class="nw">${t.status === "Closed" ? status("good", "đóng " + ddmm(dOnly(t.closed_at))) : stageOf(t)}</td></tr>`).join("") || '<tr><td class="empty">Không có.</td></tr>'}</tbody></table></div>`;
@@ -3187,7 +3232,7 @@ function drawActivity(d) {
     const r = items[+b.dataset.k];
     b.onmousemove = (e) => { tip.innerHTML = `<b>${esc(r.ticket || "")}</b> · ${esc(r.agent)}<br>Bắt đầu ${esc(r.st.toLocaleString("vi-VN"))}<br>` +
         (r.kind === "run" ? `Đang chạy ${dur(Math.round((now - r.st) / 1000))}${r.phase === "push" ? " · Orchestrator đẩy code" : ""}` : r.en ? `Thời lượng ${dur(Math.round((r.en - r.st) / 1000))}` : "Chưa ghi thời lượng") +
-        `${r.num_turns != null ? ` · ${r.num_turns} turn` : ""}<br>${r.kind === "err" ? "Kết quả: lỗi" : r.kind === "odd" ? "Kết quả: bất thường (dưới 3 turn)" : r.kind === "run" ? "" : "Kết quả: xong"}${r.pr ? " · có PR" : ""}`;
+        `${r.num_turns != null ? ` · ${r.num_turns} turn` : ""}<br>${r.kind === "err" ? "Kết quả: lỗi" : r.kind === "odd" ? "Kết quả: bất thường (dưới 3 turn)" : r.kind === "run" ? "" : "Kết quả: xong"}${runPr(r) ? " · có PR" : ""}${r.cost_usd != null ? ` · ${usd(r.cost_usd)}` : ""}`;
       tip.style.display = "block"; const bx = el.getBoundingClientRect();
       tip.style.left = Math.min(e.clientX - bx.left + 12, bx.width - tip.offsetWidth - 4) + "px"; tip.style.top = Math.max(0, e.clientY - bx.top - tip.offsetHeight - 8) + "px"; };
     b.onmouseleave = () => (tip.style.display = "none");
@@ -3229,8 +3274,12 @@ function render(d) {
     ["Chờ CTO", RV.ready + groups.question.length, `${RV.ready} sẵn sàng chấm · ${groups.question.length} câu hỏi${rvMore ? ` · ai-review còn: ${rvMore}` : ""}`],
     ["PR mở", d.prs.length, `${ciRun} đang chạy CI · ${ciBad} CI lỗi${ciRe ? ` · ${ciRe} cần chạy lại` : ""}`],
     ["CI develop", "", ""],
+    ["Token tháng", "", ""],
   ];
+  const bd = budgetOf(d);
   $("kpis").innerHTML = k.map(([l, v, s], i) => {
+    if (i === 5) return `<div class="kpi"><div class="l">Token tháng ${esc(mmyy(bd.month))}</div><div class="v">${bd.kind === "good" ? "" : `<span style="font-size:15px">${status(bd.kind, Math.round(bd.pct) + "%")}</span> `}${esc(usd(bd.usd))}</div>
+      <div class="s" title="cost_usd Claude Code báo mỗi lượt; Orchestrator dừng ở 100% ngân sách">${Math.round(bd.pct)}% / ${esc(usd(bd.budget))} · dự báo cuối tháng ~${esc(usd(bd.fc))}${bd.with_cost < bd.runs ? ` · ${bd.runs - bd.with_cost} lượt chưa ghi chi phí` : ""}</div></div>`;
     if (i === 4) return `<div class="kpi"><div class="l">${l}</div><div class="v" style="font-size:16px;margin-top:8px">${status(ciKind, ciLbl)}</div><div class="s" title="${esc(ci ? ci.displayTitle + (ciInfo ? " · " + ciInfo : "") : "")}">${ci ? `${red && red.n > 1 ? `từ ${esc(ago(red.since))} · ` : ""}${ciInfo ? esc(ciInfo) + " · " : ""}${esc((ci.headSha || "").slice(0, 7))} · ${ago(ci.createdAt)} · ${esc(ci.displayTitle)}` : ""}</div></div>`;
     return `<div class="kpi"><div class="l">${l}</div><div class="v">${esc(v)}</div><div class="s" title="${esc(s)}">${esc(s)}</div></div>`;
   }).join("");
@@ -3261,7 +3310,7 @@ function render(d) {
     const fl = d.prs.filter((p) => p.branch.startsWith("feature/ai-"));
     $("live").innerHTML = `<div class="empty" style="padding-top:0">${status("none", "Không có agent nào đang chạy")}${last ? ` · Lượt gần nhất <b>${esc(last.ticket)}</b> ${agentTag(last.agent, 16)}
         bắt đầu ${esc((last.started_at || "").slice(5, 16).replace("T", " "))}${last.duration_s != null ? ` · ${dur(last.duration_s)}` : ""} · ${last.is_error || runOdd(last) ? runChip(last) : status("good", "agent xong")}
-        ${last.pr ? ` · <a href="${esc(last.pr)}" target="_blank" rel="noopener">PR #${esc(String(last.pr).split("/").pop())}</a>` : ""}` : ""}</div>
+        ${runPr(last) ? ` · <a href="${esc(runPr(last))}" target="_blank" rel="noopener">PR #${esc(String(runPr(last)).split("/").pop())}</a>` : ""}${last.cost_usd != null ? ` · ${esc(usd(last.cost_usd))}` : ""}` : ""}</div>
       ${fl.length ? `<div class="inflight"><div class="fresh" style="margin:6px 0 4px">Đang xử lý sau agent (${fl.length} PR mở)</div><div class="tablewrap"><table class="info"><tbody>${fl.map((p) => {
         const key = p.branch.replace("feature/ai-", ""), g = prGate(p), rr = ["fail", "cancelled", "stuck"].includes(g) ? rerunCmd(p) : null;
         return `<tr><td class="k"><a href="#/t/${esc(key)}">${esc(key)}</a></td><td class="nw"><a href="${esc(p.url)}" target="_blank" rel="noopener">PR #${p.number}</a></td>
@@ -3304,9 +3353,9 @@ function render(d) {
   // Lượt chạy gần đây
   const R = d.runs;
   $("runs").innerHTML = R.slice(-12).reverse().map((r) => `<tr><td class="fresh">${esc((r.started_at || "").slice(5, 16).replace("T", " "))}</td>
-    <td>${r.pr ? `<a href="${esc(r.pr)}" target="_blank" rel="noopener">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${agentTag(r.agent)}</td>
-    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td>
-    <td>${runChip(r)}</td></tr>`).join("") || '<tr><td colspan="6" class="empty">Chưa có lượt chạy.</td></tr>';
+    <td>${runPr(r) ? `<a href="${esc(runPr(r))}" target="_blank" rel="noopener" title="Mở PR">${esc(r.ticket)}</a>` : esc(r.ticket)}</td><td>${agentTag(r.agent)}</td>
+    <td class="n">${r.num_turns ?? "—"}</td><td class="n">${r.duration_s != null ? dur(r.duration_s) : "—"}</td><td class="n">${r.cost_usd != null ? (Math.round(r.cost_usd * 100) / 100).toLocaleString("vi-VN") : "—"}</td>
+    <td>${runChip(r)}</td></tr>`).join("") || '<tr><td colspan="7" class="empty">Chưa có lượt chạy.</td></tr>';
 
   // Hiệu quả theo agent
   const A = {};

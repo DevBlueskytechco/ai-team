@@ -139,7 +139,16 @@ def _run_agent(t):
            "duration_s": int((ended - datetime.datetime.fromisoformat(started)).total_seconds()), "is_error": out.get("is_error", False), "result": (out.get("result") or "")[:4000]}
     d = os.path.join(ROOT, "evals/raw", agent); os.makedirs(d, exist_ok=True)
     json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-    open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
+    try: _push_and_pr(rec, t, tid, key, agent, branch, d)
+    finally:   # một dòng mỗi lượt, có nhánh / PR / chi phí — dashboard đọc để nối lượt ↔ PR và tính ngân sách tháng
+        open(os.path.join(ROOT, "evals/raw/_runs.jsonl"), "a", encoding="utf-8").write(json.dumps(rec, ensure_ascii=False) + "\n")
+    cur = T.get(tid)
+    if "ai-review" not in cur.get("labels", []):
+        T.set_label(tid, "ai-review", note=f"orchestrator: agent kết thúc (turns={rec['num_turns']}, cost={rec['cost_usd']}); chưa tự set_label — kiểm tra đầu ra")
+    pg_insert(rec); return rec
+
+def _push_and_pr(rec, t, tid, key, agent, branch, d):
+    """Commit, push nhánh agent, mở PR (dev-fe, dev-be, devops), gắn ai-review; ghi nhánh / PR vào rec."""
     if branch:
         rec["branch"] = branch
         subprocess.run(["git", "add", "-A"], cwd=THEME, check=False)
@@ -159,10 +168,6 @@ def _run_agent(t):
             T.set_label(tid, "ai-review", link=link, note=f"orchestrator: đầu ra {link}")
         subprocess.run(["git", "checkout", "-q", "develop"], cwd=THEME, check=False)
         json.dump(rec, open(os.path.join(d, f"{key}.run.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-    cur = T.get(tid)
-    if "ai-review" not in cur.get("labels", []):
-        T.set_label(tid, "ai-review", note=f"orchestrator: agent kết thúc (turns={rec['num_turns']}, cost={rec['cost_usd']}); chưa tự set_label — kiểm tra đầu ra")
-    pg_insert(rec); return rec
 
 def pg_insert(rec):
     url = os.environ.get("DATABASE_URL")

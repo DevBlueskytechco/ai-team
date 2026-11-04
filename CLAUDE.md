@@ -16,7 +16,8 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Ticket nội bộ là nguồn duy nhất: `ai-team/data/tickets.db` (SQLite, không commit, sao lưu mỗi ngày vào `data/backup/`). Không dùng hệ ticket ngoài.
 - Thao tác: `python3 ops/ticket.py show|close|reopen|label|comment|children|backup|export`; CTO dùng dashboard menu Ticket.
 - Không sửa trực tiếp file .db bằng sqlite3; luôn qua ops/ticket.py hoặc mcp/ticket_local.py để có lịch sử.
-- Sprint: trường `sprint` của ticket (tên trong `ops/dashboard/project.json` scrum.sprints). CTO xếp ở Quản lý dự án → Kế hoạch sprint; vai trò theo dõi ở Bảng sprint. Orchestrator chạy ticket ai-draft của sprint hiện tại trước, rồi theo key.
+- Sprint: trường `sprint` của ticket (tên trong `ops/dashboard/project.json` scrum.sprints). Ticket agent mới (ai-draft, task/bug, không phải [Q]) tự vào sprint hiện tại khi tạo; câu hỏi, việc người làm ở backlog. CTO xếp lại ở Quản lý dự án → Kế hoạch sprint (có nút đưa ticket chưa có sprint / chuyển ticket chưa xong của sprint trước); vai trò theo dõi ở Bảng sprint. Ticket đã đóng chưa có sprint tính theo ngày đóng. Orchestrator chạy ticket ai-draft của sprint hiện tại trước, rồi theo key.
+- Ngân sách token: `budget_usd_month` trong orchestrator/config.yaml (chỉ CTO nới). Orchestrator ghi cost_usd, nhánh, PR mỗi lượt vào evals/raw/_runs.jsonl; dashboard ô Token tháng + Hiệu suất → Chi phí token; cảnh báo ở `budget_warn_pct`, Orchestrator dừng ở 100%.
 
 ## Yêu cầu dự án
 - Yêu cầu từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi Shopify, khách hàng: dashboard menu Quản lý dự án; lưu `requirements/REQ-xxxx.md` (commit vào ai-team).
