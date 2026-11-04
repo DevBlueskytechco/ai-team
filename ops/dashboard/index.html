@@ -141,6 +141,23 @@ nav.menu .cnt:empty{display:none}
 nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot.urg{background:var(--critical)}
 .ibx-sec{margin-top:18px} .ibx-sec h3.sub{display:inline-flex;align-items:center;gap:8px;margin:0 0 2px} .ibx-sec h3 .n{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}
 .ibx-sec>p.fresh{margin:0 0 6px}
+#guide{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:var(--bg);color:var(--text);font:inherit}
+#guide[open]{display:flex;flex-direction:column} #guide::backdrop{background:rgba(10,12,20,.45)} #guide [hidden]{display:none!important}
+.gd-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--line);border-top:3px solid var(--brand)}
+.gd-top>.ic{width:22px;height:22px;color:var(--accent)} .gd-top h2{margin:0;font-size:18px;text-transform:none;letter-spacing:0;color:var(--text)}
+.gd-sel{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2)}
+.gd-body{flex:1;min-height:0;display:grid;grid-template-columns:230px minmax(0,1fr)}
+.gd-toc{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto;background:var(--surface)}
+.gd-toc a{padding:7px 10px;border-radius:8px;color:var(--text-2);text-decoration:none;font-size:14px} .gd-toc a:hover{background:var(--surface-2);color:var(--text)}
+.gd-main{overflow:auto;padding:22px clamp(16px,4vw,48px) 48px;outline:none}
+.gd-main>section{max-width:860px;margin:0 auto 26px} .gd-main h3{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2);margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.gd-main h4{font-size:15px;margin:14px 0 4px} .gd-main p.lead{font-size:16px;line-height:1.6;margin:0 0 6px} .gd-main ul{margin:4px 0 0;padding-left:20px;line-height:1.6} .gd-main li{margin:3px 0}
+.gd-main code,.gd-main kbd{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.gd-main dl{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:8px 16px;margin:0} .gd-main dt{font-weight:600} .gd-main dd{margin:0;line-height:1.55;color:var(--text-2)}
+@media (max-width:800px){.gd-body{grid-template-columns:minmax(0,1fr)} .gd-toc{display:none} .gd-sel span{display:none} .gd-main dl{grid-template-columns:minmax(0,1fr)} .gd-main dd{margin-bottom:6px}}
+@media print{body.guide-open>:not(#guide){display:none!important} body.guide-open #guide{position:static;display:block;height:auto;width:auto;overflow:visible}
+  body.guide-open .gd-toc,body.guide-open .gd-top .btn,body.guide-open .gd-sel{display:none!important} body.guide-open .gd-body{display:block} body.guide-open .gd-main{overflow:visible;padding:0}
+  body.guide-open .gd-main>section{break-inside:avoid-page}}
 .pcard .knl{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12.5px}
 .kn-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:12px} .kn-head h2{margin:0;font-size:18px;text-transform:none;letter-spacing:0;color:var(--text)} .kn-head .av{border-radius:50%}
 .kn-meter{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px} .kn-meter i{display:block;height:100%;background:var(--series-1)} .kn-meter i.over{background:var(--warning)}
@@ -172,8 +189,8 @@ nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot
 .app.collapsed nav.menu a[aria-current="page"]::before{left:-5px}
 .navback{display:none}
 .navhead{display:none}
-@media (max-width:1000px){#fresh,#themeBtn span{display:none}}
-@media (max-width:600px){#fresh,#themeBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
+@media (max-width:1000px){#fresh,#themeBtn span,#guideBtn span{display:none}}
+@media (max-width:600px){#fresh,#themeBtn span,#guideBtn span,#connText,.brand .sep,.brand h1{display:none} header{gap:8px 12px}}
 /* màn hẹp: menu là ngăn kéo trượt từ trái, có nền mờ */
 @media (max-width:900px){
   .app,.app.collapsed{grid-template-columns:minmax(0,1fr)}
@@ -371,6 +388,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
@@ -384,6 +402,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <span class="conn"><span class="dot" id="dot"></span><span id="connText">đang kết nối…</span></span>
   <span class="fresh" id="fresh"></span>
   <span class="spacer"></span>
+  <button id="guideBtn" class="iconbtn" type="button" aria-haspopup="dialog" aria-controls="guide" aria-label="Hướng dẫn trang này" title="Hướng dẫn trang này (phím ?)"><svg class="ic" aria-hidden="true"><use href="#i-help"/></svg><span>Hướng dẫn</span></button>
   <button id="themeBtn" class="iconbtn" type="button" aria-label="Đổi giao diện sáng/tối"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg><span>Sáng/Tối</span></button>
 </header>
 
@@ -462,6 +481,17 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
 </div>
 </div>
 
+<dialog id="guide" aria-labelledby="guideTitle">
+  <div class="gd-top">
+    <svg class="ic" aria-hidden="true"><use href="#i-help"/></svg><h2 id="guideTitle">Hướng dẫn</h2>
+    <label class="gd-sel"><span>Xem hướng dẫn trang</span><select id="guideSel"></select></label>
+    <span class="spacer"></span>
+    <a class="btn" id="guideGo" href="#/dashboard" hidden><svg class="ic" aria-hidden="true"><use href="#i-arrow-left"/></svg>Mở trang này</a>
+    <button class="btn" type="button" id="guidePrint"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg>In / lưu PDF</button>
+    <button class="btn primary" type="button" id="guideClose" aria-label="Đóng hướng dẫn"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg>Đóng</button>
+  </div>
+  <div class="gd-body"><nav class="gd-toc" id="guideToc" aria-label="Mục lục hướng dẫn"></nav><article class="gd-main" id="guideMain" tabindex="-1"></article></div>
+</dialog>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -597,7 +627,7 @@ $("navToggle").onclick = () => {
   applyNav(); if (TP) setTimeout(() => drawTp(TP.days, TP.by), 220); if (PAGE.startsWith("r-")) setTimeout(renderInfo, 220);
 };
 $("navBack").onclick = () => { NAV.open = false; applyNav(); };
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && NAV.open) { NAV.open = false; applyNav(); $("navToggle").focus(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && NAV.open && !GUIDE_OPEN) { NAV.open = false; applyNav(); $("navToggle").focus(); } });
 window.addEventListener("hashchange", () => { if (NAV.open) { NAV.open = false; applyNav(); } });
 window.addEventListener("resize", applyNav);
 const PAGE_IDS = MENU.flatMap(([, items]) => items.map(([id]) => id));
@@ -690,6 +720,290 @@ function renderInfoInner(box) {
   const live = ["t-list", "t-board", "story"].includes(PAGE);
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
+}
+
+/* ===== Hướng dẫn từng trang: nút Hướng dẫn trên header (phím ?) mở popup toàn màn hình — để người khác đọc hiểu trang đang xem ===== */
+const GUIDE_CTX = [
+  "Efitco là theme Shopify (Skeleton, chạy trong Canvas). 9 vai trò của team phần mềm — PO, BA, Designer, Tech Lead, Dev FE, Dev BE, QA, DevOps, Writer — do agent AI làm; gate-reviewer chấm độc lập.",
+  "Orchestrator (ai-team) giao ticket cho agent: tạo nhánh `feature/ai-<ticket>`, chạy agent, commit, push, mở PR trên GitHub. CI kiểm theme-check, preview, e2e.",
+  "CTO là cổng duyệt duy nhất: review, chấm theo rubric, merge và đóng ticket bằng `/merge-pr`. Agent không tự qua cổng, không đụng production.",
+  "Vòng đời ticket: `ai-draft` (sẵn sàng giao agent) → agent làm → `ai-review` (chờ CTO) → `ai-dat` / `ai-sua` / `ai-loai`. Thiếu thông tin thì agent tạo ticket câu hỏi cho người trả lời.",
+  "Dashboard chạy trên máy CTO (http://localhost:8787), tự cập nhật; chấm xanh “trực tiếp” trên header là đang nhận dữ liệu.",
+];
+const GLOSS = {
+  "ai-draft": "Nhãn: ticket sẵn sàng giao agent. Cần có agent và loại việc (RACI); Orchestrator chỉ chạy ticket không bị chặn.",
+  "ai-review": "Nhãn: agent đã nộp đầu ra, chờ CTO review và chấm.",
+  "ai-sua": "Nhãn: CTO chấm cần sửa (nhẹ hoặc nặng). CTO tự sửa hoặc đổi về ai-draft để agent chạy lại.",
+  "ai-dat / ai-loai": "Kết quả chấm: đạt, hoặc bỏ đầu ra.",
+  "Câu hỏi": "Ticket loại question, tên bắt đầu [Q] hoặc có chữ “hỏi” — agent hỏi khi thiếu thông tin; người trả lời bằng comment rồi đóng. Câu hỏi có loại việc (vd ui_spec) thì agent tự trả lời như ticket thường.",
+  "Role owner": "Người chịu trách nhiệm duyệt đầu ra của một vai, kèm ngày duyệt cố định trong tuần.",
+  "RACI": "Ai làm gì: A = agent nhận và chịu trách nhiệm loại việc đó, C = được hỏi ý kiến, I = được báo. Orchestrator từ chối giao ticket sai vai.",
+  "Loại việc": "task_type của ticket (vd fe_task, be_task, ui_spec, adr) — quyết định agent nào nhận theo RACI.",
+  "Rubric": "Tiêu chí CTO chấm cho từng agent, mỗi tiêu chí 0–2 điểm (rubrics/<agent>.yaml); đạt khi tổng ≥ 80%.",
+  "Check bắt buộc": "theme-check, preview, e2e — PR phải đạt mới merge được. Lighthouse đang chạy nhưng chưa chặn merge.",
+  "Orchestrator": "Chương trình trong ai-team giao ticket cho agent, chạy agent, đẩy code và mở PR. CTO gọi bằng /run-next hoặc /sprint trong Claude Code.",
+  "Lượt chạy": "Một lần agent làm một ticket. Một ticket có thể có nhiều lượt (chạy lại sau khi cần sửa).",
+  "Turn": "Một bước suy nghĩ/hành động của agent trong một lượt chạy.",
+  "agent_version": "Mã băm định nghĩa + skill + kiến thức CTO nạp của agent lúc chạy — đổi khi agent được chỉnh, để so kết quả trước/sau.",
+  "Point": "Ước lượng độ lớn công việc (story point). Câu hỏi không có point.",
+  "Story": "Nhóm tính năng lớn mã TE-x (vd TE-4 Trang sản phẩm); ticket con mã ES1-Txx.",
+  "Cycle time": "Thời gian từ lúc tạo đến lúc đóng ticket.",
+  "Burndown / burn-up": "Burndown: point còn lại theo ngày so với đường lý tưởng. Burn-up: phạm vi và phần hoàn thành tích luỹ.",
+  "Eval": "Bản ghi chấm điểm dùng để đánh giá và cải thiện agent; mục tiêu ≥ 300 bản ghi đến tuần 12.",
+  "Preview": "Bản theme xem thử CI đẩy lên store dev hoa-qua-nhap-khau cho từng PR.",
+  "Skill": "Tài liệu cách làm cho agent (theme-efitco/.claude/skills), gắn vào agent trong định nghĩa.",
+  "Kiến thức CTO nạp": "Kinh nghiệm, quy tắc, checklist CTO thêm cho agent (ai-team/knowledge); Orchestrator nối vào prompt agent mỗi lượt.",
+  "Sprint": "Chu kỳ 2 tuần; có mục tiêu, ticket cam kết đầu sprint và ticket thêm giữa sprint.",
+};
+const GUIDE = {
+  dashboard: { t: "Dashboard", who: "CTO, role owner, cả team",
+    what: "Toàn cảnh vận hành theo thời gian thực: agent nào đang chạy, việc gì đang chờ CTO, PR và CI ra sao, kết quả 7–30 ngày gần nhất.",
+    parts: [
+      ["Ô số liệu đầu trang", ["**Đang chạy**: ticket + agent + thời gian chạy; “Orchestrator đẩy code, mở PR” khi agent đã xong và đang đẩy code.",
+        "**Sẵn sàng chạy**: ticket ai-draft đủ điều kiện giao agent; dòng dưới là số ticket đang bị chặn bởi ticket khác.",
+        "**Chờ CTO**: ticket chờ chấm + câu hỏi chờ trả lời (+ số đang chờ CI).", "**PR mở**: PR đang mở, bao nhiêu đang chạy CI, bao nhiêu lỗi check bắt buộc.",
+        "**CI develop**: kết quả CI gần nhất của nhánh develop; Lighthouse lỗi ghi “không chặn”."]],
+      ["Lịch duyệt hôm nay", ["Vai có ngày duyệt cố định là hôm nay, role owner và số ticket chờ chấm của vai đó.", "Link “Việc chờ tôi” mở danh sách mọi việc chờ CTO; “Sửa lịch duyệt” mở trang Vai trò."]],
+      ["Hoạt động agent · thời gian thực", ["Mỗi làn là một agent; tên kèm trạng thái (rảnh, đang chạy, số ticket sẵn sàng/bị chặn/chờ chấm).",
+        "Mỗi thanh là một lượt chạy: cam = đang chạy, xanh = xong, đỏ = lỗi; vạch mảnh = lượt chưa ghi thời lượng. Vạch đứt “bây giờ” là thời điểm hiện tại.",
+        "Đổi khung 6 giờ / 24 giờ / 7 ngày; rê chuột lên thanh xem chi tiết, bấm để mở ticket; “Xem dạng bảng” để đọc số."]],
+      ["Agent đang chạy", ["Agent, ticket, thời gian và nhật ký từng bước (tool agent gọi, lời agent, lỗi tool). Không có agent chạy thì hiện lượt gần nhất.",
+        "“Đang xử lý sau agent”: PR vừa mở và trạng thái từng check CI cho tới khi CI xong."]],
+      ["Các khối bên dưới", ["**Tiến độ story**: % ticket con đã đóng của mỗi story.",
+        "**Kết quả vận hành**: chọn kỳ 7/14/30 ngày — lượt chạy, PR agent đã merge, ticket đã chấm, tỉ lệ đạt, point, thời gian mỗi lượt; biểu đồ theo ngày.",
+        "**Hiệu quả theo agent**: lượt, lỗi, thời gian và turn trung bình, đạt/sửa/loại, tỉ lệ đạt.",
+        "**Lượt chạy gần đây**, **Pull request đang mở** + CI develop gần nhất, **PR agent đã merge gần đây** (thời gian mở → merge).",
+        "**Bảng ticket**: ticket xếp cột theo giai đoạn quy trình."]],
+    ],
+    do: ["Bấm key ticket hoặc số PR để mở chi tiết.", "Đổi khung thời gian ở khối Hoạt động agent và kỳ ở khối Kết quả vận hành.", "Mở “Việc chờ tôi” để xử lý việc CTO theo thứ tự ưu tiên."],
+    src: ["Ticket nội bộ (ai-team/data/tickets.db): đọc lại ngay khi đổi, kiểm mỗi 2 giây.", "Lượt chạy và agent đang chạy (ai-team/evals/raw): mỗi 2 giây.",
+      "GitHub (PR, CI): mỗi 60 giây, 20 giây khi CI đang chạy, và ngay khi một lượt agent kết thúc.", "Header hiện lần cập nhật gần nhất của ticket và GitHub."],
+    terms: ["ai-draft", "ai-review", "Check bắt buộc", "Lượt chạy", "Turn", "Orchestrator", "Story"] },
+  inbox: { t: "Việc chờ tôi", who: "CTO (và người được CTO giao xử lý)",
+    what: "Mọi việc đang chờ CTO làm hoặc thiết lập, tính trực tiếp từ ticket, PR, CI và cấu hình. Việc tự biến mất khi đã xử lý xong.",
+    parts: [
+      ["Mức ưu tiên", ["**Gấp**: chờ quá 2 ngày, câu hỏi đang chặn ticket khác, CI develop đỏ, thiếu biến môi trường.", "**Cao**: hôm nay là ngày duyệt của vai, PR lỗi check bắt buộc, ticket thiếu loại việc.", "**Thường**: việc còn lại. **Chờ**: hệ thống đang chạy, chưa cần làm gì."]],
+      ["Các nhóm việc", ["**Duyệt PR và chấm**: PR đã đạt check bắt buộc — review rồi merge, chấm, đóng ticket.",
+        "**Trả lời câu hỏi**: câu hỏi agent tạo khi thiếu thông tin.",
+        "**Cần bạn quyết định**: PR lỗi check bắt buộc, ticket cần sửa, ai-review mà không có PR, PR đã merge mà ticket chưa đóng, CI develop lỗi, Lighthouse lỗi.",
+        "**Thiết lập ticket**: ticket Orchestrator đang bỏ qua (chưa có nhãn, thiếu agent, thiếu/sai loại việc) và ticket quá hạn.",
+        "**Thiết lập dự án và môi trường**: role owner chưa gán, mục tiêu sprint, trạng thái story lệch, biến .env, Claude Code, Shopify CLI, tài khoản gh, theme-efitco có thay đổi chưa commit.",
+        "**Có thể chạy tiếp** và **Đang chờ hệ thống**: thu gọn, không tính vào số việc."]],
+    ],
+    do: ["Bấm nút lệnh để chép: lệnh bắt đầu bằng `/` dán vào Claude Code ở thư mục ai-team; lệnh `python3` chạy trong terminal ai-team.",
+      "Lệnh `/merge-pr` đã điền sẵn tiêu chí rubric của agent với điểm 2 — sửa điểm và lý do trước khi chạy.", "“Kiểm tra lại môi trường” để kiểm ngay thay vì đợi 10 phút.", "Số việc hiện trên menu; đỏ khi có việc gấp."],
+    src: ["Ticket nội bộ, PR và CI GitHub, project.json, orchestrator/config.yaml.", "Kiểm môi trường mỗi 10 phút; với biến .env chỉ kiểm có hay không, không đọc giá trị."],
+    terms: ["ai-review", "ai-sua", "Câu hỏi", "Check bắt buộc", "Rubric", "Loại việc", "Role owner"] },
+  "t-list": { t: "Danh sách ticket", who: "CTO, role owner, người theo dõi tiến độ",
+    what: "Bảng mọi ticket nội bộ để tìm, lọc và mở chi tiết. Mặc định chỉ hiện ticket đang mở.",
+    parts: [
+      ["Thanh lọc", ["Ô tìm: theo key, tên, agent, loại việc, nhãn.", "Lọc trạng thái (đang mở/đã đóng), agent, story, loại ticket, nhãn, ưu tiên; sắp xếp mới tạo hoặc mới cập nhật.", "Dòng số liệu cho biết đang hiện bao nhiêu trên tổng, mở và đóng."]],
+      ["Các cột", ["**Giai đoạn**: Đang chạy, Sẵn sàng, Bị chặn, Câu hỏi, Chờ CTO chấm (kèm Chờ CI / CI lỗi), Cần sửa, Chưa gắn nhãn, Đã xong.",
+        "**Nhãn**: nhãn quy trình ai-* và nhãn khác (vd P2).", "**Agent**, **Loại việc**, **Point**, **Story**, **Ưu tiên**, **Cập nhật**, **Cmt** (số comment)."]],
+    ],
+    do: ["Bấm key hoặc tên để mở chi tiết ticket.", "“Tạo ticket” để tạo mới.", "Từ trang RACI, bấm số ticket mở của một loại việc để mở danh sách đã lọc sẵn."],
+    src: ["Ticket nội bộ ai-team/data/tickets.db, cập nhật ngay khi có thay đổi."],
+    terms: ["ai-draft", "ai-review", "ai-sua", "Câu hỏi", "Loại việc", "Point", "Story"] },
+  "t-board": { t: "Kanban", who: "CTO, cả team",
+    what: "Ticket xếp cột theo giai đoạn của quy trình agent, để nhìn nhanh việc đang dồn ở đâu.",
+    parts: [
+      ["Các cột", ["**Đang chạy · Sẵn sàng**: agent đang làm hoặc có thể giao ngay.", "**Bị chặn**: chờ ticket khác đóng.", "**Câu hỏi**: chờ người trả lời.",
+        "**Chờ CTO chấm**: agent đã nộp (thẻ ghi trạng thái CI của PR).", "**Cần sửa**: CTO chấm sửa.", "**Chưa gắn nhãn**: ticket chưa vào quy trình — thường là việc người làm hoặc cần thiết lập.", "**Đã xong**: ticket đã đóng gần nhất."]],
+      ["Thẻ ticket", ["Key, agent, phía FE/BE, point, story, ưu tiên, chip trạng thái chạy/CI; số comment và lần cập nhật."]],
+    ],
+    do: ["Lọc theo story, agent; tìm theo key hoặc tên.", "Bấm thẻ để mở chi tiết."],
+    src: ["Ticket nội bộ; cột tính từ nhãn quy trình, ticket chặn và trạng thái PR/CI."],
+    terms: ["ai-draft", "ai-review", "ai-sua", "Câu hỏi", "Check bắt buộc"] },
+  "t-new": { t: "Tạo ticket", who: "CTO, Tech Lead (người)",
+    what: "Tạo ticket nội bộ mới, giao cho agent hoặc cho người làm.",
+    parts: [
+      ["Các trường", ["**Tên ticket**: việc cụ thể — file, số lượng, phạm vi.", "**Loại**: task, bug, question, story.",
+        "**Agent**: để “— (người làm)” nếu là việc của người. **Loại việc (RACI)**: chỉ hiện loại agent đó nhận được.",
+        "**Phía**: FE/BE (Dev FE/BE suy loại việc từ phía nếu để trống). **Point**, **Story**, **Ưu tiên**, **Sprint**, **Hạn**.",
+        "**Bị chặn bởi**: key ticket phải xong trước (vd ES1-T56) — Orchestrator chờ các ticket này đóng.", "**Nhãn khác**: vd P2, rtl.",
+        "**Gắn ai-draft**: tick để Orchestrator chạy ticket (bắt buộc chọn agent).", "**Mô tả**: Nguồn, Giải pháp (quyết định kỹ thuật + đầu ra), DoD (lệnh chạy và điều kiện pass)."]],
+    ],
+    do: ["Điền rồi bấm Tạo; ticket nhận key ES1-Txx mới.", "Ticket giao agent cần đủ agent + loại việc + ai-draft thì mới chạy."],
+    src: ["Ghi vào ai-team/data/tickets.db, người tạo là cto; lịch sử thay đổi được lưu."],
+    terms: ["ai-draft", "Loại việc", "RACI", "Point", "Story"] },
+  "t-detail": { t: "Chi tiết ticket", who: "CTO, role owner, người trả lời câu hỏi",
+    what: "Toàn bộ thông tin một ticket: mô tả, comment, lịch sử, trường dữ liệu, PR đầu ra, chấm điểm và các lượt agent.",
+    parts: [
+      ["Đầu trang", ["Key, trạng thái (đang mở/đã đóng), giai đoạn, nhãn.", "**Sửa tên**, **Đóng ticket / Mở lại**, **Nhãn quy trình** + **Đổi nhãn** (vd đưa ticket cần sửa về ai-draft để agent chạy lại)."]],
+      ["Nội dung", ["**Mô tả** hiển thị markdown; “Sửa” để chỉnh.", "**Comment**: agent đọc được qua công cụ ticket — trả lời câu hỏi bằng comment ở đây. Người viết “Claude Code” là thao tác từ phiên Claude Code trước bản vá ghi tên.",
+        "**Lịch sử**: ai đổi trường nào, lúc nào."]],
+      ["Thông tin", ["Sửa các trường (loại, agent, loại việc, phía, point, story, ưu tiên, sprint, hạn, bị chặn bởi, nhãn khác) rồi “Lưu thông tin”.",
+        "Bên dưới: agent, người duyệt (role owner + ngày duyệt), đầu ra (PR), ticket chặn / đang chặn, chấm điểm (mức, điểm từng tiêu chí, lý do), các lượt agent."]],
+    ],
+    do: ["Ticket agent bình thường được đóng bằng `/merge-pr` (merge + chấm + đóng); chỉ đóng tay khi là việc người hoặc câu hỏi đã trả lời.", "Bấm key trong mô tả/comment để sang ticket liên quan."],
+    src: ["Ticket nội bộ; PR từ GitHub; lượt chạy từ evals/raw."],
+    terms: ["ai-draft", "ai-review", "ai-sua", "Câu hỏi", "Role owner", "Rubric", "Lượt chạy"] },
+  "r-week": { t: "Báo cáo tuần", who: "CTO, người nhận báo cáo",
+    what: "Kết quả một tuần (thứ 2 – chủ nhật) so với tuần trước, kèm việc đang chờ và bị chặn.",
+    parts: [
+      ["Ô số liệu", ["Ticket và point hoàn thành (▲▼ so tuần trước), ticket mới (+ số câu hỏi mới), lượt agent và % thành công, PR agent merge (trung vị mở → merge), tỉ lệ đạt trên ticket chấm trong tuần."]],
+      ["Biểu đồ và danh sách", ["Ticket và point hoàn thành theo ngày; so sánh với tuần trước.", "**Đã hoàn thành** (kèm kết quả chấm), **Cần CTO xử lý** (cũ nhất lên đầu, ≥ 2 ngày có cảnh báo, kèm ngày duyệt của vai), **Bị chặn** (chờ ticket nào)."]],
+    ],
+    do: ["Chọn tuần.", "“Sao chép tóm tắt” để dán vào Slack/email; “In / lưu PDF” để gửi file."],
+    src: ["Ticket nội bộ, lượt chạy, PR agent (nhánh feature/ai-*) từ GitHub. Câu hỏi không tính là ticket hoàn thành."],
+    terms: ["Point", "Câu hỏi", "Lượt chạy", "Rubric"] },
+  "r-perf": { t: "Hiệu suất", who: "CTO",
+    what: "Tốc độ và thông lượng của team agent trong một kỳ.",
+    parts: [
+      ["Ô số liệu", ["Ticket hoàn thành (ticket/tuần, point), cycle time trung vị, PR agent mở → merge, lượt agent và % thành công, thời gian một lượt (trung vị, TB turn), câu hỏi phát sinh trên mỗi ticket xong."]],
+      ["Biểu đồ", ["Thông lượng theo ngày/tuần; phân bố cycle time; lượt chạy theo agent (thành công/lỗi); point và cycle time theo agent.", "Bảng chỉ số theo agent, gồm số câu hỏi agent đã tạo."]],
+    ],
+    do: ["Chọn kỳ 7/14/30 ngày hoặc toàn dự án.", "“In / lưu PDF”."],
+    src: ["Ticket nội bộ, lượt chạy, PR agent. Lượt chạy trước 03/11 chưa ghi thời lượng; PR patch/fix/ci của CTO không tính."],
+    terms: ["Cycle time", "Lượt chạy", "Turn", "Point", "Câu hỏi"] },
+  "r-quality": { t: "Chất lượng", who: "CTO, role owner",
+    what: "Chất lượng đầu ra của agent theo kết quả CTO chấm và điểm rubric — để biết agent nào, tiêu chí nào cần cải thiện.",
+    parts: [
+      ["Ô số liệu", ["Ticket đã chấm, tỉ lệ đạt ngay, số sửa nhẹ / sửa nặng / loại, điểm rubric trung vị, bug đang mở."]],
+      ["Biểu đồ và bảng", ["Kết quả chấm theo agent (màu theo mức).", "Tỉ lệ đạt theo tuần — số trong ngoặc là số ticket chấm; tuần ít ticket thì tỉ lệ dao động mạnh.",
+        "**Tiêu chí rubric yếu nhất**: điểm trung bình 0–2, vạch dọc là ngưỡng 80%; dưới 1,5 tô màu cảnh báo.", "Điểm theo từng tiêu chí; **Bài học** từ ticket phải sửa/loại."]],
+    ],
+    do: ["Chọn kỳ.", "Tiêu chí yếu và bài học → nạp thành kiến thức cho agent ở trang Kiến thức agent."],
+    src: ["Kết quả chấm lưu trên ticket (mức, điểm từng tiêu chí, lý do); tiêu chí từ ai-team/rubrics."],
+    terms: ["Rubric", "ai-sua", "ai-dat / ai-loai", "Kiến thức CTO nạp"] },
+  "r-results": { t: "Kết quả dự án", who: "CTO, người quản lý dự án",
+    what: "Dự án đang ở đâu so với charter: story, ticket, point, eval, mốc và mục tiêu đo được.",
+    parts: [
+      ["Ô số liệu", ["Story hoàn tất, ticket đã đóng (không tính câu hỏi), point hoàn thành / đã ước lượng, bản ghi eval / 300, số ngày dự án, sprint hiện tại."]],
+      ["Các khối", ["**Mục tiêu đo được (charter)**: trạng thái từng mục tiêu và bằng chứng.", "**Burn-up point** và **ticket tạo/đóng tích luỹ**: khoảng cách giữa hai đường là phần còn lại.",
+        "**Hoàn thành theo story**, **Mốc** (sprint, lên Canvas, ký G5), bảng **Story** (trạng thái tính từ ticket, kèm trạng thái CTO ghi khi khác)."]],
+    ],
+    do: ["“In / lưu PDF” để báo cáo."],
+    src: ["Ticket nội bộ, evals/raw, ops/dashboard/project.json (story, sprint)."],
+    terms: ["Story", "Point", "Eval", "Burndown / burn-up", "Sprint"] },
+  "r-sprint": { t: "Báo cáo sprint", who: "CTO, người dự sprint review",
+    what: "Một sprint đã cam kết gì, thêm gì, xong gì, còn gì.",
+    parts: [
+      ["Ô số liệu", ["**Cam kết đầu sprint**: point của ticket mở lúc sprint bắt đầu.", "**Thêm giữa sprint**: ticket tạo trong sprint — lớn nghĩa là phạm vi chưa chốt lúc planning.",
+        "**Hoàn thành**, **Còn lại**, việc không point đã xong (câu hỏi, chia task…), vận tốc trung bình."]],
+      ["Biểu đồ", ["**Burndown**: point còn lại (xanh), phạm vi (cam, đi lên khi thêm ticket), đường lý tưởng (nét đứt); “Xem dạng bảng” để đọc số từng ngày.", "Vận tốc theo sprint; cơ cấu phạm vi.", "Danh sách Hoàn thành / Còn lại / Thêm giữa sprint."]],
+    ],
+    do: ["Chọn sprint.", "“Sao chép tóm tắt” hoặc “In / lưu PDF”."],
+    src: ["Ticket nội bộ có point; lịch sprint và mục tiêu ở ops/dashboard/project.json."],
+    terms: ["Sprint", "Point", "Burndown / burn-up"] },
+  links: { t: "Links", who: "Cả team", what: "Các đường dẫn của dự án: repo, PR, CI, store, Figma, tài liệu.",
+    parts: [["Bảng", ["Nhóm, tên, link, ghi chú. Bấm link để mở ở tab mới."]]], do: ["Gõ vào ô tìm để lọc."],
+    src: ["ops/dashboard/project.json (chuyển từ file Excel thông tin dự án) — sửa file rồi tải lại trang."], terms: ["Preview"] },
+  accounts: { t: "Tài khoản & biến", who: "CTO, DevOps (người)", what: "Danh sách biến môi trường và tài khoản dự án dùng: dùng cho việc gì, lưu ở đâu, ai giữ.",
+    parts: [["Bảng", ["Tên biến/tài khoản, dùng cho, nơi lưu, người giữ, ghi chú. Trang chỉ có tên — không có giá trị bí mật."]]],
+    do: ["Gõ vào ô tìm để lọc.", "Kiểm biến nào đang thiếu ở trang Việc chờ tôi → Thiết lập dự án và môi trường."],
+    src: ["ops/dashboard/project.json — sửa file rồi tải lại trang."], terms: [] },
+  roles: { t: "Vai trò", who: "CTO, role owner",
+    what: "9 vai của team agent: ai là role owner, duyệt ngày nào, đang có bao nhiêu việc, và lối vào kiến thức của từng agent.",
+    parts: [
+      ["Thẻ profile", ["Ảnh agent, tên vai, role owner, ngày duyệt cố định, số ticket mở và chờ chấm; “Kiến thức →” mở trang kiến thức của agent."]],
+      ["Lịch duyệt trong tuần", ["Mỗi cột một ngày; hôm nay được viền xanh. Role owner duyệt đầu ra của vai vào ngày cố định."]],
+      ["Bảng Role owner và ngày duyệt cố định", ["Sửa ô Role owner và chọn Ngày duyệt rồi “Lưu thay đổi”; “Huỷ” để bỏ.", "“chưa gán người” khi role owner đang để tên vai trò thay vì tên người.",
+        "Cột **Kiến thức**: số mục CTO nạp · số skill · số ghi nhớ agent — bấm để mở trang quản lý kiến thức.", "Cột Sửa lần cuối: ai sửa, lúc nào."]],
+    ],
+    do: ["Gán tên người cho role owner, đặt ngày duyệt.", "Mở trang Kiến thức của agent."],
+    src: ["Mặc định từ project.json; giá trị CTO sửa lưu trong ai-team/data/tickets.db (sao lưu mỗi ngày).",
+      "Dùng ở lịch duyệt hôm nay (Dashboard), RACI, chi tiết ticket (Người duyệt), báo cáo tuần, Việc chờ tôi, nhắc quá hạn của Orchestrator."],
+    terms: ["Role owner", "RACI", "Kiến thức CTO nạp", "Skill"] },
+  knowledge: { t: "Kiến thức agent", who: "CTO, role owner",
+    what: "Xem kiến thức hiện có của từng agent và nạp thêm kinh nghiệm chuyên môn để chuyên môn hoá agent.",
+    parts: [
+      ["Trang tổng quan", ["Mỗi thẻ một agent: số mục riêng + chung đang bật, số ký tự sẽ nạp (thanh so với giới hạn 12.000), skill, ghi nhớ agent, tiêu chí rubric yếu (“nên nạp”).", "Thẻ “Chung · mọi agent” cho quy tắc áp dụng cho tất cả."]],
+      ["Trang một agent", ["Ô số liệu: mục đang bật/tổng, ký tự nạp vào prompt, skill, ghi nhớ agent, tỉ lệ đạt, tiêu chí yếu.",
+        "**Kiến thức CTO nạp**: các mục kèm loại, ưu tiên, nguồn; Sửa, Tắt/Bật, Lưu trữ (bấm 2 lần; chuyển vào _archive, không xoá).",
+        "**Nạp kiến thức mới**: tiêu đề, loại (kinh nghiệm, quy tắc, tài liệu, checklist, bài học), ưu tiên, nguồn, nội dung markdown; “Nạp từ file .md/.txt”.",
+        "**Gợi ý nạp**: lý do CTO chấm sửa/loại, tiêu chí rubric dưới 1,6/2, ghi nhớ agent tự ghi — bấm “Nạp” để điền sẵn form.",
+        "**Phần agent sẽ nhận ở lượt tới**: đúng đoạn Orchestrator nối vào prompt.",
+        "**Kiến thức hiện có**: định nghĩa và prompt hệ thống, skill, ghi nhớ agent tự ghi, tiêu chí CTO chấm kèm điểm TB, loại việc RACI, quy tắc chung."]],
+    ],
+    do: ["Nạp bài học sau mỗi lần chấm sửa để lần sau agent không lặp lỗi.", "Viết ngắn, cụ thể, agent làm theo được; mâu thuẫn với AGENTS.md/ADR thì AGENTS.md/ADR thắng.",
+      "Commit thư mục ai-team/knowledge để giữ lịch sử.", "Dòng lệnh: `python3 orchestrator/knowledge.py prompt <agent>` xem phần agent nhận."],
+    src: ["Kiến thức CTO nạp: ai-team/knowledge/<agent>/*.md và knowledge/_chung.", "Định nghĩa, skill, quy tắc: theme-efitco/.claude ở nhánh develop (sửa bằng PR). Ghi nhớ agent: theme-efitco/.claude/agent-memory trên máy (ngoài git).",
+      "Orchestrator nạp mục đang bật vào prompt mỗi lượt (chung trước, ưu tiên cao trước, tối đa 12.000 ký tự) và cộng vào agent_version."],
+    terms: ["Kiến thức CTO nạp", "Skill", "Rubric", "agent_version", "RACI"] },
+  agents: { t: "Agent", who: "Cả team, người mới",
+    what: "Sơ đồ vận hành: agent nào làm gì, bàn giao cho ai, và phạm vi của từng agent.",
+    parts: [
+      ["Sơ đồ bàn giao", ["5 giai đoạn từ trái sang phải: Định nghĩa → Giải pháp → Xây dựng → Kiểm chứng → Bàn giao. Mỗi mũi tên là thứ được bàn giao (PRD, story, UI spec, task, PR…).",
+        "CTO ở trên cùng duyệt mọi đầu ra; gate-reviewer chấm độc lập; khung nét đứt là việc người làm hoặc quy tắc chung."]],
+      ["Luồng xử lý", ["Bảng từng bước: agent nhận gì, làm gì, giao cho ai."]],
+      ["Phạm vi từng agent", ["Bảng: thư mục agent được ghi (hook scope-guard chặn ghi ngoài phạm vi), loại ticket nhận (raci.yaml), rubric dùng để chấm."]],
+    ],
+    do: ["Gõ vào ô tìm để lọc bảng phạm vi."], src: ["ops/dashboard/project.json; ảnh agent ở ops/dashboard/static."], terms: ["Orchestrator", "RACI", "Check bắt buộc"] },
+  raci: { t: "RACI", who: "CTO, Tech Lead (người), người giao ticket",
+    what: "Ai nhận loại việc nào — dùng khi tạo ticket để chọn đúng agent và loại việc.",
+    parts: [
+      ["RACI từng agent", ["Thẻ mỗi agent: R (làm), A (chịu trách nhiệm), C (hỏi ý kiến), I (được báo), việc không làm; số ticket đang mở (bấm để xem); role owner và ngày duyệt."]],
+      ["Ma trận loại việc × agent", ["**A** = agent nhận loại việc đó; **C** = được hỏi ý kiến. Cột cuối: ticket đang mở / đã đóng của loại việc (bấm số để xem ticket).",
+        "Cảnh báo khi có ticket mở có agent nhưng chưa có loại việc."]],
+    ],
+    do: ["Gõ vào ô tìm để lọc loại việc."], src: ["ai-team/orchestrator/raci.yaml (Orchestrator dùng để kiểm) và project.json (mô tả)."], terms: ["RACI", "Loại việc", "ai-draft"] },
+  process: { t: "Quy trình", who: "Cả team, người mới",
+    what: "Quy trình từ giao việc tới đóng ticket: ai làm bước nào, bằng công cụ gì.",
+    parts: [
+      ["Sơ đồ quy trình", ["Các làn: CTO, Claude Code, Orchestrator, Agent, GitHub + CI, Ticket; 7 bước: Giao việc → Khởi chạy → Làm → Nộp → Kiểm → Duyệt → Đóng.", "Đường viền xanh là bước chỉ CTO được làm (/merge-pr)."]],
+      ["Sơ đồ trạng thái ticket", ["Ticket đi qua các nhãn ai-draft → ai-review → ai-dat/ai-sua/ai-loai, nhánh câu hỏi và bị chặn."]],
+      ["Các bảng", ["Các bước của một ticket, nhịp tuần, dừng và xử lý sự cố, quy tắc cứng."]],
+    ],
+    do: ["Gõ vào ô tìm để lọc các bảng."], src: ["ops/dashboard/project.json."], terms: ["ai-draft", "ai-review", "Orchestrator", "Check bắt buộc", "Câu hỏi"] },
+  scrum: { t: "Agile/Scrum", who: "Cả team",
+    what: "Cách team chạy Scrum với agent: vòng sprint, vai trò, sự kiện, artifact, DoR, DoD. Số liệu sprint xem ở Báo cáo sprint.",
+    parts: [
+      ["Sprint hiện tại", ["Tên, ngày, ngày thứ mấy, mục tiêu; link “Burndown, vận tốc, phạm vi →” sang Báo cáo sprint."]],
+      ["Sơ đồ vòng Scrum", ["Product backlog → Sprint planning → Sprint backlog → vòng hằng ngày (/sprint, PR + CI, /merge-pr) → Increment → Sprint review → Retrospective → Backlog refinement."]],
+      ["Các bảng", ["Lịch sprint (đã qua/đang chạy/sắp tới, mục tiêu); vai trò Scrum ở Efitco; sự kiện; artifact; Definition of Ready (ticket được chạy); Definition of Done."]],
+    ],
+    do: ["Gõ vào ô tìm để lọc bảng."], src: ["ops/dashboard/project.json mục scrum — mục tiêu sprint sửa ở scrum.sprints."], terms: ["Sprint", "Story", "Point"] },
+  commands: { t: "Lệnh", who: "CTO", what: "Các lệnh vận hành CTO gõ trong Claude Code ở thư mục ai-team và quy tắc đi kèm.",
+    parts: [["Bảng", ["Lệnh / quy tắc, việc lệnh làm, ghi chú (thời gian chạy, ai được chạy).", "Ví dụ: /status, /run-next, /review-pr, /merge-pr (CTO gõ = đồng ý merge), /apply-patch, /sprint, /dashboard."]]],
+    do: ["Gõ vào ô tìm để lọc."], src: ["ops/dashboard/project.json."], terms: ["Orchestrator"] },
+  story: { t: "Story", who: "CTO, người quản lý dự án",
+    what: "14 story của theme và tiến độ ticket con của từng story.",
+    parts: [["Bảng", ["Mã, tên, phía, point sơ bộ.", "**Trạng thái** tính từ ticket con (không tính câu hỏi): Chưa làm, Đã chia task, Đang làm, Xong ticket; kèm số câu hỏi còn mở và “CTO ghi” khi trạng thái trong project.json khác.",
+      "Ticket con, đã đóng, % ticket đóng (tính cả câu hỏi), point của ticket đạt."]]],
+    do: ["Cập nhật trạng thái CTO ghi trong ops/dashboard/project.json khi story đã nghiệm thu."], src: ["Ticket nội bộ + project.json."], terms: ["Story", "Point", "Câu hỏi"] },
+  decisions: { t: "Quyết định", who: "Cả team", what: "Nhật ký quyết định của CTO theo ngày và nơi ghi lại.",
+    parts: [["Bảng", ["Ngày, quyết định, ghi ở đâu (charter, ADR, config…)."]]], do: ["Gõ vào ô tìm để lọc."], src: ["ops/dashboard/project.json."], terms: [] },
+};
+let GUIDE_OPEN = false;
+const gi = (x) => esc(x).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+const guideKey = () => (GUIDE[PAGE] ? PAGE : "dashboard");
+function guideHtml(k) {
+  const g = GUIDE[k] || GUIDE.dashboard, ul = (a) => `<ul>${a.map((x) => `<li>${gi(x)}</li>`).join("")}</ul>`;
+  const terms = (g.terms || []).filter((x) => GLOSS[x]);
+  const sec = [["gd-what", "Trang này để làm gì"], ["gd-parts", "Đọc trang thế nào"], ["gd-do", "Bạn có thể làm gì"], ["gd-src", "Dữ liệu lấy từ đâu"], ...(terms.length ? [["gd-terms", "Thuật ngữ trên trang"]] : []), ["gd-ctx", "Bối cảnh Efitco Agent Ops"]];
+  return { toc: sec.map(([id, h]) => `<a href="#${id}" data-gd="${id}">${esc(h)}</a>`).join(""),
+    main: `<section id="gd-what"><h3>Trang này để làm gì</h3><p class="lead">${gi(g.what)}</p><p class="fresh">Dành cho: ${esc(g.who)}</p></section>
+      <section id="gd-parts"><h3>Đọc trang thế nào</h3>${g.parts.map(([h, a]) => `<h4>${esc(h)}</h4>${ul(a)}`).join("")}</section>
+      <section id="gd-do"><h3>Bạn có thể làm gì</h3>${ul(g.do)}</section>
+      <section id="gd-src"><h3>Dữ liệu lấy từ đâu</h3>${ul(g.src)}</section>
+      ${terms.length ? `<section id="gd-terms"><h3>Thuật ngữ trên trang</h3><dl>${terms.map((x) => `<dt>${esc(x)}</dt><dd>${gi(GLOSS[x])}</dd>`).join("")}</dl></section>` : ""}
+      <section id="gd-ctx"><h3>Bối cảnh Efitco Agent Ops</h3>${ul(GUIDE_CTX)}<p class="fresh">Phím tắt: <kbd>?</kbd> mở hướng dẫn, <kbd>Esc</kbd> đóng.</p></section>` };
+}
+function openGuide(k) {
+  k = k || guideKey(); const dlg = $("guide"), h = guideHtml(k), g = GUIDE[k];
+  $("guideTitle").textContent = `Hướng dẫn · ${g.t}`;
+  $("guideSel").innerHTML = Object.entries(GUIDE).map(([id, x]) => `<option value="${id}" ${id === k ? "selected" : ""}>${esc(x.t)}${id === guideKey() ? " (trang đang xem)" : ""}</option>`).join("");
+  $("guideToc").innerHTML = h.toc; $("guideMain").innerHTML = h.main; $("guideMain").scrollTop = 0;
+  $("guideGo").hidden = k === guideKey() || k === "t-detail"; $("guideGo").href = `#/${k}`;
+  if (!dlg.open) { dlg.showModal(); GUIDE_OPEN = true; document.body.classList.add("guide-open"); }
+  $("guideMain").focus({ preventScroll: true });
+}
+function closeGuide() { const d = $("guide"); if (d.open) d.close(); }
+function bindGuide() {
+  const d = $("guide");
+  $("guideBtn").onclick = () => openGuide();
+  $("guideClose").onclick = closeGuide;
+  $("guidePrint").onclick = () => window.print();
+  $("guideSel").onchange = (e) => openGuide(e.target.value);
+  $("guideGo").onclick = () => closeGuide();
+  d.addEventListener("close", () => { GUIDE_OPEN = false; document.body.classList.remove("guide-open"); $("guideBtn").focus(); });
+  $("guideToc").onclick = (e) => { const a = e.target.closest("[data-gd]"); if (!a) return; e.preventDefault(); const t = document.getElementById(a.dataset.gd); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); };
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey || GUIDE_OPEN) return;
+    const t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault(); openGuide();
+  });
 }
 
 /* ===== Kiến thức agent: xem kiến thức hiện có (định nghĩa, skill, quy tắc, ghi nhớ agent) + CTO nạp thêm (ai-team/knowledge) ===== */
@@ -2271,7 +2585,7 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); loadRaci(); loadRubrics(); loadRoles(); loadKnowledgeSummary(); route();
+loadProject(); loadRaci(); loadRubrics(); loadRoles(); loadKnowledgeSummary(); route(); bindGuide();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);
