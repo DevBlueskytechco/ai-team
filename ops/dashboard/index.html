@@ -140,7 +140,22 @@ nav.menu .cnt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-num
 nav.menu .cnt:empty{display:none}
 nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot.urg{background:var(--critical)}
 .ibx-sec{margin-top:18px} .ibx-sec h3.sub{display:inline-flex;align-items:center;gap:8px;margin:0 0 2px} .ibx-sec h3 .n{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:0}
-.ibx-sec>p.fresh{margin:0 0 6px} .ibx-sec>summary{cursor:pointer;list-style-position:outside}
+.ibx-sec>p.fresh{margin:0 0 6px}
+.pcard .knl{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12.5px}
+.kn-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:12px} .kn-head h2{margin:0;font-size:18px;text-transform:none;letter-spacing:0;color:var(--text)} .kn-head .av{border-radius:50%}
+.kn-meter{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px} .kn-meter i{display:block;height:100%;background:var(--series-1)} .kn-meter i.over{background:var(--warning)}
+.kn-item{border-top:1px solid var(--line);padding:9px 0} .kn-item:first-of-type{border-top:0} .kn-item.off{opacity:.62}
+.kn-item .top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px} .kn-item .top b{font-size:14px} .kn-item .acts{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.kn-item details{margin-top:4px} .kn-item summary{font-size:12.5px;color:var(--muted);cursor:pointer}
+.kn-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;margin-top:6px} .kn-form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--text-2)}
+.kn-form .wide{grid-column:1 / -1} .kn-form textarea{min-height:170px;font-family:var(--mono);font-size:12.5px;line-height:1.5}
+.kn-form .bar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kn-sug{border-top:1px solid var(--line);padding:8px 0;display:flex;gap:10px;align-items:flex-start} .kn-sug:first-of-type{border-top:0} .kn-sug .tx{flex:1;min-width:0;font-size:13px} .kn-sug .tx .fresh{display:block;margin-top:2px}
+.kn-cur details{border-top:1px solid var(--line);padding:7px 0} .kn-cur summary{cursor:pointer} .kn-cur .md{margin-top:6px;font-size:13px}
+.kn-chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0} .kn-pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;background:var(--surface-2);border-radius:8px;padding:10px;max-height:420px;overflow:auto;margin:6px 0 0}
+.kn-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px} .kn-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.kn-card .hd{display:flex;align-items:center;gap:10px} .kn-card .hd b{font-size:15px} .kn-card .fresh{font-size:12.5px}
+@media (max-width:800px){.kn-form{grid-template-columns:repeat(2,minmax(0,1fr))}} .ibx-sec>summary{cursor:pointer;list-style-position:outside}
 .ibx{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
 .ibx .ttl{font-weight:500;line-height:1.4} .ibx .ttl a.k{font-family:var(--mono);font-size:12.5px;margin-right:6px}
 .ibx .meta{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.5} .ibx .meta .agtag{vertical-align:-3px}
@@ -296,6 +311,7 @@ details.tv{margin-top:4px} details.tv summary{cursor:pointer}
 .todayrev .who{display:inline-flex;align-items:center;gap:6px}
 .noown{color:var(--muted);font-style:italic}
 .md{white-space:normal} .md p{margin:0 0 8px} .md ul,.md ol{margin:2px 0 8px;padding-left:20px} .md li{margin:2px 0} .md h4{margin:10px 0 4px;font-size:14px}
+.md pre.mdpre{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;overflow:auto;margin:4px 0 8px} .md pre.mdpre code{border:0;padding:0;background:none;white-space:pre}
 .md code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
 .pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:6px}
 .pcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);display:grid;grid-template-columns:64px 1fr;gap:4px 12px;align-items:start}
@@ -355,6 +371,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
   <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
@@ -537,7 +554,7 @@ const MENU = [
   ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
   ["Báo cáo vận hành", [["r-week", "Báo cáo tuần", "calendar"], ["r-perf", "Hiệu suất", "activity"], ["r-quality", "Chất lượng", "shield"], ["r-results", "Kết quả dự án", "target"], ["r-sprint", "Báo cáo sprint", "flag"]]],
   ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
-  ["Vận hành", [["roles", "Vai trò", "users"], ["agents", "Agent", "bot"], ["raci", "RACI", "grid"], ["process", "Quy trình", "workflow"], ["scrum", "Agile/Scrum", "cycle"], ["commands", "Lệnh", "terminal"]]],
+  ["Vận hành", [["roles", "Vai trò", "users"], ["knowledge", "Kiến thức agent", "book"], ["agents", "Agent", "bot"], ["raci", "RACI", "grid"], ["process", "Quy trình", "workflow"], ["scrum", "Agile/Scrum", "cycle"], ["commands", "Lệnh", "terminal"]]],
   ["Tiến độ", [["story", "Story", "chart"]]],
   ["Quy ước", [["decisions", "Quyết định", "bookmark"]]],
 ];
@@ -591,6 +608,7 @@ function renderMenu() {
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   if (ROLES) cnt.roles = ROLES.rows.length;
+  if (KSUM) cnt.knowledge = Object.values(KSUM.agents).reduce((a, x) => a + x.cto_active, 0) || "";
   const IB = inboxSummary(); cnt.inbox = IB.n || "";
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
     `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt${id === "inbox" && IB.n ? (IB.urgent ? " hot urg" : " hot") : ""}"${id === "inbox" && IB.n ? ` title="${IB.n} việc chờ bạn${IB.urgent ? `, ${IB.urgent} gấp` : ""}"` : ""}>${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
@@ -600,7 +618,8 @@ function renderMenu() {
 function route() {
   let id = (location.hash.replace(/^#\/?/, "") || "dashboard");
   if (id === "tickets") id = "t-list";                     // link cũ
-  const tm = id.match(/^t\/([A-Za-z0-9-]+)$/);
+  const tm = id.match(/^t\/([A-Za-z0-9-]+)$/), km = id.match(/^knowledge\/([a-z_-]+)$/);
+  if (km) { id = "knowledge"; KNA = km[1]; if (KDET[KNA]) loadKnowledge(KNA); } else if (id === "knowledge") { KNA = null; loadKnowledgeSummary(); }
   PAGE = tm ? "t-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
   if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
   $("page-dashboard").hidden = PAGE !== "dashboard";
@@ -647,6 +666,7 @@ function renderInfoInner(box) {
   else if (PAGE === "process") box.innerHTML = pageProcess();
   else if (PAGE === "roles") { box.innerHTML = pageRoles(); bindRoles(); return; }
   else if (PAGE === "inbox") { box.innerHTML = pageInbox(); bindInbox(); return; }
+  else if (PAGE === "knowledge") { box.innerHTML = pageKnowledge(); bindKnowledge(); return; }
   else if (PAGE === "raci") box.innerHTML = pageRaci();
   else if (PAGE.startsWith("r-")) {
     DRAWS = [];
@@ -670,6 +690,162 @@ function renderInfoInner(box) {
   const live = ["t-list", "t-board", "story"].includes(PAGE);
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
+}
+
+/* ===== Kiến thức agent: xem kiến thức hiện có (định nghĩa, skill, quy tắc, ghi nhớ agent) + CTO nạp thêm (ai-team/knowledge) ===== */
+let KSUM = null, KNA = null, KN_FORM = null, KN_ARCH = null;
+const KDET = {};
+const KN_SHARED = "_chung";
+const SEVL = { dat: "đạt", sua_nhe: "sửa nhẹ", sua_nang: "sửa nặng", loai: "loại" };
+const cutW = (x, n) => { x = String(x || "").replace(/\s+/g, " ").trim(); if (x.length <= n) return x; const c = x.slice(0, n); return c.slice(0, Math.max(c.lastIndexOf(" "), n - 20)).replace(/[,;:.\-–—]+$/, "") + "…"; };
+const knName = (a) => (a === KN_SHARED ? "Chung · mọi agent" : (roleRow(a) && roleRow(a).role) || a);
+const knLink = (a) => { const s = KSUM && KSUM.agents[a];
+  return `<a class="btn sm" href="#/knowledge/${esc(a)}" title="Quản lý kiến thức ${esc(knName(a))}">${IC("book")}${s ? `${s.cto_active} nạp · ${s.skills} skill${s.memory ? ` · ${s.memory} ghi nhớ` : ""}` : "Kiến thức"}</a>`; };
+async function loadKnowledgeSummary() {
+  try { const r = await fetch("/api/knowledge", { cache: "no-store" }); if (!r.ok) return; KSUM = await r.json(); renderMenu();
+    if (["knowledge"].includes(PAGE) || (PAGE === "roles" && !ROLEDIRTY)) renderInfo(); } catch (e) {}
+}
+async function loadKnowledge(a, quiet) {
+  try { const r = await fetch(`/api/knowledge?agent=${encodeURIComponent(a)}`, { cache: "no-store" }); const j = await r.json();
+    KDET[a] = r.ok ? j : { error: j.error || r.status }; } catch (e) { KDET[a] = { error: e.message }; }
+  if (!quiet && PAGE === "knowledge" && KNA === a) renderInfo();
+}
+async function kapi(action, body) {
+  const r = await fetch(`/api/knowledge/${action}`, { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: JSON.stringify(body) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+// điểm rubric trung bình theo tiêu chí của agent (từ ticket đã chấm)
+function knCriteria(a) {
+  const rs = ((DATA && DATA.tickets) || []).filter((t) => t.agent === a && t.review && t.review.scores), meta = ((RUBRICS || {})[a] || { criteria: [] }).criteria;
+  return meta.map((c) => { const v = rs.map((t) => t.review.scores[c.id]).filter((x) => x != null); return { ...c, n: v.length, avg: v.length ? v.reduce((x, y) => x + y, 0) / v.length : null }; });
+}
+function pageKnowledge() {
+  if (!KSUM) { loadKnowledgeSummary(); return '<div class="empty">Đang tải kiến thức…</div>'; }
+  if (!KNA) return pageKnowledgeAll();
+  const a = KNA;
+  if (!AGENT_IDS.includes(a) && a !== KN_SHARED) return `<div class="empty">Không có agent ${esc(a)}. <a href="#/knowledge">Xem tất cả</a></div>`;
+  const D = KDET[a];
+  if (!D) { loadKnowledge(a); return '<div class="empty">Đang tải kiến thức…</div>'; }
+  if (D.error) return `<p class="note">${status("critical", "Không đọc được kiến thức: " + D.error)}</p>`;
+  const S = KSUM.agents[a] || {}, rr = roleRow(a), T = (DATA && DATA.tickets) || [], K = D.kinds || {};
+  const rev = T.filter((t) => t.agent === a && t.review && t.review.severity), dat = rev.filter((t) => t.review.severity === "dat").length;
+  const crit = a === KN_SHARED ? [] : knCriteria(a), weak = crit.filter((c) => c.avg != null && c.avg < 1.6).sort((x, y) => x.avg - y.avg);
+  const pc = D.prompt.chars, lim = D.limit;
+  const tiles = [["Kiến thức CTO nạp", `${D.items.filter((x) => x.status === "active").length}/${D.items.length}`, `đang bật / tổng${D.archived ? ` · ${D.archived} lưu trữ` : ""}`],
+    ["Nạp vào prompt", `${pc.toLocaleString("vi-VN")}`, `/${lim.toLocaleString("vi-VN")} ký tự mỗi lượt${D.prompt.skipped.length ? ` · bỏ ${D.prompt.skipped.length} mục` : ""}`],
+    ["Skill", a === KN_SHARED ? "—" : (D.current.skills || []).length, a === KN_SHARED ? "" : `.claude/agents/${a}.md`],
+    ["Agent tự ghi nhớ", a === KN_SHARED ? "—" : (D.current.memory || []).length, "file trong agent-memory"],
+    ["Tỉ lệ đạt", a === KN_SHARED ? "—" : pct(dat, rev.length), a === KN_SHARED ? "" : `${rev.length} ticket đã chấm`],
+    ["Tiêu chí yếu", a === KN_SHARED ? "—" : weak.length, a === KN_SHARED ? "" : "TB dưới 1,6/2 — nên nạp kinh nghiệm"]];
+  const opts = [...AGENT_IDS, KN_SHARED].map((x) => `<option value="${x}" ${x === a ? "selected" : ""}>${esc(knName(x))}${x !== KN_SHARED ? ` (${x})` : ""}</option>`).join("");
+  const kindOpts = (cur) => Object.entries(K).map(([k, l]) => opt(k, cur, l)).join("");
+  const F = KN_FORM && KN_FORM.agent === a ? KN_FORM : { agent: a, id: "", title: "", kind: "kinh-nghiem", priority: "thuong", source: "", body: "" };
+  const item = (x) => `<div class="kn-item ${x.status === "off" ? "off" : ""}" data-id="${esc(x.id)}">
+      <div class="top"><b>${esc(x.title)}</b>${lab(K[x.kind] || x.kind)}${x.priority === "cao" ? status("warning", "ưu tiên cao") : ""}${x.status === "off" ? status("none", "đang tắt") : ""}
+        ${x.agent === KN_SHARED && a !== KN_SHARED ? lab("chung") : ""}
+        ${x.agent === a ? `<span class="acts"><button type="button" class="btn sm" data-kact="edit">${IC("edit")}Sửa</button>
+          <button type="button" class="btn sm" data-kact="toggle">${x.status === "off" ? IC("check") + "Bật" : IC("x") + "Tắt"}</button>
+          <button type="button" class="btn sm" data-kact="archive">${KN_ARCH === x.id ? "Bấm lần nữa để lưu trữ" : IC("bookmark") + "Lưu trữ"}</button></span>` : ""}</div>
+      <div class="fresh">${x.source ? `nguồn ${keyLinks(x.source)} · ` : ""}${esc(x.by || "")} · ${fmt(x.updated || x.created)} · ${x.body.length.toLocaleString("vi-VN")} ký tự</div>
+      <details><summary>Nội dung</summary><div class="tbody md">${md(x.body)}</div></details></div>`;
+  const used = new Set(D.items.map((x) => x.source).join(" ").match(/ES1-T\d+/g) || []);
+  const lessons = rev.filter((t) => t.review.severity !== "dat" && t.review.reason && !used.has(t.key)).sort((x, y) => String(y.review.at).localeCompare(String(x.review.at))).slice(0, 8);
+  const sug = [
+    ...lessons.map((t) => ({ t: `${t.key} · ${SEVL[t.review.severity] || t.review.severity}`, d: t.review.reason, f: { title: `Bài học ${t.key}: ${cutW(t.review.reason, 90)}`, kind: "bai-hoc", priority: ["sua_nang", "loai"].includes(t.review.severity) ? "cao" : "thuong", source: `${t.key} (CTO chấm ${SEVL[t.review.severity] || t.review.severity})`, body: `${t.review.reason}\n\nLần sau: ` } })),
+    ...weak.map((c) => ({ t: `Tiêu chí ${c.id} · TB ${c.avg.toFixed(2)}/2 qua ${c.n} lần chấm`, d: c.text, f: { title: `Đạt tiêu chí ${c.id}: ${c.text.slice(0, 70)}`, kind: "checklist", priority: c.avg < 1.2 ? "cao" : "thuong", source: `rubric ${a}.${c.id}`, body: `Tiêu chí rubric: ${c.text}\n\n- ` } })),
+    ...((D.current && D.current.memory) || []).map((m) => ({ t: `Agent tự ghi: ${m.name}`, d: m.body.slice(0, 180), f: { title: m.name.replace(/\.(md|txt)$/, "").replace(/[_-]+/g, " "), kind: "kinh-nghiem", priority: "thuong", source: `agent-memory/${a}/${m.name}`, body: m.body } }))];
+  KN_SUG = sug.map((x) => x.f);
+  const cur = D.current || {}, def = cur.definition;
+  const curHtml = a === KN_SHARED ? "" : `
+    <div class="rcardx kn-cur"><h3>Kiến thức hiện có của agent</h3>
+      <p class="fresh" style="margin:0 0 6px">Đọc từ theme-efitco ${esc(cur.theme_ref || "")} (định nghĩa, skill, quy tắc) và thư mục agent-memory trên máy (agent tự ghi). Sửa định nghĩa/skill bằng PR vào theme-efitco; nạp kinh nghiệm thì dùng khối bên trên.</p>
+      ${def ? `<div><b>Định nghĩa</b> <span class="fresh">${esc(def.path)} · ${def.chars.toLocaleString("vi-VN")} ký tự</span></div>
+        <div class="fresh">${esc(def.description)}</div>
+        <div class="kn-chips">${def.model ? lab("model " + def.model) : ""}${def.max_turns ? lab("tối đa " + def.max_turns + " turn") : ""}${def.memory ? lab("ghi nhớ: " + def.memory) : ""}${(def.tools || []).map((x) => `<span class="chip" style="background:var(--surface-2)">${esc(x)}</span>`).join("")}</div>
+        <details><summary>Prompt hệ thống của agent</summary><div class="md">${md(def.body)}</div></details>` : `<p class="note">${status("warning", "Không đọc được .claude/agents/" + a + ".md")}</p>`}
+      <h3 style="margin-top:12px">Skill (${(cur.skills || []).length})</h3>
+      ${(cur.skills || []).map((x) => `<details><summary><b>${esc(x.name)}</b> <span class="fresh">— ${esc(x.description || (x.found ? "" : "không tìm thấy SKILL.md"))} · ${x.chars.toLocaleString("vi-VN")} ký tự</span></summary><div class="md">${md(x.body)}</div></details>`).join("") || '<p class="fresh">Không có skill.</p>'}
+      <h3 style="margin-top:12px">Agent tự ghi nhớ (${(cur.memory || []).length})</h3>
+      ${(cur.memory || []).map((m, i) => `<details><summary><b>${esc(m.name)}</b> <span class="fresh">· ${fmt(m.updated)} · ${m.chars.toLocaleString("vi-VN")} ký tự</span></summary><div class="md">${md(m.body)}</div>
+          <button type="button" class="btn sm" data-ksug="${lessons.length + weak.length + i}" style="margin-top:6px">${IC("plus")}Nạp thành kiến thức chính thức</button></details>`).join("") || '<p class="fresh">Chưa có — agent ghi vào theme-efitco/.claude/agent-memory/' + esc(a) + '/ (giữ ngoài git, chỉ có trên máy chạy agent).</p>'}
+      <h3 style="margin-top:12px">Tiêu chí CTO chấm (rubrics/${esc(a)}.yaml)</h3>
+      ${crit.length ? `<div class="tablewrap"><table class="info"><thead><tr><th>Tiêu chí</th><th>Nội dung</th><th class="n">Lần chấm</th><th class="n">TB (0–2)</th></tr></thead><tbody>${crit.map((c) => `<tr><td class="k">${esc(c.id)}</td><td class="ttl">${esc(c.text)}</td><td class="n">${c.n}</td><td class="n">${c.avg == null ? "—" : c.avg < 1.5 ? status("serious", c.avg.toFixed(2)) : c.avg < 1.6 ? status("warning", c.avg.toFixed(2)) : c.avg.toFixed(2)}</td></tr>`).join("")}</tbody></table></div>` : '<p class="fresh">Chưa có rubric.</p>'}
+      <h3 style="margin-top:12px">Loại việc nhận (RACI)</h3><div class="kn-chips">${taskTypes(a).map(lab).join("") || '<span class="fresh">—</span>'}</div>
+      <h3 style="margin-top:12px">Quy tắc chung của team (${(cur.rules || []).length})</h3>
+      ${(cur.rules || []).map((x) => `<details><summary><b>${esc(x.name)}</b> <span class="fresh">· ${esc(x.path)}</span></summary><div class="md">${md(x.body)}</div></details>`).join("")}
+    </div>`;
+  return `<div class="kn-head">${a === KN_SHARED ? IC("book") : av(a, 40)}<h2>Kiến thức · ${esc(knName(a))}</h2>${a !== KN_SHARED ? `<span class="chip">${esc(a)}</span>` : ""}
+      ${rr && a !== KN_SHARED ? `<span class="fresh">role owner ${unowned(rr) ? '<span class="noown">chưa gán người</span>' : esc(rr.owner)}${rr.day ? ` · duyệt ${esc(rr.day)}` : ""}</span>` : ""}
+      <span class="spacer"></span><select id="knSel" aria-label="Chọn agent">${opts}</select><a class="btn" href="#/knowledge">${IC("grid")}Tất cả agent</a><a class="btn" href="#/roles">${IC("users")}Vai trò</a></div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      <div class="rcardx"><h3>Kiến thức CTO nạp (${D.items.length})</h3>
+        <div class="kn-meter" title="${pc}/${lim} ký tự"><i class="${pc > lim * 0.9 ? "over" : ""}" style="width:${Math.min(100, (pc / lim) * 100)}%"></i></div>
+        <p class="fresh" style="margin:6px 0 8px">${a === KN_SHARED ? "Áp dụng cho mọi agent." : `Orchestrator nối mục đang bật (cả mục chung) vào prompt của ${esc(a)} mỗi lượt, ưu tiên cao trước, tối đa ${lim.toLocaleString("vi-VN")} ký tự; đổi kiến thức = agent_version mới.`}</p>
+        ${D.items.map(item).join("") || '<p class="fresh">Chưa có mục nào — nạp ở form bên dưới hoặc từ gợi ý.</p>'}
+        ${a !== KN_SHARED && D.shared.length ? `<details style="margin-top:8px"><summary class="fresh">${D.shared.filter((x) => x.status === "active").length} mục kiến thức chung cũng được nạp</summary>${D.shared.map(item).join("")}</details>` : ""}
+        <h3 style="margin-top:14px" id="knFormTitle">${F.id ? "Sửa kiến thức" : "Nạp kiến thức mới"}</h3>
+        <form id="knForm" class="kn-form" autocomplete="off">
+          <label class="wide">Tiêu đề<input name="title" maxlength="120" required value="${esc(F.title)}" placeholder="vd Badge sale tính theo variant đang chọn"></label>
+          <label>Loại<select name="kind">${kindOpts(F.kind)}</select></label>
+          <label>Ưu tiên<select name="priority">${opt("thuong", F.priority, "Thường")}${opt("cao", F.priority, "Cao — nạp trước")}</select></label>
+          <label class="wide" style="grid-column:span 2">Nguồn<input name="source" maxlength="160" value="${esc(F.source)}" placeholder="vd ES1-T56, ADR 0005, tài liệu Shopify"></label>
+          <label class="wide">Nội dung (markdown)<textarea name="body" maxlength="${D.body_max}" required placeholder="Kinh nghiệm, quy tắc, checklist… viết ngắn, cụ thể, agent làm theo được">${esc(F.body)}</textarea></label>
+          <div class="bar"><button class="btn primary" type="submit">${IC("save")}${F.id ? "Lưu thay đổi" : "Nạp kiến thức"}</button>
+            ${F.id || F.title || F.body ? `<button class="btn" type="button" id="knCancel">${IC("x")}Huỷ</button>` : ""}
+            <label class="btn" style="flex-direction:row;cursor:pointer">${IC("plus-square")}Nạp từ file .md/.txt<input type="file" id="knFile" accept=".md,.txt,.markdown,text/plain,text/markdown" hidden></label>
+            <span class="fresh" id="knCount">${F.body.length.toLocaleString("vi-VN")}/${D.body_max.toLocaleString("vi-VN")} ký tự</span></div>
+          <input type="hidden" name="id" value="${esc(F.id)}">
+        </form>
+      </div>
+      <div class="rcardx"><h3>Gợi ý nạp (${sug.length})</h3>
+        <p class="fresh" style="margin:0 0 6px">Từ ticket CTO chấm sửa/loại, tiêu chí rubric yếu và ghi nhớ agent tự ghi. Bấm để điền sẵn form, sửa lại rồi lưu.</p>
+        ${sug.map((x, i) => `<div class="kn-sug"><div class="tx"><b>${keyLinks(x.t)}</b><span class="fresh">${esc(String(x.d).slice(0, 220))}</span></div><button type="button" class="btn sm" data-ksug="${i}">${IC("plus")}Nạp</button></div>`).join("") || '<p class="fresh">Chưa có gợi ý.</p>'}
+      </div>
+    </div>
+    <details class="rcardx"><summary><b>Phần agent sẽ nhận ở lượt tới</b> <span class="fresh">${D.prompt.used.length} mục · ${pc.toLocaleString("vi-VN")} ký tự${D.prompt.skipped.length ? ` · bỏ ${D.prompt.skipped.length} mục vì quá giới hạn` : ""}</span></summary>
+      <pre class="kn-pre">${esc(D.prompt.text || "(chưa có kiến thức đang bật)")}</pre>
+      <p class="fresh">Xem trong terminal: <code>python3 orchestrator/knowledge.py prompt ${esc(a)}</code></p></details>
+    ${curHtml}`;
+}
+let KN_SUG = [];
+function pageKnowledgeAll() {
+  const rows = [...AGENT_IDS, KN_SHARED];
+  const card = (a) => { const s = KSUM.agents[a] || {}, rr = roleRow(a), weak = a === KN_SHARED ? [] : knCriteria(a).filter((c) => c.avg != null && c.avg < 1.6);
+    return `<a class="kn-card plain" href="#/knowledge/${esc(a)}"><div class="hd">${a === KN_SHARED ? IC("book") : av(a, 36)}<div><b>${esc(knName(a))}</b><div class="fresh">${a === KN_SHARED ? "nạp cho mọi agent" : esc(a) + (rr && !unowned(rr) ? " · " + esc(rr.owner) : "")}</div></div></div>
+      <div>${a === KN_SHARED ? `${s.cto_active || 0} mục đang bật` : `${s.cto_active || 0} mục riêng${(KSUM.agents[KN_SHARED] || {}).cto_active ? ` + ${KSUM.agents[KN_SHARED].cto_active} chung` : ""}`}${s.cto_total > s.cto_active ? ` · ${s.cto_total - s.cto_active} tắt` : ""} · ${(s.prompt_chars || 0).toLocaleString("vi-VN")} ký tự nạp</div>
+      <div class="kn-meter"><i class="${s.prompt_chars > KSUM.limit * 0.9 ? "over" : ""}" style="width:${Math.min(100, ((s.prompt_chars || 0) / KSUM.limit) * 100)}%"></i></div>
+      <div class="fresh">${a === KN_SHARED ? "quy tắc, giọng văn, cách nộp chung" : `${s.skills || 0} skill · ${s.memory || 0} ghi nhớ agent${weak.length ? ` · ${weak.length} tiêu chí yếu` : ""}`}${s.updated ? ` · sửa ${fmt(s.updated)}` : ""}</div>
+      ${weak.length ? `<div>${status("warning", "nên nạp: " + weak.slice(0, 3).map((c) => c.id).join(", "))}</div>` : ""}</a>`; };
+  return `<div class="page-head"><h2>Kiến thức agent</h2><span class="fresh">kiến thức hiện có (định nghĩa, skill, ghi nhớ) + kinh nghiệm CTO nạp để chuyên môn hoá từng agent</span></div>
+    <div class="kn-cards">${rows.map(card).join("")}</div>
+    <p class="note">Kho kiến thức CTO nạp: ai-team/knowledge/&lt;agent&gt;/*.md (knowledge/_chung cho mọi agent) — commit vào ai-team để lưu lịch sử. Orchestrator nối mục đang bật vào prompt agent mỗi lượt và tính vào agent_version. Định nghĩa agent và skill nằm ở theme-efitco/.claude, sửa bằng PR.</p>`;
+}
+function bindKnowledge() {
+  const sel = $("knSel"); if (sel) sel.onchange = () => { location.hash = "#/knowledge/" + sel.value; };
+  const a = KNA, form = $("knForm"); if (!a || !form) return;
+  const keep = () => { const f = form.elements; KN_FORM = { agent: a, id: f.id.value, title: f.title.value, kind: f.kind.value, priority: f.priority.value, source: f.source.value, body: f.body.value }; };
+  form.oninput = () => { keep(); $("knCount").textContent = `${form.elements.body.value.length.toLocaleString("vi-VN")}/${(KDET[a].body_max || 20000).toLocaleString("vi-VN")} ký tự`; };
+  form.onsubmit = async (e) => { e.preventDefault(); keep(); const b = form.querySelector('[type="submit"]'); b.disabled = true;
+    try { const j = await kapi("save", { ...KN_FORM, agent: a }); if (a === KN_SHARED) Object.keys(KDET).forEach((k) => delete KDET[k]); KDET[a] = j.detail; const was = KN_FORM.id; KN_FORM = null; toast(was ? "Đã lưu kiến thức" : "Đã nạp kiến thức — áp dụng từ lượt agent tới"); loadKnowledgeSummary(); renderInfo(); }
+    catch (err) { toast(err.message, true); b.disabled = false; } };
+  const cancel = $("knCancel"); if (cancel) cancel.onclick = () => { KN_FORM = null; renderInfo(); };
+  const file = $("knFile"); if (file) file.onchange = async () => { const f = file.files[0]; if (!f) return;
+    if (f.size > 200000) { toast("File quá lớn (> 200 KB) — tách nhỏ", true); return; }
+    const txt = await f.text(); keep(); KN_FORM.body = txt.slice(0, KDET[a].body_max || 20000); if (!KN_FORM.title) KN_FORM.title = f.name.replace(/\.(md|txt|markdown)$/i, "").replace(/[_-]+/g, " ").slice(0, 120);
+    if (!KN_FORM.source) KN_FORM.source = "file " + f.name; renderInfo(); toast(txt.length > (KDET[a].body_max || 20000) ? "File dài, đã cắt theo giới hạn — nên tách thành nhiều mục" : `Đã nạp ${f.name} vào form — kiểm tra rồi bấm Nạp kiến thức`); };
+  document.querySelectorAll("#info [data-ksug]").forEach((b) => (b.onclick = () => { const f = KN_SUG[+b.dataset.ksug]; if (!f) return;
+    KN_FORM = { agent: a, id: "", ...f }; renderInfo(); const t = $("knFormTitle"); if (t) t.scrollIntoView({ block: "start", behavior: "smooth" }); const ta = $("knForm") && $("knForm").elements.body; if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } }));
+  document.querySelectorAll("#info .kn-item [data-kact]").forEach((b) => (b.onclick = async () => {
+    const id = b.closest(".kn-item").dataset.id, it = KDET[a].items.find((x) => x.id === id), act = b.dataset.kact; if (!it) return;
+    if (act === "edit") { KN_FORM = { agent: a, id: it.id, title: it.title, kind: it.kind, priority: it.priority, source: it.source, body: it.body }; renderInfo(); $("knFormTitle").scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (act === "archive" && KN_ARCH !== id) { KN_ARCH = id; renderInfo(); setTimeout(() => { if (KN_ARCH === id) { KN_ARCH = null; if (PAGE === "knowledge") renderInfo(); } }, 4000); return; }
+    try { const j = await kapi(act === "toggle" ? "status" : "archive", { agent: a, id, status: it.status === "off" ? "active" : "off" });
+      if (a === KN_SHARED) Object.keys(KDET).forEach((k) => delete KDET[k]); KDET[a] = j.detail; KN_ARCH = null; if (KN_FORM && KN_FORM.id === id) KN_FORM = null;
+      toast(act === "archive" ? "Đã lưu trữ (chuyển vào _archive, không xoá)" : it.status === "off" ? "Đã bật lại" : "Đã tắt — lượt tới agent không nhận mục này"); loadKnowledgeSummary(); renderInfo(); }
+    catch (err) { toast(err.message, true); } }));
 }
 
 /* ===== Việc chờ tôi (CTO): duyệt, trả lời, quyết định, thiết lập — tính trực tiếp từ ticket, PR, CI, cấu hình; tự hết khi đã xử lý ===== */
@@ -947,15 +1123,17 @@ function pageRoles() {
     <div class="pcards">${ag.map((r) => { const c = cnt(r.agent), a = PROJECT && PROJECT.raci && (PROJECT.raci.agents || []).find((x) => x.id === r.agent);
       return `<article class="pcard">${av(r.agent, 64)}<div class="nm">${esc(r.role)}</div><div class="rl"><span class="chip">${esc(r.agent)}</span>${a ? " " + esc(a.role) : ""}</div>
         <div class="own">Role owner: ${ownerHtml(r)}${r.day ? ` · duyệt <b>${esc(r.day)}</b>` : ""}</div>
-        <div class="st">${c.run ? status("warning", "đang chạy") + " " : ""}${c.open} ticket mở · ${c.rev} chờ chấm</div></article>`; }).join("")}</div>
+        <div class="st">${c.run ? status("warning", "đang chạy") + " " : ""}${c.open} ticket mở · ${c.rev} chờ chấm</div>
+        <a class="knl" href="#/knowledge/${esc(r.agent)}">${IC("book")}Kiến thức${KSUM && KSUM.agents[r.agent] ? ` · ${KSUM.agents[r.agent].cto_active} nạp · ${KSUM.agents[r.agent].skills} skill` : ""} →</a></article>`; }).join("")}</div>
     <h3 class="sub">Lịch duyệt trong tuần</h3>
     <div class="week" style="grid-template-columns:repeat(${Math.min(wk.length, 7)},minmax(0,1fr))">${wk.map((d) => `<div class="day ${d === today ? "today" : ""}"><h4>${esc(d)}${d === today ? " · hôm nay" : ""}</h4>
       ${ag.filter((r) => r.day === d).map((r) => `<div class="who">${av(r.agent, 24)}<div><div>${esc(r.role)}</div><div class="fresh">${unowned(r) ? '<span class="noown">chưa gán người</span>' : esc(r.owner)}</div></div></div>`).join("") || '<div class="fresh">—</div>'}</div>`).join("")}</div>
     <h3 class="sub">Role owner và ngày duyệt cố định</h3>
-    <div class="tablewrap"><table class="info rtable"><thead><tr><th>Vai trò</th><th>Agent</th><th>Role owner</th><th>Ngày duyệt cố định</th><th>Ghi chú</th><th>Sửa lần cuối</th></tr></thead>
+    <div class="tablewrap"><table class="info rtable"><thead><tr><th>Vai trò</th><th>Agent</th><th>Role owner</th><th>Ngày duyệt cố định</th><th>Kiến thức</th><th>Ghi chú</th><th>Sửa lần cuối</th></tr></thead>
       <tbody>${ROLES.rows.map((r, i) => `<tr data-i="${i}"><td class="nw"><b>${esc(r.role)}</b></td><td class="nw">${r.agent ? agentTag(r.agent, 22) : '<span class="fresh">người</span>'}</td>
         <td><input data-f="owner" value="${esc(r.owner || "")}" maxlength="60" aria-label="Role owner ${esc(r.role)}"></td>
         <td><select data-f="day" aria-label="Ngày duyệt ${esc(r.role)}">${["", ...days].map((d) => opt(d, r.day, d || "— không cố định")).join("")}</select></td>
+        <td class="nw">${r.agent ? knLink(r.agent) : '<span class="fresh">—</span>'}</td>
         <td class="fresh">${esc(r.note || "")}</td><td class="fresh nw">${r.edited_at ? `${esc(r.edited_by || "")} · ${esc(String(r.edited_at).slice(5, 16).replace("T", " "))}` : "mặc định"}</td></tr>`).join("")}</tbody></table></div>
     <div class="rbar"><button class="btn primary" id="rolesSave" disabled>${IC("save")}Lưu thay đổi</button><button class="btn" id="rolesReset" disabled>${IC("x")}Huỷ</button>
       <span class="fresh" id="rolesMsg">Lưu vào data/tickets.db (sao lưu mỗi ngày). Dùng cho: lịch duyệt hôm nay ở Dashboard, RACI, chi tiết ticket, báo cáo tuần, nhắc việc của Orchestrator.</span></div>`;
@@ -1206,10 +1384,12 @@ function md(src) {
   const inline = (x) => x.split(/(`[^`]+`)/).map((part, i) => i % 2 ? `<code>${part.slice(1, -1)}</code>` :
     part.split(/(https?:\/\/[^\s<]+)/).map((p, j) => j % 2 ? `<a href="${p}" target="_blank" rel="noopener">${p}</a>` :
       p.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/\b(ES1-T\d+)\b/g, '<a href="#/t/$1">$1</a>')).join("")).join("");
-  let out = "", list = null, para = [];
+  let out = "", list = null, para = [], fence = null;
   const flushP = () => { if (para.length) out += `<p>${para.map(inline).join("<br>")}</p>`; para = []; };
   const flushL = () => { if (list) out += `<${list.tag}>${list.items.map((x) => `<li>${inline(x)}</li>`).join("")}</${list.tag}>`; list = null; };
   esc(src || "").split("\n").forEach((raw) => {
+    if (/^\s*```/.test(raw)) { if (fence) { out += `<pre class="mdpre"><code>${fence.join("\n")}</code></pre>`; fence = null; } else { flushP(); flushL(); fence = []; } return; }
+    if (fence) { fence.push(raw); return; }
     const l = raw.replace(/\s+$/, ""), b = l.match(/^\s*[-*•]\s+(.*)$/), n = l.match(/^\s*\d+[.)]\s+(.*)$/), h = l.match(/^#{1,4}\s+(.*)$/);
     if (b || n) { flushP(); const tag = b ? "ul" : "ol"; if (!list || list.tag !== tag) { flushL(); list = { tag, items: [] }; } list.items.push((b || n)[1]); return; }
     if (list && /^\s{2,}\S/.test(l)) { list.items[list.items.length - 1] += " " + l.trim(); return; }
@@ -1218,6 +1398,7 @@ function md(src) {
     if (!l.trim()) { flushP(); return; }
     para.push(l);
   });
+  if (fence) out += `<pre class="mdpre"><code>${fence.join("\n")}</code></pre>`;
   flushP(); flushL(); return out;
 }
 function pageTDetail() {
@@ -2090,7 +2271,7 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); loadRaci(); loadRubrics(); loadRoles(); route();
+loadProject(); loadRaci(); loadRubrics(); loadRoles(); loadKnowledgeSummary(); route();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);

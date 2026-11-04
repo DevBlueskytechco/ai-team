@@ -17,6 +17,12 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Thao tác: `python3 ops/ticket.py show|close|reopen|label|comment|children|backup|export`; CTO dùng dashboard menu Ticket.
 - Không sửa trực tiếp file .db bằng sqlite3; luôn qua ops/ticket.py hoặc mcp/ticket_local.py để có lịch sử.
 
+## Kiến thức agent
+- CTO nạp kinh nghiệm/quy tắc/checklist cho từng agent ở dashboard (Vai trò → cột Kiến thức, hoặc menu Kiến thức agent). Lưu ở `knowledge/<agent>/*.md`, `knowledge/_chung/` cho mọi agent; commit vào ai-team để giữ lịch sử.
+- Orchestrator nối mục đang bật vào prompt agent mỗi lượt (tối đa 12.000 ký tự, ưu tiên cao trước) và cộng vào agent_version. Xem đúng phần agent nhận: `python3 orchestrator/knowledge.py prompt <agent>`.
+- Chỉ thêm/sửa/tắt/lưu trữ khi CTO yêu cầu: `python3 orchestrator/knowledge.py add|off|on|archive ...`. Không xoá file kiến thức (lưu trữ = chuyển vào `_archive/`).
+- Định nghĩa agent và skill ở `../theme-efitco/.claude/` sửa bằng PR, không qua kho kiến thức.
+
 ## Quy tắc cứng
 - Mọi thao tác qua script trong `ops/`. Không tự viết lệnh gh/git thay script khi script đã có.
 - KHÔNG approve/merge PR, KHÔNG đóng ticket, KHÔNG chấm điểm nếu CTO chưa gõ /merge-pr hoặc nói rõ "merge".
