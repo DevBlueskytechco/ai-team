@@ -142,7 +142,7 @@ def analysis_ticket(r, agent):
             f"3. Mỗi kiến thức đề xuất nạp cho một agent: `## Kiến thức cho <agent>: <tiêu đề ngắn>` rồi nội dung ngắn, cụ thể, agent làm theo được "
             f"(agent: {', '.join(KN.AGENTS)}, hoặc _chung cho mọi agent).\n"
             f"4. Mỗi skill cần sửa: `## Sửa skill <tên skill>: <tóm tắt>` rồi đoạn đề xuất thay đổi (không tự sửa .claude/ — CTO sửa bằng PR).\n"
-            f"5. `## Ticket cần tạo` — việc mới cần làm (tên cụ thể, phía FE/BE, point ước lượng).\n"
+            f"5. `## Ticket cần tạo` — mỗi dòng `- ` một việc: tên cụ thể, phía FE/BE (hoặc QA), `N point` ước lượng. Không tự tạo ticket; CTO tạo từ dashboard (gắn nhãn mã yêu cầu).\n"
             f"Thiếu thông tin thì tạo ticket câu hỏi cho CTO, ghi KHÔNG CHẮC ở đầu file và vẫn nộp.")
     return title, body
 
@@ -164,9 +164,41 @@ def proposals(r):
                 if m and (m.group(1) in KN.AGENTS or m.group(1) == KN.SHARED):
                     items.append({"type": "knowledge", "agent": m.group(1), "title": m.group(2).strip()[:120], "body": body}); continue
                 m = re.match(r"Sửa skill\s+([A-Za-z0-9_-]+)\s*:\s*(.+)$", head.strip(), re.I)
-                if m: items.append({"type": "skill", "skill": m.group(1), "title": m.group(2).strip()[:160], "body": body})
+                if m: items.append({"type": "skill", "skill": m.group(1), "title": m.group(2).strip()[:160], "body": body}); continue
+                if re.match(r"Ticket cần tạo", head.strip(), re.I):
+                    for line in body.splitlines():   # chỉ dòng gạch đầu dòng / đánh số là một ticket
+                        m = re.match(r"^\s*(?:[-*•]|\d+[.)])\s+(.+)$", line)
+                        if m and m.group(1).strip(): items.append({"type": "ticket", **ticket_hint(m.group(1).strip())})
             out.append({"ticket": key, "agent": agent, "path": rel, "ref": ref_used, "text": txt[:BODY_MAX], "items": items})
     return out
+
+def ticket_hint(line):
+    """'TE-14-FE3 rà 17 block (FE, 5 point)' → title, side, points, agent đoán từ phía."""
+    side = "fe" if re.search(r"\bFE\b", line) else "be" if re.search(r"\bBE\b", line) else None
+    pts = re.search(r"(\d+)\s*(?:point|pt|điểm)\b", line, re.I)
+    agent = {"fe": "dev-fe", "be": "dev-be"}.get(side) or ("qa" if re.search(r"\bQA\b|test|e2e", line, re.I) else None)
+    title = re.sub(r"\s*\((?:[^()]*\b(?:FE|BE|QA|point|pt)\b[^()]*)\)\s*$", "", line).strip() or line
+    return {"title": title[:280], "side": side, "points": int(pts.group(1)) if pts and int(pts.group(1)) <= 100 else None, "agent": agent, "line": line}
+
+def impl_ticket(r, d):
+    """Ticket thực hiện tạo từ yêu cầu (mục Ticket cần tạo của impact.md hoặc CTO tự gõ): gắn nhãn mã yêu cầu để nối yêu cầu ↔ ticket ↔ sprint."""
+    title = str(d.get("title") or "").strip()
+    if not title: raise ValueError("tên ticket trống")
+    agent = d.get("agent") if d.get("agent") in KN.AGENTS else None
+    side = d.get("side") if d.get("side") in ("fe", "be") else ({"dev-fe": "fe", "dev-be": "be"}.get(agent))
+    runnable = agent in ("dev-fe", "dev-be")   # Orchestrator suy fe_task/be_task từ phía; agent khác cần CTO đặt loại việc
+    body = (f"Từ yêu cầu dự án {r['id']}: {r['title']} (ai-team/requirements/{r['id']}.md)"
+            f"{(' — đề xuất trong ' + d['from_ticket'] + ' impact.md') if d.get('from_ticket') else ''}.\n\n"
+            f"Nguồn: {r['id']}\nGiải pháp: \nDoD: ")
+    try: pts = int(d.get("points")) if d.get("points") not in (None, "") else None
+    except (TypeError, ValueError): pts = None
+    return {"title": title[:300], "agent": agent, "side": side, "points": pts if pts is None or 0 <= pts <= 100 else None,
+            "parent": (r["stories"][0] if r["stories"] else None),
+            "labels": [r["id"]] + (["ai-draft"] if runnable else []), "body": body, "sprint": (str(d.get("sprint") or "").strip()[:60] or None),
+            "priority": {"cao": "high", "vua": "medium", "thap": "low"}[r["priority"]], "due_date": r["due"] or None}
+
+def note(id, text, by="cto"):
+    r = get(id); r["history"].append(f"{now()[:16]} {by}: {text}"); r["updated"] = now(); _write(r); return id
 
 def prompt_for(agent):
     """Yêu cầu đang áp dụng có liên quan tới agent (không chọn agent = mọi agent). Trả (text, dùng, bỏ)."""

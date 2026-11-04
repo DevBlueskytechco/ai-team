@@ -231,8 +231,16 @@ def blockers_open(full):
         except Exception: out.append(b)
     return out
 
+def current_sprint():
+    """Tên sprint đang chạy theo lịch trong ops/dashboard/project.json (scrum.sprints)."""
+    try:
+        d = datetime.date.today().isoformat()
+        return next((x["name"] for x in json.load(open(os.path.join(ROOT, "ops/dashboard/project.json"), encoding="utf-8"))["scrum"]["sprints"]
+                     if x["start"] <= d <= x["end"]), None)
+    except Exception: return None
+
 def pick(only=None):
-    """Ticket ai-draft đủ điều kiện chạy, theo thứ tự key. Bỏ câu hỏi [Q] (cho người trả lời)."""
+    """Ticket ai-draft đủ điều kiện chạy: sprint hiện tại trước, rồi theo thứ tự key. Bỏ câu hỏi [Q] (cho người trả lời)."""
     ready = []
     for t in T.list(label="ai-draft"):
         full = T.get(t["id"])
@@ -246,7 +254,8 @@ def pick(only=None):
         bl = blockers_open(full)
         if bl: print(f"chờ {full.get('key')}: bị chặn bởi {', '.join(bl)}"); continue
         ready.append(full)
-    return sorted(ready, key=lambda x: int(re.sub(r"\D", "", x.get("key") or "0") or 0))
+    cur = current_sprint()   # ticket CTO đã đưa vào sprint hiện tại (trang Kế hoạch sprint) chạy trước, rồi theo key
+    return sorted(ready, key=lambda x: (0 if cur and x.get("sprint") == cur else 1, int(re.sub(r"\D", "", x.get("key") or "0") or 0)))
 
 def once(max_n=1, only=None):
     if not remind_and_budget(): return
