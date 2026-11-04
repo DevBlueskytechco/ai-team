@@ -14,6 +14,7 @@ RACI = yaml.safe_load(open(os.path.join(HERE, "raci.yaml")))
 THEME = os.path.abspath(os.path.join(ROOT, CFG["theme_dir"]))
 sys.path.insert(0, os.path.join(ROOT, "mcp")); import ticket_server as T
 sys.path.insert(0, HERE); import knowledge as KN   # kiến thức CTO nạp cho agent (ai-team/knowledge)
+import requirements as RQ   # yêu cầu dự án đang áp dụng (ai-team/requirements)
 # Thao tác ticket của chính Orchestrator (comment PR, đổi nhãn, nhắc việc) ghi tên "orchestrator". /run-next chạy trong Claude Code,
 # nơi AI_AGENT=claude-code_<bản>_agent — bỏ đi; agent con vẫn nhận AI_AGENT=<agent> qua env riêng ở run_agent.
 if os.environ.get("AI_AGENT", "").startswith("claude-code"): os.environ.pop("AI_AGENT")
@@ -25,6 +26,7 @@ def agent_version(agent):
         fp = os.path.join(THEME, p)
         if os.path.exists(fp): h.update(open(fp, "rb").read())
     h.update(KN.digest(agent).encode())   # đổi kiến thức CTO nạp = agent_version mới, eval so được trước/sau
+    h.update(RQ.digest(agent).encode())   # yêu cầu dự án đang áp dụng cũng tính vào phiên bản agent
     return f"{agent}@{h.hexdigest()[:10]}"
 def skills_of(agent):
     txt = open(os.path.join(THEME, f".claude/agents/{agent}.md"), encoding="utf-8").read()
@@ -118,6 +120,10 @@ def _run_agent(t):
     if kn:
         prompt += kn
         print(f"{key}: nạp {len(kn_used)} mục kiến thức CTO ({len(kn)} ký tự)" + (f", bỏ {len(kn_skip)} mục vì quá giới hạn" if kn_skip else ""))
+    rq, rq_used, rq_skip = RQ.prompt_for(agent)
+    if rq:
+        prompt += rq
+        print(f"{key}: nạp {len(rq_used)} yêu cầu dự án đang áp dụng ({len(rq)} ký tự)" + (f", bỏ {len(rq_skip)} vì quá giới hạn" if rq_skip else ""))
     cmd = [CFG["claude_bin"], "-p", "--agent", agent, "--permission-mode", CFG["permission_mode"], "--output-format", "stream-json", "--verbose",
            "--max-turns", str(t.get("max_turns") or CFG["max_turns_default"])]
     if CFG.get("model_override", {}).get(agent): cmd += ["--model", CFG["model_override"][agent]]
@@ -126,7 +132,7 @@ def _run_agent(t):
     out = stream_agent(cmd, env, key, agent, t, started)
     ended = datetime.datetime.now()
     rec = {"agent": agent, "ticket": key, "ticket_id": tid, "task_type": t.get("task_type"), "agent_version": env["AI_AGENT_VERSION"],
-           "knowledge": [f"{x['agent']}/{x['id']}" for x in kn_used],
+           "knowledge": [f"{x['agent']}/{x['id']}" for x in kn_used], "requirements": [r["id"] for r in rq_used],
            "model": out.get("model") or ",".join((out.get("modelUsage") or {}).keys()) or CFG.get("model_override", {}).get(agent, ""), "tokens": (out.get("usage") or {}).get("output_tokens"),
            "cost_usd": out.get("total_cost_usd"), "num_turns": out.get("num_turns"), "session_id": out.get("session_id"),
            "started_at": started, "ended_at": ended.isoformat(timespec="seconds"),

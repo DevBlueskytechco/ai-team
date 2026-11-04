@@ -158,6 +158,13 @@ nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot
 @media print{body.guide-open>:not(#guide){display:none!important} body.guide-open #guide{position:static;display:block;height:auto;width:auto;overflow:visible}
   body.guide-open .gd-toc,body.guide-open .gd-top .btn,body.guide-open .gd-sel{display:none!important} body.guide-open .gd-body{display:block} body.guide-open .gd-main{overflow:visible;padding:0}
   body.guide-open .gd-main>section{break-inside:avoid-page}}
+.rq-flow{margin:0;padding-left:20px;line-height:1.6;font-size:13.5px} .rq-flow li{margin:3px 0}
+.rq-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:14px;align-items:start} .rq-grid .rcardx{margin:0}
+.rq-agents{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px 14px;margin:0} .rq-agents legend{font-size:12.5px;color:var(--text-2);padding:0 4px}
+.rq-agents label.chk{flex-direction:row;align-items:center;gap:6px;color:var(--text);font-size:13px} .rq-agents input{width:auto;margin:0}
+.rq-prop{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0 10px} .rq-prop .top{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:4px}
+.rq-list td{vertical-align:top} .rq-list td.ttl{min-width:260px}
+@media (max-width:1000px){.rq-grid{grid-template-columns:minmax(0,1fr)}}
 .pcard .knl{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12.5px}
 .kn-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:12px} .kn-head h2{margin:0;font-size:18px;text-transform:none;letter-spacing:0;color:var(--text)} .kn-head .av{border-radius:50%}
 .kn-meter{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px} .kn-meter i{display:block;height:100%;background:var(--series-1)} .kn-meter i.over{background:var(--warning)}
@@ -166,7 +173,7 @@ nav.menu .cnt.hot{background:var(--btn);color:var(--on-brand)} nav.menu .cnt.hot
 .kn-item details{margin-top:4px} .kn-item summary{font-size:12.5px;color:var(--muted);cursor:pointer}
 .kn-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;margin-top:6px} .kn-form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--text-2)}
 .kn-form .wide{grid-column:1 / -1} .kn-form textarea{min-height:170px;font-family:var(--mono);font-size:12.5px;line-height:1.5}
-.kn-form .bar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kn-form .kn-bar{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .kn-sug{border-top:1px solid var(--line);padding:8px 0;display:flex;gap:10px;align-items:flex-start} .kn-sug:first-of-type{border-top:0} .kn-sug .tx{flex:1;min-width:0;font-size:13px} .kn-sug .tx .fresh{display:block;margin-top:2px}
 .kn-cur details{border-top:1px solid var(--line);padding:7px 0} .kn-cur summary{cursor:pointer} .kn-cur .md{margin-top:6px;font-size:13px}
 .kn-chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0} .kn-pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;background:var(--surface-2);border-radius:8px;padding:10px;max-height:420px;overflow:auto;margin:6px 0 0}
@@ -388,6 +395,7 @@ h3.sub{font-size:13px;margin:22px 0 8px;color:var(--text-2);text-transform:upper
   <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
   <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
   <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
@@ -581,6 +589,7 @@ let PAGE = "dashboard", PROJECT = null;
 const Q = {};   // ô tìm/lọc của từng trang
 const MENU = [
   ["Tổng quan", [["dashboard", "Dashboard", "dashboard"], ["inbox", "Việc chờ tôi", "inbox"]]],
+  ["Quản lý dự án", [["req", "Yêu cầu dự án", "clipboard"], ["req-new", "Nạp yêu cầu", "plus-square"]]],
   ["Ticket", [["t-list", "Danh sách", "list"], ["t-board", "Kanban", "kanban"], ["t-new", "Tạo ticket", "plus-square"]]],
   ["Báo cáo vận hành", [["r-week", "Báo cáo tuần", "calendar"], ["r-perf", "Hiệu suất", "activity"], ["r-quality", "Chất lượng", "shield"], ["r-results", "Kết quả dự án", "target"], ["r-sprint", "Báo cáo sprint", "flag"]]],
   ["Thông tin dự án", [["links", "Links", "link"], ["accounts", "Tài khoản & biến", "key"]]],
@@ -638,23 +647,26 @@ function renderMenu() {
   if (PROJECT && PROJECT.process) cnt.process = PROJECT.process.steps.rows.length;
   if (RACI) cnt.raci = Object.values(RACI).reduce((a, x) => a + x.length, 0);
   if (ROLES) cnt.roles = ROLES.rows.length;
+  if (REQS) cnt.req = (REQS.items || []).filter(rqOpen).length || "";
   if (KSUM) cnt.knowledge = Object.values(KSUM.agents).reduce((a, x) => a + x.cto_active, 0) || "";
   const IB = inboxSummary(); cnt.inbox = IB.n || "";
   const html = `<div class="navhead"><span>Menu</span><button type="button" id="navClose" aria-label="Đóng menu" title="Đóng menu">${IC("x")}</button></div>` + MENU.map(([grp, items]) => `<div class="grpbox" role="group" aria-label="${esc(grp)}"><div class="grp">${esc(grp)}</div>` + items.map(([id, name, icon]) =>
-    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt${id === "inbox" && IB.n ? (IB.urgent ? " hot urg" : " hot") : ""}"${id === "inbox" && IB.n ? ` title="${IB.n} việc chờ bạn${IB.urgent ? `, ${IB.urgent} gấp` : ""}"` : ""}>${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
+    `<a href="#/${id}" title="${esc(name)}" ${id === PAGE || (PAGE === "t-detail" && id === "t-list") || (PAGE === "req-detail" && id === "req") ? 'aria-current="page"' : ""}>${IC(icon)}<span class="lbl">${esc(name)}</span><span class="cnt${id === "inbox" && IB.n ? (IB.urgent ? " hot urg" : " hot") : id === "req" && REQS && REQS.items.some((r) => r.status === "moi") ? " hot" : ""}"${id === "inbox" && IB.n ? ` title="${IB.n} việc chờ bạn${IB.urgent ? `, ${IB.urgent} gấp` : ""}"` : ""}>${cnt[id] ?? ""}</span></a>`).join("") + "</div>").join("");
   if (renderMenu.last !== html) { renderMenu.last = html; $("menu").innerHTML = html; $("navClose").onclick = () => { NAV.open = false; applyNav(); $("navToggle").focus(); }; }
 }
 
 function route() {
   let id = (location.hash.replace(/^#\/?/, "") || "dashboard");
   if (id === "tickets") id = "t-list";                     // link cũ
-  const tm = id.match(/^t\/([A-Za-z0-9-]+)$/), km = id.match(/^knowledge\/([a-z_-]+)$/);
+  const tm = id.match(/^t\/([A-Za-z0-9-]+)$/), km = id.match(/^knowledge\/([a-z_-]+)$/), rm = id.match(/^req\/(REQ-\d{4,6})$/i);
+  if (rm) { if (RQ_ID !== rm[1].toUpperCase()) { RQ_EDIT = false; RQ_FORM = null; RQ_ARCH = false; } RQ_ID = rm[1].toUpperCase(); if (RQD[RQ_ID]) loadReq(RQ_ID); }
+  if (id === "req-new" && RQ_EDIT) { RQ_EDIT = false; RQ_FORM = null; }
   if (km) { id = "knowledge"; KNA = km[1]; if (KDET[KNA]) loadKnowledge(KNA); } else if (id === "knowledge") { KNA = null; loadKnowledgeSummary(); }
-  PAGE = tm ? "t-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
+  PAGE = tm ? "t-detail" : rm ? "req-detail" : PAGE_IDS.includes(id) ? id : "dashboard";
   if (tm) TDETAIL.key !== tm[1].toUpperCase() && (TDETAIL = { key: tm[1].toUpperCase(), t: null, sig: null, dirty: false });
   $("page-dashboard").hidden = PAGE !== "dashboard";
   $("page-info").hidden = PAGE === "dashboard";
-  document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : PAGE === "t-detail" ? `${TDETAIL.key} · Efitco Agent Ops` : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
+  document.title = PAGE === "dashboard" ? "Efitco Agent Ops" : PAGE === "t-detail" ? `${TDETAIL.key} · Efitco Agent Ops` : PAGE === "req-detail" ? `${RQ_ID} · Efitco Agent Ops` : `${MENU.flatMap(([, i]) => i).find(([x]) => x === PAGE)[1]} · Efitco Agent Ops`;
   window.scrollTo(0, 0);
   if (DATA && PAGE === "dashboard") render(DATA); else { renderMenu(); renderInfo(); }
 }
@@ -697,6 +709,9 @@ function renderInfoInner(box) {
   else if (PAGE === "roles") { box.innerHTML = pageRoles(); bindRoles(); return; }
   else if (PAGE === "inbox") { box.innerHTML = pageInbox(); bindInbox(); return; }
   else if (PAGE === "knowledge") { box.innerHTML = pageKnowledge(); bindKnowledge(); return; }
+  else if (PAGE === "req") { box.innerHTML = pageReq(); bindSearch(); return; }
+  else if (PAGE === "req-new") { box.innerHTML = pageReqNew(); bindReq(); return; }
+  else if (PAGE === "req-detail") { box.innerHTML = pageReqDetail(); bindReq(); return; }
   else if (PAGE === "raci") box.innerHTML = pageRaci();
   else if (PAGE.startsWith("r-")) {
     DRAWS = [];
@@ -720,6 +735,198 @@ function renderInfoInner(box) {
   const live = ["t-list", "t-board", "story"].includes(PAGE);
   box.insertAdjacentHTML("beforeend", `<p class="note fresh">Nguồn: ${live ? `ticket ${DATA && DATA.backend === "local" ? "nội bộ (ai-team/data/tickets.db)" : esc(DATA ? DATA.backend : "")} · ${ago(DATA && DATA.tickets_at)}` : ""}${PAGE === "t-list" || PAGE === "t-board" ? "" : (live ? " + " : "") + `ops/dashboard/project.json (cập nhật ${esc(PROJECT.updated || "")}). Sửa file rồi tải lại trang.`}</p>`);
   bindSearch();
+}
+
+/* ===== Quản lý dự án · Yêu cầu dự án: nạp từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi Shopify…; agent phân tích → đề xuất kiến thức/skill; yêu cầu "đang áp dụng" nạp vào prompt agent ===== */
+let REQS = null, RQ_ID = null, RQ_FORM = null, RQ_EDIT = false, RQ_ARCH = false;
+const RQD = {};
+const RQ_SRC_TPL = {
+  "shopify": "Thay đổi của Shopify: \nNguồn (changelog / Editions / tài liệu): \nNgày hiệu lực: \nẢnh hưởng tới theme Efitco: \nViệc cần làm: ",
+  "ban-giam-doc": "Mục tiêu kinh doanh: \nPhạm vi: \nHạn / mốc: \nTiêu chí thành công: ",
+  "quan-ly-san-pham": "Vấn đề / cơ hội: \nNgười dùng (merchant, khách mua): \nYêu cầu: \nTiêu chí chấp nhận: ",
+  "cto": "Quyết định kỹ thuật: \nLý do: \nÁp dụng cho (agent, story, block): \nTừ ngày: ",
+  "khach-hang": "Khách / store: \nYêu cầu: \nMức độ ảnh hưởng: \nHạn mong muốn: ",
+  "khac": "",
+};
+const RQ_ST_KIND = { "moi": "warning", "phan-tich": "warning", "ap-dung": "good", "xong": "good", "khong": "none" };
+const rqMeta = () => (REQS || {});
+const rqSrc = (k) => (rqMeta().sources || {})[k] || k;
+const rqSt = (k) => status(RQ_ST_KIND[k] || "none", (rqMeta().statuses || {})[k] || k);
+const rqPri = (k) => (k === "cao" ? status("warning", "ưu tiên cao") : k === "thap" ? lab("ưu tiên thấp") : lab("ưu tiên vừa"));
+const rqOpen = (r) => !["xong", "khong"].includes(r.status);
+const rqLate = (r) => r.due && r.due < todayKey() && rqOpen(r);
+async function loadReqs() {
+  try { const r = await fetch("/api/req", { cache: "no-store" }); if (!r.ok) return; REQS = await r.json(); renderMenu();
+    if (["req", "inbox"].includes(PAGE) || (PAGE === "req-new" && !RQ_FORM)) renderInfo(); } catch (e) {}
+}
+async function loadReq(id) {
+  try { const r = await fetch(`/api/req?id=${encodeURIComponent(id)}`, { cache: "no-store" }); const j = await r.json(); RQD[id] = r.ok ? j : { error: j.error || r.status }; }
+  catch (e) { RQD[id] = { error: e.message }; }
+  if (PAGE === "req-detail" && RQ_ID === id && !RQ_EDIT) renderInfo();
+}
+async function rapi(action, body) {
+  const r = await fetch(`/api/req/${action}`, { method: "POST", headers: { "Content-Type": "application/json", "X-Efitco": "1" }, body: JSON.stringify(body) });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+const rqAgents = (a) => (a && a.length ? a.map((x) => agentTag(x, 18)).join(" ") : '<span class="fresh">mọi agent</span>');
+const rqTickets = (r) => (r.tickets || []).map((k) => { const t = tByKey()[k]; return `<a href="#/t/${esc(k)}">${esc(k)}</a> ${t ? stageOf(t) : ""}`; }).join("<br>") || '<span class="fresh">chưa giao</span>';
+function pageReq() {
+  if (!REQS) { loadReqs(); return '<div class="empty">Đang tải yêu cầu…</div>'; }
+  const M = REQS, all = M.items || [], st = Q.rqst ?? "open", src = Q.rqsrc || "", ag = Q.rqag || "", pr = Q.rqpri || "";
+  const rows = all.filter((r) => (st === "open" ? rqOpen(r) : !st || r.status === st) && (!src || r.source === src) && (!ag || r.agents.includes(ag) || (!r.agents.length && ag)) &&
+    (!pr || r.priority === pr) && match(Q.rq, [r.id, r.title, r.from, r.body.slice(0, 400), r.tickets.join(" "), r.stories.join(" ")]));
+  const cnt = (k) => all.filter((r) => r.status === k).length, open = all.filter(rqOpen);
+  const tiles = [["Đang mở", open.length, `${all.length} yêu cầu đã nạp`], ["Mới, chưa phân tích", cnt("moi"), "giao PO/BA/Tech Lead phân tích"],
+    ["Đang phân tích", cnt("phan-tich"), "agent viết impact.md đề xuất"], ["Đang áp dụng", cnt("ap-dung"), "đang nạp vào prompt agent"],
+    ["Đã áp dụng", cnt("xong"), "đã vào skill / kiến thức"], ["Quá hạn", all.filter(rqLate).length, "hạn đã qua, chưa xong"]];
+  const sel = (id, cur, list, aria) => `<select data-sel="${id}" aria-label="${esc(aria)}">${list.map(([v, l]) => opt(v, cur, l)).join("")}</select>`;
+  const bySrc = Object.keys(M.sources).map((k) => ({ label: M.sources[k], v: open.filter((r) => r.source === k).length, text: `${open.filter((r) => r.source === k).length} đang mở · ${all.filter((r) => r.source === k).length} tổng` })).filter((x) => x.text !== "0 đang mở · 0 tổng");
+  return `<div class="page-head"><h2>Yêu cầu dự án</h2>${searchBox("rq", "Tìm mã, tiêu đề, nội dung")}
+      ${sel("rqst", st, [["open", "Đang mở"], ["", "Mọi trạng thái"], ...Object.entries(M.statuses)], "Trạng thái")}
+      ${sel("rqsrc", src, [["", "Mọi nguồn"], ...Object.entries(M.sources)], "Nguồn")}
+      ${sel("rqag", ag, [["", "Mọi agent"], ...AGENT_IDS.map((a) => [a, a])], "Agent bị ảnh hưởng")}
+      ${sel("rqpri", pr, [["", "Mọi ưu tiên"], ...Object.entries(M.prios)], "Ưu tiên")}
+      <a class="btn primary" href="#/req-new">${IC("plus")}Nạp yêu cầu</a><span class="fresh">${rows.length} hiển thị</span></div>
+    ${repTiles(tiles)}
+    <div class="rgrid">
+      ${card("Luồng xử lý yêu cầu", `<ol class="rq-flow"><li><b>Nạp</b> — ban giám đốc, quản lý sản phẩm, CTO, thay đổi Shopify, khách hàng. Trạng thái <i>Mới</i>.</li>
+        <li><b>Giao phân tích</b> — PO, BA hoặc Tech Lead nhận ticket, ghi <code>impact.md</code>: ảnh hưởng, kiến thức đề xuất cho từng agent, skill cần sửa, ticket cần tạo.</li>
+        <li><b>Chốt áp dụng</b> — CTO duyệt; yêu cầu được nạp vào prompt của agent bị ảnh hưởng mỗi lượt; nạp đề xuất vào kiến thức agent; sửa skill bằng PR.</li>
+        <li><b>Đã áp dụng</b> — nội dung đã vào skill/kiến thức, thôi nạp vào prompt.</li></ol>`)}
+      ${card("Theo nguồn", bySrc.length ? hbars(bySrc) : '<p class="fresh">Chưa có yêu cầu.</p>', "đang mở / tổng đã nạp")}
+    </div>
+    <div class="tablewrap"><table class="info rq-list"><thead><tr><th>Mã</th><th>Yêu cầu</th><th>Nguồn</th><th>Trạng thái</th><th>Agent bị ảnh hưởng</th><th>Ticket phân tích</th><th>Nhận / hạn</th></tr></thead>
+      <tbody>${rows.map((r) => `<tr><td class="k"><a href="#/req/${esc(r.id)}">${esc(r.id)}</a></td>
+        <td class="ttl"><a class="plain" href="#/req/${esc(r.id)}"><b>${esc(r.title)}</b></a> ${r.priority === "cao" ? rqPri("cao") : ""}<div class="fresh">${esc(cutW(r.body.replace(/\s+/g, " "), 150))}</div></td>
+        <td class="nw">${lab(rqSrc(r.source))}${r.from ? `<div class="fresh">${esc(r.from)}</div>` : ""}</td><td class="nw">${rqSt(r.status)}</td><td>${rqAgents(r.agents)}</td>
+        <td class="nw">${rqTickets(r)}</td><td class="nw fresh">${esc(ddmm(r.received || "") || "—")}${r.due ? `<br>${rqLate(r) ? status("critical", "hạn " + ddmm(r.due)) : "hạn " + ddmm(r.due)}` : ""}</td></tr>`).join("") ||
+        `<tr><td colspan="7" class="empty">Không có yêu cầu khớp. <a href="#/req-new">Nạp yêu cầu</a></td></tr>`}</tbody></table></div>
+    <p class="note">Kho: ai-team/requirements/REQ-xxxx.md — commit vào ai-team để giữ lịch sử. Yêu cầu <b>Đang áp dụng</b> được Orchestrator nối vào prompt agent bị ảnh hưởng (tối đa ${(M.limit || 6000).toLocaleString("vi-VN")} ký tự mỗi lượt) và tính vào agent_version.</p>`;
+}
+function reqForm(r, mode) {
+  const M = rqMeta(), F = RQ_FORM || r || { title: "", source: "quan-ly-san-pham", from: "", received: todayKey(), due: "", priority: "vua", agents: [], stories: [], link: "", body: RQ_SRC_TPL["quan-ly-san-pham"] };
+  const stories = Array.isArray(F.stories) ? F.stories.join(", ") : F.stories || "";
+  return `<form id="rqForm" class="kn-form rq-form" autocomplete="off">
+    <label class="wide"><span>Tiêu đề yêu cầu <span class="req">*</span></span><input name="title" required maxlength="160" value="${esc(F.title)}" placeholder="vd Shopify Editions Fall '26: theme blocks trong app block"></label>
+    <label><span>Nguồn <span class="req">*</span></span><select name="source">${Object.entries(M.sources || {}).map(([k, l]) => opt(k, F.source, l)).join("")}</select></label>
+    <label>Người / kênh gửi<input name="from" maxlength="120" value="${esc(F.from)}" placeholder="vd Anh Hưng (BGĐ), shopify.dev changelog"></label>
+    <label>Ngày nhận<input name="received" type="date" value="${esc(F.received || todayKey())}"></label>
+    <label>Hạn<input name="due" type="date" value="${esc(F.due || "")}"></label>
+    <label>Ưu tiên<select name="priority">${Object.entries(M.prios || {}).map(([k, l]) => opt(k, F.priority, l)).join("")}</select></label>
+    <label>Story liên quan<input name="stories" value="${esc(stories)}" placeholder="vd TE-4, TE-14" list="rqStories"></label>
+    <datalist id="rqStories">${(PROJECT ? PROJECT.story : []).map((s) => `<option value="${esc(s.key)}">${esc(s.title)}</option>`).join("")}</datalist>
+    <label class="wide" style="grid-column:span 2">Link nguồn<input name="link" maxlength="300" value="${esc(F.link)}" placeholder="https://… (email, tài liệu, changelog)"></label>
+    <fieldset class="wide rq-agents"><legend>Agent bị ảnh hưởng — nhận yêu cầu trong prompt khi Đang áp dụng (để trống = mọi agent)</legend>
+      ${AGENT_IDS.map((a) => `<label class="chk"><input type="checkbox" name="agents" value="${a}" ${(F.agents || []).includes(a) ? "checked" : ""}>${av(a, 18)}${esc(a)}</label>`).join("")}</fieldset>
+    <label class="wide"><span>Nội dung yêu cầu (markdown) <span class="req">*</span></span><textarea name="body" required maxlength="${M.body_max || 30000}" placeholder="Yêu cầu gì, vì sao, phạm vi, hạn, tiêu chí chấp nhận">${esc(F.body)}</textarea></label>
+    <div class="kn-bar"><button class="btn primary" type="submit" data-after="">${IC("save")}${mode === "edit" ? "Lưu thay đổi" : "Nạp yêu cầu"}</button>
+      ${mode === "edit" ? "" : `<button class="btn" type="submit" data-after="analyze">${IC("send")}Nạp và giao phân tích</button>`}
+      ${mode === "edit" ? `<button class="btn" type="button" id="rqCancel">${IC("x")}Huỷ</button>` : RQ_FORM ? `<button class="btn" type="button" id="rqCancel">${IC("x")}Xoá form</button>` : ""}
+      <label class="btn" style="flex-direction:row;cursor:pointer">${IC("plus-square")}Nạp từ file .md/.txt<input type="file" id="rqFile" accept=".md,.txt,.markdown,text/plain,text/markdown" hidden></label>
+      <span class="fresh" id="rqCount">${(F.body || "").length.toLocaleString("vi-VN")}/${(M.body_max || 30000).toLocaleString("vi-VN")} ký tự</span></div>
+  </form>`;
+}
+function pageReqNew() {
+  if (!REQS) { loadReqs(); return '<div class="empty">Đang tải…</div>'; }
+  return `<div class="page-head"><h2>Nạp yêu cầu dự án</h2><span class="fresh">từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi của Shopify, khách hàng</span><span class="spacer"></span><a class="btn" href="#/req">${IC("list")}Danh sách yêu cầu</a></div>
+    <div class="rq-grid"><div class="rcardx">${reqForm(null, "new")}</div>
+      <div class="rcardx"><h3>Yêu cầu đi đâu sau khi nạp</h3><ol class="rq-flow">
+        <li>Trạng thái <b>Mới</b>, hiện ở <a href="#/inbox">Việc chờ tôi</a>.</li>
+        <li><b>Giao phân tích</b>: tạo ticket ai-draft cho PO (change_request), BA (srs) hoặc Tech Lead (adr). Mặc định theo nguồn: Shopify và CTO → Tech Lead, còn lại → PO. Orchestrator chạy như ticket thường.</li>
+        <li>Agent ghi <code>drafts/&lt;agent&gt;/&lt;ticket&gt;/impact.md</code>: ảnh hưởng, <code>## Kiến thức cho &lt;agent&gt;</code>, <code>## Sửa skill &lt;tên&gt;</code>, ticket cần tạo. Trang chi tiết yêu cầu đọc file này để bạn nạp đề xuất vào kiến thức agent bằng một nút.</li>
+        <li><b>Chốt áp dụng</b>: yêu cầu được nối vào prompt agent bị ảnh hưởng mỗi lượt (agent đọc và làm theo), tính vào agent_version.</li>
+        <li><b>Đã áp dụng</b> khi nội dung đã vào skill/kiến thức — thôi nạp vào prompt. <b>Không áp dụng</b> nếu bỏ.</li></ol>
+        <p class="fresh">Chọn nguồn sẽ điền sẵn khung nội dung phù hợp nếu ô nội dung đang trống hoặc còn khung mặc định.</p></div></div>`;
+}
+function pageReqDetail() {
+  const id = RQ_ID, D = RQD[id];
+  if (!REQS) loadReqs();
+  if (!D) { loadReq(id); return '<div class="empty">Đang tải…</div>'; }
+  if (D.error) return `<div class="page-head"><h2>${esc(id)}</h2></div><p class="note">${status("critical", D.error)}</p><a class="btn" href="#/req">${IC("arrow-left")}Danh sách</a>`;
+  const r = D.req, M = D, st = r.status, an = M.default_analyst[r.source] || "po";
+  if (RQ_EDIT) return `<div class="tback"><a class="btn sm" href="#/req">${IC("arrow-left")}Danh sách</a></div><div class="page-head"><h2>Sửa ${esc(r.id)}</h2></div><div class="rcardx">${reqForm(r, "edit")}</div>`;
+  const kn = D.knowledge || [], knKey = new Set(kn.map((x) => x.agent + "|" + x.title));
+  const btn = (s, icon, label, primary) => `<button type="button" class="btn ${primary ? "primary" : ""}" data-rqst="${s}">${IC(icon)}${label}</button>`;
+  const acts = [
+    ["moi", "phan-tich"].includes(st) ? `<label class="inline">Giao phân tích cho <select id="rqAnalyst">${Object.keys(M.analysts).map((a) => opt(a, an, `${knName(a)} (${M.analysts[a]})`)).join("")}</select></label><button type="button" class="btn ${st === "moi" ? "primary" : ""}" id="rqAnalyze">${IC("send")}Giao phân tích</button>` : "",
+    ["moi", "phan-tich"].includes(st) ? btn("ap-dung", "check", "Chốt áp dụng", st === "phan-tich") : "",
+    st === "ap-dung" ? btn("xong", "check", "Đã áp dụng xong", true) : "",
+    rqOpen(r) ? btn("khong", "x", "Không áp dụng") : btn("moi", "reopen", "Mở lại"),
+    `<button type="button" class="btn" id="rqEdit">${IC("edit")}Sửa</button>`,
+    `<button type="button" class="btn" id="rqArchive">${RQ_ARCH ? "Bấm lần nữa để lưu trữ" : IC("bookmark") + "Lưu trữ"}</button>`].join("");
+  const prop = (D.proposals || []).map((p) => `<div class="rq-prop"><div class="top"><b>${esc(p.path)}</b> · ${agentTag(p.agent, 16)} · <a href="#/t/${esc(p.ticket)}">${esc(p.ticket)}</a>
+      ${/feature\//.test(p.ref || "") ? status("warning", "đọc từ nhánh PR, chưa merge") : status("good", "đã vào develop")}</div>
+    ${p.items.map((x, i) => x.type === "knowledge" ? `<div class="kn-sug"><div class="tx"><b>Kiến thức cho ${x.agent === "_chung" ? "mọi agent" : esc(x.agent)}: ${esc(x.title)}</b><span class="fresh">${esc(cutW(x.body.replace(/\s+/g, " "), 220))}</span></div>
+        ${knKey.has(x.agent + "|" + x.title) ? status("good", "đã nạp") : `<button type="button" class="btn sm" data-rqkn="${esc(p.ticket)}|${i}">${IC("book")}Nạp vào kiến thức</button>`}</div>`
+      : `<div class="kn-sug"><div class="tx"><b>Sửa skill ${esc(x.skill)}: ${esc(x.title)}</b><span class="fresh">${esc(cutW(x.body.replace(/\s+/g, " "), 220))} — sửa trong theme-efitco/.claude/skills bằng PR</span></div>
+        <button type="button" class="btn sm cmd" data-cmd="${esc(`Sửa skill ${x.skill} theo ${r.id} (${p.ticket}): ${x.title}\n\n${x.body}`)}">${IC("copy")}Chép đề xuất</button></div>`).join("") || '<p class="fresh">File chưa có mục “## Kiến thức cho …” hoặc “## Sửa skill …”.</p>'}
+    <details><summary class="fresh">Toàn bộ impact.md</summary><div class="tbody md">${md(p.text)}</div></details></div>`).join("");
+  return `<div class="tback"><a class="btn sm" href="#/req">${IC("arrow-left")}Danh sách yêu cầu</a></div>
+    <div class="thead"><span class="key big">${esc(r.id)}</span>${rqSt(st)} ${lab(rqSrc(r.source))} ${rqPri(r.priority)} ${rqLate(r) ? status("critical", "quá hạn " + ddmm(r.due)) : ""}</div>
+    <h2 class="ttitle">${esc(r.title)}</h2>
+    <div class="tbar">${acts}</div>
+    ${st === "ap-dung" ? `<p class="note">${status("good", "Đang nạp vào prompt")} ${(D.prompt_agents || []).map((a) => agentTag(a, 16)).join(" ")} — mỗi lượt chạy, agent đọc yêu cầu này cùng kiến thức. Khi nội dung đã vào skill/kiến thức thì bấm “Đã áp dụng xong”.</p>` : ""}
+    <div class="tgrid">
+      <div class="tmain">
+        <div class="tsec"><h3>Nội dung yêu cầu</h3><div class="tbody md">${md(r.body)}</div></div>
+        <div class="tsec"><h3>Đề xuất từ phân tích (${(D.proposals || []).reduce((a, p) => a + p.items.length, 0)})</h3>
+          ${prop || `<p class="fresh">${r.tickets.length ? "Chưa có impact.md — agent đang làm hoặc PR chưa có file." : "Chưa giao phân tích. Chọn PO/BA/Tech Lead rồi bấm “Giao phân tích”."}</p>`}</div>
+        <div class="tsec"><h3>Kiến thức đã nạp từ yêu cầu này (${kn.length})</h3>
+          ${kn.map((x) => `<div class="kn-sug"><div class="tx"><b>${esc(x.title)}</b><span class="fresh">${x.agent === "_chung" ? "mọi agent" : esc(x.agent)} · ${esc(x.source)} · ${x.status === "off" ? "đang tắt" : "đang bật"}</span></div><a class="btn sm" href="#/knowledge/${esc(x.agent)}">${IC("book")}Xem</a></div>`).join("") || '<p class="fresh">Chưa có.</p>'}</div>
+        <details class="tsec"><summary><h3 style="display:inline">Lịch sử (${r.history.length})</h3></summary><ul class="fresh">${r.history.slice().reverse().map((h) => `<li>${esc(h)}</li>`).join("")}</ul></details>
+      </div>
+      <aside class="tside"><div class="tsec"><h3>Thông tin</h3><dl class="tmeta">
+        <dt>Nguồn</dt><dd>${esc(rqSrc(r.source))}${r.from ? `<br><span class="fresh">${esc(r.from)}</span>` : ""}</dd>
+        <dt>Nhận</dt><dd>${esc(r.received || "—")}</dd><dt>Hạn</dt><dd>${r.due ? (rqLate(r) ? status("critical", r.due) : esc(r.due)) : "—"}</dd>
+        <dt>Ưu tiên</dt><dd>${esc((M.prios || {})[r.priority] || r.priority)}</dd>
+        <dt>Agent bị ảnh hưởng</dt><dd>${rqAgents(r.agents)}</dd>
+        <dt>Story</dt><dd>${r.stories.map((s) => `<a href="#/story">${esc(s)}</a>`).join(", ") || "—"}</dd>
+        <dt>Link</dt><dd>${/^https?:\/\//.test(r.link) ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(cutW(r.link, 60))}</a>` : esc(r.link || "—")}</dd>
+        <dt>Ticket phân tích</dt><dd>${rqTickets(r)}</dd>
+        <dt>Nạp bởi</dt><dd>${who(r.by)} · ${fmt(r.created)}</dd><dt>Cập nhật</dt><dd>${fmt(r.updated)}</dd></dl>
+        <p class="fresh">File: ai-team/requirements/${esc(r.id)}.md</p></div></aside>
+    </div>`;
+}
+function bindReqForm(r) {
+  const form = $("rqForm"); if (!form) return;
+  const keep = () => { const f = form.elements; RQ_FORM = { id: r ? r.id : "", title: f.title.value, source: f.source.value, from: f.from.value, received: f.received.value, due: f.due.value,
+    priority: f.priority.value, stories: f.stories.value, link: f.link.value, body: f.body.value, agents: [...form.querySelectorAll('[name="agents"]:checked')].map((x) => x.value) }; };
+  const isTpl = (b) => !b.trim() || Object.values(RQ_SRC_TPL).some((t) => t && b.trim() === t.trim());
+  form.oninput = () => { keep(); $("rqCount").textContent = `${form.elements.body.value.length.toLocaleString("vi-VN")}/${(rqMeta().body_max || 30000).toLocaleString("vi-VN")} ký tự`; };
+  form.elements.source.onchange = () => { if (isTpl(form.elements.body.value)) form.elements.body.value = RQ_SRC_TPL[form.elements.source.value] || ""; keep(); };
+  let after = "";
+  form.querySelectorAll('[type="submit"]').forEach((b) => (b.onclick = () => { after = b.dataset.after || ""; }));
+  form.onsubmit = async (e) => { e.preventDefault(); keep(); const bs = form.querySelectorAll('[type="submit"]'); bs.forEach((b) => (b.disabled = true));
+    try { let j = await rapi("save", RQ_FORM); const id = j.req.id;
+      if (after === "analyze") j = await rapi("analyze", { id, agent: rqMeta().default_analyst[RQ_FORM.source] || "po" });
+      RQD[id] = j; RQ_FORM = null; RQ_EDIT = false; loadReqs();
+      toast(after === "analyze" ? `Đã nạp ${id} và giao ${j.req.tickets.slice(-1)[0]} phân tích` : r ? "Đã lưu yêu cầu" : `Đã nạp ${id}`);
+      if (location.hash === `#/req/${id}`) renderInfo(); else location.hash = `#/req/${id}`; }
+    catch (err) { toast(err.message, true); bs.forEach((b) => (b.disabled = false)); } };
+  const c = $("rqCancel"); if (c) c.onclick = () => { RQ_FORM = null; RQ_EDIT = false; renderInfo(); };
+  const file = $("rqFile"); if (file) file.onchange = async () => { const f = file.files[0]; if (!f) return; if (f.size > 300000) { toast("File quá lớn (> 300 KB)", true); return; }
+    const txt = await f.text(); keep(); RQ_FORM.body = txt.slice(0, rqMeta().body_max || 30000); if (!RQ_FORM.title) RQ_FORM.title = f.name.replace(/\.(md|txt|markdown)$/i, "").replace(/[_-]+/g, " ").slice(0, 160);
+    if (!RQ_FORM.link) RQ_FORM.link = "file " + f.name; renderInfo(); toast(`Đã đưa ${f.name} vào form — kiểm tra rồi bấm Nạp`); };
+}
+function bindReq() {
+  if (PAGE === "req-new") return bindReqForm(null);
+  if (PAGE !== "req-detail") return;
+  const D = RQD[RQ_ID]; if (!D || D.error) return; const r = D.req;
+  if (RQ_EDIT) return bindReqForm(r);
+  const run = async (act, body, msg) => { try { const j = await rapi(act, body); RQD[r.id] = j; loadReqs(); toast(msg(j)); renderInfo(); } catch (e) { toast(e.message, true); } };
+  const an = $("rqAnalyze"); if (an) an.onclick = () => { an.disabled = true; run("analyze", { id: r.id, agent: $("rqAnalyst").value }, (j) => `Đã tạo ${j.req.tickets.slice(-1)[0]} giao ${$("rqAnalyst") ? $("rqAnalyst").value : ""} phân tích — Orchestrator chạy như ticket ai-draft`); };
+  document.querySelectorAll("#info [data-rqst]").forEach((b) => (b.onclick = () => run("status", { id: r.id, status: b.dataset.rqst }, (j) => `${r.id}: ${D.statuses[j.req.status]}${j.req.status === "ap-dung" ? " — nạp vào prompt agent từ lượt tới" : ""}`)));
+  $("rqEdit").onclick = () => { RQ_EDIT = true; RQ_FORM = null; renderInfo(); };
+  $("rqArchive").onclick = async () => { if (!RQ_ARCH) { RQ_ARCH = true; renderInfo(); setTimeout(() => { if (RQ_ARCH) { RQ_ARCH = false; if (PAGE === "req-detail") renderInfo(); } }, 4000); return; }
+    try { await rapi("archive", { id: r.id }); RQ_ARCH = false; delete RQD[r.id]; toast(`Đã lưu trữ ${r.id} (requirements/_archive, không xoá)`); await loadReqs(); location.hash = "#/req"; } catch (e) { toast(e.message, true); } };
+  document.querySelectorAll("#info [data-rqkn]").forEach((b) => (b.onclick = async () => { const [tk, i] = b.dataset.rqkn.split("|"), p = D.proposals.find((x) => x.ticket === tk), x = p && p.items[+i]; if (!x) return;
+    b.disabled = true;
+    try { await kapi("save", { agent: x.agent, title: x.title, body: x.body, kind: "kinh-nghiem", priority: r.priority === "cao" ? "cao" : "thuong", source: `${r.id} · ${tk}` });
+      delete KDET[x.agent]; loadKnowledgeSummary(); toast(`Đã nạp vào kiến thức ${x.agent === "_chung" ? "chung" : x.agent}`); loadReq(r.id); }
+    catch (e) { toast(e.message, true); b.disabled = false; } }));
+  document.querySelectorAll("#info [data-cmd]").forEach((b) => (b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.cmd); toast("Đã chép đề xuất"); } catch (e) { toast("Không chép được", true); } }));
 }
 
 /* ===== Hướng dẫn từng trang: nút Hướng dẫn trên header (phím ?) mở popup toàn màn hình — để người khác đọc hiểu trang đang xem ===== */
@@ -754,6 +961,7 @@ const GLOSS = {
   "Skill": "Tài liệu cách làm cho agent (theme-efitco/.claude/skills), gắn vào agent trong định nghĩa.",
   "Kiến thức CTO nạp": "Kinh nghiệm, quy tắc, checklist CTO thêm cho agent (ai-team/knowledge); Orchestrator nối vào prompt agent mỗi lượt.",
   "Sprint": "Chu kỳ 2 tuần; có mục tiêu, ticket cam kết đầu sprint và ticket thêm giữa sprint.",
+  "Yêu cầu dự án": "Yêu cầu từ ban giám đốc, quản lý sản phẩm, CTO, Shopify, khách hàng (REQ-xxxx). Đang áp dụng thì Orchestrator nạp vào prompt agent bị ảnh hưởng.",
 };
 const GUIDE = {
   dashboard: { t: "Dashboard", who: "CTO, role owner, cả team",
@@ -886,6 +1094,39 @@ const GUIDE = {
     do: ["Chọn sprint.", "“Sao chép tóm tắt” hoặc “In / lưu PDF”."],
     src: ["Ticket nội bộ có point; lịch sprint và mục tiêu ở ops/dashboard/project.json."],
     terms: ["Sprint", "Point", "Burndown / burn-up"] },
+  req: { t: "Yêu cầu dự án", who: "CTO, ban giám đốc, quản lý sản phẩm, PO",
+    what: "Sổ yêu cầu dự án từ ban giám đốc, quản lý sản phẩm, CTO, thay đổi của Shopify, khách hàng — và đường đi của từng yêu cầu tới skill, kiến thức của agent.",
+    parts: [
+      ["Ô số liệu", ["Đang mở, Mới chưa phân tích, Đang phân tích, Đang áp dụng (đang nạp vào prompt agent), Đã áp dụng, Quá hạn."]],
+      ["Luồng xử lý", ["**Mới** → **Giao phân tích** (ticket cho PO / BA / Tech Lead) → **Chốt áp dụng** → **Đã áp dụng** (đã vào skill/kiến thức) hoặc **Không áp dụng**."]],
+      ["Bảng yêu cầu", ["Mã REQ-xxxx, tiêu đề + trích nội dung, nguồn và người gửi, trạng thái, agent bị ảnh hưởng, ticket phân tích kèm giai đoạn, ngày nhận và hạn (đỏ khi quá hạn).", "Lọc trạng thái (mặc định Đang mở), nguồn, agent, ưu tiên; ô tìm theo mã, tiêu đề, nội dung."]],
+    ],
+    do: ["Bấm mã để xem chi tiết và xử lý.", "“Nạp yêu cầu” để thêm mới.", "Yêu cầu mới và yêu cầu đã phân tích xong hiện ở Việc chờ tôi."],
+    src: ["ai-team/requirements/REQ-xxxx.md — commit vào ai-team để giữ lịch sử; lưu trữ chuyển vào requirements/_archive.",
+      "Orchestrator nối yêu cầu Đang áp dụng vào prompt agent bị ảnh hưởng (tối đa 6.000 ký tự mỗi lượt) và tính vào agent_version. Dòng lệnh: `python3 orchestrator/requirements.py list|prompt <agent>`."],
+    terms: ["Yêu cầu dự án", "Kiến thức CTO nạp", "Skill", "agent_version", "ai-draft"] },
+  "req-new": { t: "Nạp yêu cầu", who: "CTO (nạp thay ban giám đốc, quản lý sản phẩm, khách hàng)",
+    what: "Ghi một yêu cầu dự án mới để team agent phân tích và làm theo.",
+    parts: [
+      ["Các trường", ["**Tiêu đề**, **Nguồn** (Ban giám đốc, Quản lý sản phẩm, CTO, Shopify thay đổi, Khách hàng / merchant, Khác) — đổi nguồn sẽ điền khung nội dung phù hợp.",
+        "**Người / kênh gửi**, **Ngày nhận**, **Hạn**, **Ưu tiên**, **Story liên quan** (vd TE-4), **Link nguồn**.",
+        "**Agent bị ảnh hưởng**: agent sẽ nhận yêu cầu trong prompt khi Đang áp dụng; để trống = mọi agent.", "**Nội dung** (markdown) hoặc “Nạp từ file .md/.txt”."]],
+      ["Bên phải", ["Yêu cầu đi đâu sau khi nạp: phân tích, đề xuất kiến thức/skill, chốt áp dụng, đã áp dụng."]],
+    ],
+    do: ["“Nạp yêu cầu”: lưu với trạng thái Mới.", "“Nạp và giao phân tích”: lưu rồi tạo luôn ticket phân tích cho agent mặc định theo nguồn (Shopify, CTO → Tech Lead; còn lại → PO)."],
+    src: ["Ghi file ai-team/requirements/REQ-xxxx.md; người nạp là cto."], terms: ["Yêu cầu dự án", "ai-draft", "Story"] },
+  "req-detail": { t: "Chi tiết yêu cầu", who: "CTO, PO, Tech Lead (người)",
+    what: "Một yêu cầu dự án: nội dung, phân tích của agent, đề xuất kiến thức/skill và trạng thái áp dụng.",
+    parts: [
+      ["Nút xử lý", ["**Giao phân tích**: chọn PO (change_request), BA (srs) hoặc Tech Lead (adr) — tạo ticket ai-draft chứa nội dung yêu cầu và hướng dẫn viết impact.md; Orchestrator chạy như ticket thường.",
+        "**Chốt áp dụng**: yêu cầu được nạp vào prompt agent bị ảnh hưởng từ lượt tới. **Đã áp dụng xong**: thôi nạp. **Không áp dụng**, **Mở lại**, **Sửa**, **Lưu trữ** (bấm 2 lần)."]],
+      ["Đề xuất từ phân tích", ["Đọc `drafts/<agent>/<ticket>/impact.md` ở develop (hoặc nhánh PR khi chưa merge).",
+        "Mỗi mục “Kiến thức cho <agent>” có nút **Nạp vào kiến thức** — lưu vào kho kiến thức agent, nguồn ghi mã yêu cầu và ticket.",
+        "Mỗi mục “Sửa skill <tên>” có nút **Chép đề xuất** — skill sửa bằng PR vào theme-efitco (agent không được sửa .claude)."]],
+      ["Bên phải và bên dưới", ["Thông tin: nguồn, ngày nhận, hạn, ưu tiên, agent bị ảnh hưởng, story, link, ticket phân tích kèm giai đoạn.", "Kiến thức đã nạp từ yêu cầu này; lịch sử trạng thái."]],
+    ],
+    do: ["Giao phân tích → đọc đề xuất → nạp kiến thức, sửa skill → Chốt áp dụng → Đã áp dụng xong."],
+    src: ["ai-team/requirements, ticket nội bộ, theme-efitco (impact.md), ai-team/knowledge."], terms: ["Yêu cầu dự án", "Kiến thức CTO nạp", "Skill", "RACI", "agent_version"] },
   links: { t: "Links", who: "Cả team", what: "Các đường dẫn của dự án: repo, PR, CI, store, Figma, tài liệu.",
     parts: [["Bảng", ["Nhóm, tên, link, ghi chú. Bấm link để mở ở tab mới."]]], do: ["Gõ vào ô tìm để lọc."],
     src: ["ops/dashboard/project.json (chuyển từ file Excel thông tin dự án) — sửa file rồi tải lại trang."], terms: ["Preview"] },
@@ -913,7 +1154,7 @@ const GUIDE = {
         "**Kiến thức CTO nạp**: các mục kèm loại, ưu tiên, nguồn; Sửa, Tắt/Bật, Lưu trữ (bấm 2 lần; chuyển vào _archive, không xoá).",
         "**Nạp kiến thức mới**: tiêu đề, loại (kinh nghiệm, quy tắc, tài liệu, checklist, bài học), ưu tiên, nguồn, nội dung markdown; “Nạp từ file .md/.txt”.",
         "**Gợi ý nạp**: lý do CTO chấm sửa/loại, tiêu chí rubric dưới 1,6/2, ghi nhớ agent tự ghi — bấm “Nạp” để điền sẵn form.",
-        "**Phần agent sẽ nhận ở lượt tới**: đúng đoạn Orchestrator nối vào prompt.",
+        "**Phần agent sẽ nhận ở lượt tới**: đúng đoạn Orchestrator nối vào prompt — kiến thức đang bật và yêu cầu dự án đang áp dụng cho agent.",
         "**Kiến thức hiện có**: định nghĩa và prompt hệ thống, skill, ghi nhớ agent tự ghi, tiêu chí CTO chấm kèm điểm TB, loại việc RACI, quy tắc chung."]],
     ],
     do: ["Nạp bài học sau mỗi lần chấm sửa để lần sau agent không lặp lỗi.", "Viết ngắn, cụ thể, agent làm theo được; mâu thuẫn với AGENTS.md/ADR thì AGENTS.md/ADR thắng.",
@@ -967,7 +1208,7 @@ const GUIDE = {
 };
 let GUIDE_OPEN = false;
 const gi = (x) => esc(x).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
-const guideKey = () => (GUIDE[PAGE] ? PAGE : "dashboard");
+const guideKey = () => (GUIDE[PAGE] ? PAGE : "dashboard");   // gồm cả t-detail, req-detail
 function guideHtml(k) {
   const g = GUIDE[k] || GUIDE.dashboard, ul = (a) => `<ul>${a.map((x) => `<li>${gi(x)}</li>`).join("")}</ul>`;
   const terms = (g.terms || []).filter((x) => GLOSS[x]);
@@ -1098,6 +1339,7 @@ function pageKnowledge() {
       <div class="rcardx"><h3>Kiến thức CTO nạp (${D.items.length})</h3>
         <div class="kn-meter" title="${pc}/${lim} ký tự"><i class="${pc > lim * 0.9 ? "over" : ""}" style="width:${Math.min(100, (pc / lim) * 100)}%"></i></div>
         <p class="fresh" style="margin:6px 0 8px">${a === KN_SHARED ? "Áp dụng cho mọi agent." : `Orchestrator nối mục đang bật (cả mục chung) vào prompt của ${esc(a)} mỗi lượt, ưu tiên cao trước, tối đa ${lim.toLocaleString("vi-VN")} ký tự; đổi kiến thức = agent_version mới.`}</p>
+        ${D.req_prompt && D.req_prompt.used.length ? `<p class="note" style="margin:0 0 8px">${IC("clipboard")} Yêu cầu dự án đang áp dụng cũng được nạp: ${D.req_prompt.used.map((x) => `<a href="#/req/${esc(x.id)}" title="${esc(x.title)}">${esc(x.id)}</a>`).join(", ")} (${D.req_prompt.chars.toLocaleString("vi-VN")} ký tự)</p>` : ""}
         ${D.items.map(item).join("") || '<p class="fresh">Chưa có mục nào — nạp ở form bên dưới hoặc từ gợi ý.</p>'}
         ${a !== KN_SHARED && D.shared.length ? `<details style="margin-top:8px"><summary class="fresh">${D.shared.filter((x) => x.status === "active").length} mục kiến thức chung cũng được nạp</summary>${D.shared.map(item).join("")}</details>` : ""}
         <h3 style="margin-top:14px" id="knFormTitle">${F.id ? "Sửa kiến thức" : "Nạp kiến thức mới"}</h3>
@@ -1107,7 +1349,7 @@ function pageKnowledge() {
           <label>Ưu tiên<select name="priority">${opt("thuong", F.priority, "Thường")}${opt("cao", F.priority, "Cao — nạp trước")}</select></label>
           <label class="wide" style="grid-column:span 2">Nguồn<input name="source" maxlength="160" value="${esc(F.source)}" placeholder="vd ES1-T56, ADR 0005, tài liệu Shopify"></label>
           <label class="wide">Nội dung (markdown)<textarea name="body" maxlength="${D.body_max}" required placeholder="Kinh nghiệm, quy tắc, checklist… viết ngắn, cụ thể, agent làm theo được">${esc(F.body)}</textarea></label>
-          <div class="bar"><button class="btn primary" type="submit">${IC("save")}${F.id ? "Lưu thay đổi" : "Nạp kiến thức"}</button>
+          <div class="kn-bar"><button class="btn primary" type="submit">${IC("save")}${F.id ? "Lưu thay đổi" : "Nạp kiến thức"}</button>
             ${F.id || F.title || F.body ? `<button class="btn" type="button" id="knCancel">${IC("x")}Huỷ</button>` : ""}
             <label class="btn" style="flex-direction:row;cursor:pointer">${IC("plus-square")}Nạp từ file .md/.txt<input type="file" id="knFile" accept=".md,.txt,.markdown,text/plain,text/markdown" hidden></label>
             <span class="fresh" id="knCount">${F.body.length.toLocaleString("vi-VN")}/${D.body_max.toLocaleString("vi-VN")} ký tự</span></div>
@@ -1119,8 +1361,8 @@ function pageKnowledge() {
         ${sug.map((x, i) => `<div class="kn-sug"><div class="tx"><b>${keyLinks(x.t)}</b><span class="fresh">${esc(String(x.d).slice(0, 220))}</span></div><button type="button" class="btn sm" data-ksug="${i}">${IC("plus")}Nạp</button></div>`).join("") || '<p class="fresh">Chưa có gợi ý.</p>'}
       </div>
     </div>
-    <details class="rcardx"><summary><b>Phần agent sẽ nhận ở lượt tới</b> <span class="fresh">${D.prompt.used.length} mục · ${pc.toLocaleString("vi-VN")} ký tự${D.prompt.skipped.length ? ` · bỏ ${D.prompt.skipped.length} mục vì quá giới hạn` : ""}</span></summary>
-      <pre class="kn-pre">${esc(D.prompt.text || "(chưa có kiến thức đang bật)")}</pre>
+    <details class="rcardx"><summary><b>Phần agent sẽ nhận ở lượt tới</b> <span class="fresh">${D.prompt.used.length} mục kiến thức${D.req_prompt && D.req_prompt.used.length ? ` + ${D.req_prompt.used.length} yêu cầu dự án` : ""} · ${(pc + ((D.req_prompt && D.req_prompt.chars) || 0)).toLocaleString("vi-VN")} ký tự${D.prompt.skipped.length ? ` · bỏ ${D.prompt.skipped.length} mục vì quá giới hạn` : ""}</span></summary>
+      <pre class="kn-pre">${esc((D.prompt.text + ((D.req_prompt && D.req_prompt.text) || "")) || "(chưa có kiến thức hay yêu cầu đang áp dụng)")}</pre>
       <p class="fresh">Xem trong terminal: <code>python3 orchestrator/knowledge.py prompt ${esc(a)}</code></p></details>
     ${curHtml}`;
 }
@@ -1165,7 +1407,7 @@ function bindKnowledge() {
 /* ===== Việc chờ tôi (CTO): duyệt, trả lời, quyết định, thiết lập — tính trực tiếp từ ticket, PR, CI, cấu hình; tự hết khi đã xử lý ===== */
 const IB_SECS = [["review", "Duyệt PR và chấm", "check", "PR có check bắt buộc đạt — review rồi /merge-pr (merge, chấm, đóng ticket)"],
   ["answer", "Trả lời câu hỏi", "send", "agent hỏi khi thiếu thông tin — trả lời bằng comment rồi đóng ticket câu hỏi"],
-  ["decide", "Cần bạn quyết định", "flag", "CI lỗi, ticket cần sửa, ai-review không có PR, PR đã merge mà ticket chưa đóng"],
+  ["decide", "Cần bạn quyết định", "flag", "CI lỗi, ticket cần sửa, ai-review không có PR, PR đã merge mà ticket chưa đóng, yêu cầu dự án mới hoặc đã phân tích xong"],
   ["ticket", "Thiết lập ticket", "tag", "ticket Orchestrator đang bỏ qua vì thiếu nhãn, agent hoặc loại việc; ticket quá hạn"],
   ["setup", "Thiết lập dự án và môi trường", "key", "role owner, mục tiêu sprint, trạng thái story, biến môi trường, công cụ"],
   ["run", "Có thể chạy tiếp", "terminal", "ticket sẵn sàng — giao agent khi bạn muốn"],
@@ -1249,6 +1491,16 @@ function inboxItems() {
     if (nx && !nx.goal && (new Date(nx.start + "T00:00:00") - Date.now()) / 864e5 <= 3) add({ title: `${nx.name} bắt đầu ${ddmm(nx.start)}, chưa có mục tiêu`, sec: "setup", pri: 1, why: "chốt mục tiêu ở sprint planning", acts: [["link", "#/scrum", "Agile/Scrum"]] }); }
   if (PROJECT) { const mm = PROJECT.story.filter((x) => { const k = T.filter((t) => t.parent === x.key); return x.status && x.status !== storyState(k)[1]; });
     if (mm.length) add({ title: `${mm.length} story có trạng thái CTO ghi khác với ticket`, sec: "setup", pri: 1, why: esc(mm.map((x) => `${x.key}: ${x.status} → ${storyState(T.filter((t) => t.parent === x.key))[1]}`).join(" · ")), acts: [["link", "#/story", "Xem Story"]] }); }
+  // yêu cầu dự án
+  ((REQS && REQS.items) || []).forEach((r) => {
+    const late = rqLate(r), lk = [["link", `#/req/${r.id}`, "Mở yêu cầu", "clipboard"]], ag = ageD(r.updated || r.created);
+    if (r.status === "moi") add({ key: "", title: `${r.id} · ${r.title}`, sec: "decide", pri: late ? 3 : r.priority === "cao" ? 2 : 1, age: ag,
+      why: `yêu cầu mới từ ${esc(rqSrc(r.source))}${r.from ? " (" + esc(r.from) + ")" : ""} chưa phân tích${r.due ? ` · hạn ${ddmm(r.due)}` : ""} — giao PO/BA/Tech Lead phân tích hoặc chốt áp dụng`, acts: lk });
+    else if (r.status === "phan-tich") { const ts = r.tickets.map((k) => tByKey()[k]).filter(Boolean), done = ts.length && ts.every((t) => t.status === "Closed");
+      if (done) add({ title: `${r.id} · ${r.title}`, sec: "decide", pri: 2, age: ag, why: `phân tích xong (${r.tickets.join(", ")}) — nạp đề xuất vào kiến thức rồi chốt áp dụng hoặc không áp dụng`, acts: lk });
+      else if (late) add({ title: `${r.id} · ${r.title}`, sec: "decide", pri: 2, age: ag, why: `quá hạn ${ddmm(r.due)}, đang phân tích (${r.tickets.join(", ") || "chưa có ticket"})`, acts: lk }); }
+    else if (r.status === "ap-dung" && late) add({ title: `${r.id} · ${r.title}`, sec: "decide", pri: 2, age: ag, why: `quá hạn ${ddmm(r.due)}, vẫn đang áp dụng — đã vào skill/kiến thức thì bấm Đã áp dụng xong`, acts: lk });
+  });
   // môi trường + lỗi hệ thống
   ((d.setup || {}).items || []).filter((x) => !x.ok).forEach((x) => add({ title: x.text, sec: "setup", pri: x.level === "bad" ? 3 : 1, why: "kiểm môi trường của dashboard", acts: x.fix ? [[/^(npm|gh|git|python3|ops\/|unset)\b/.test(x.fix) ? "cmd" : "text", x.fix]] : [] }));
   Object.entries(d.errors || {}).forEach(([k, v]) => add({ title: `Lỗi nguồn dữ liệu: ${k}`, sec: "setup", pri: 3, why: esc(v), acts: [] }));
@@ -2585,7 +2837,7 @@ function connect() {
 }
 connect();
 setInterval(pollFeed, 3000);
-loadProject(); loadRaci(); loadRubrics(); loadRoles(); loadKnowledgeSummary(); route(); bindGuide();
+loadProject(); loadRaci(); loadRubrics(); loadRoles(); loadKnowledgeSummary(); loadReqs(); route(); bindGuide();
 const syncNavTop = () => { const h = document.querySelector("header").offsetHeight; if (!isNarrow()) { $("menu").style.top = h + "px"; $("menu").style.height = `calc(100vh - ${h}px)`; } else { $("menu").style.top = ""; $("menu").style.height = ""; } };
 applyNav(); syncThemeIcon();
 syncNavTop(); window.addEventListener("resize", syncNavTop);
