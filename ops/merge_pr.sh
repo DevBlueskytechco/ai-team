@@ -17,9 +17,10 @@ for c in theme-check preview e2e lighthouse; do
   [ "$st" = "pass" ] || { echo "Dừng: check $c = ${st:-không có} (cần pass)"; exit 1; }
 done
 me=$(gh api user --jq .login); lp=$(gh api "repos/$R/pulls/$n/commits" --jq '.[-1].author.login // ""')
+au=$(gh pr view "$n" -R "$R" --json author --jq .author.login)
 br=$(gh pr view "$n" -R "$R" --json headRefName --jq .headRefName); key="${br#feature/ai-}"
-if [ "$lp" = "$me" ]; then
-  echo "Push cuối là $me (CTO) → không tự duyệt được, merge bằng bypass admin"
+if [ "$lp" = "$me" ] || [ "$au" = "$me" ]; then
+  echo "PR do $me (CTO) mở hoặc push cuối → không tự duyệt được, merge bằng bypass admin"
   gh pr comment "$n" -R "$R" -b "CTO review: $label — $reason (CTO push commit cuối nên merge bằng --admin)"
   gh pr merge "$n" -R "$R" --squash --delete-branch --admin || exit 1
 else
