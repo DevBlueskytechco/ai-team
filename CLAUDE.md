@@ -44,7 +44,7 @@ Hai repo nằm cạnh nhau: `ai-team/` (Orchestrator, rubric, eval, ops) và `..
 - Merge: chỉ PR có trong sổ duyệt `python3 ops/approvals.py list` (CTO bấm Chốt merge ở Việc chờ tôi, hoặc gõ /merge-pr) → `ops/merge_pr.sh <n>`. Script tự lấy nhãn/điểm/lý do theo sổ, chờ đủ check bắt buộc; PR có commit mới sau khi chốt thì từ chối → CTO chốt lại. Đầu mỗi bước của /sprint, /run-next và khi rảnh: xem sổ, có PR đã chốt mà check đạt thì merge ngay.
 - Push: chỉ nhánh làm việc (feature/ai-*, fix/*, patch/*, test/*, qa/*), ghi rõ nhánh đích: `ops/push_branch.sh [-C <repo>] <nhánh>` hoặc `git push origin HEAD:<nhánh>`. Hook `ops/hooks/guard_bash.py` chặn push develop/main, force push, xoá nhánh, merge/approve trực tiếp, publish/xoá theme, store khác hoa-qua-nhap-khau, đọc .env — bị chặn thì đổi cách làm theo lý do hook trả về, không hỏi CTO.
 - Lệnh ngắn, mỗi lệnh một việc; không ghép nhiều bước có biến ($W, $R, $(…)) vào một lệnh — dùng script ops/ (đã allow sẵn) để auto mode chạy ngay, không bị classifier chặn.
-- Không sửa `.claude/settings*.json`, `ops/hooks/`, `ops/approvals.py`, `data/approvals.jsonl` (deny) — CTO đổi bằng patch. Không đóng ticket, không chấm điểm ngoài ops/merge_pr.sh (deny).
+- Không sửa `.claude/settings*.json`, `ops/hooks/`, `ops/approvals.py`, `data/approvals.jsonl` (deny) — CTO đổi bằng patch. Không chấm điểm ngoài ops/merge_pr.sh (deny); chỉ tự đóng ticket [Q] đã có câu trả lời (CTO 06/11/2026).
 
 ## Quy tắc cứng
 - Mọi thao tác qua script trong `ops/`. Không tự viết lệnh gh/git thay script khi script đã có.
