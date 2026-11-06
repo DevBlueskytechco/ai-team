@@ -14,7 +14,13 @@ def main():
     name = str(ev.get("command_name") or "").split(":")[-1]
     try: a = shlex.split(ev.get("command_args") or "")
     except ValueError: a = (ev.get("command_args") or "").split()
-    if name == "merge-pr" and a and a[0].lstrip("#").isdigit():
+    if name == "merge-pr" and len(a) >= 2 and a[0] == "auto":
+        r = AP.record("merge-policy", a[1], via="/merge-pr", reason=" ".join(a[2:]) or None)
+        print(f"CTO cấp quyền merge chung '{r['ref']}' (14 ngày). PR trong phạm vi merge khi đủ check, không chấm điểm; CTO chấm sau.")
+    elif name == "merge-pr" and len(a) >= 2 and a[0] == "auto-off":
+        AP.cancel("merge-policy", a[1], via="/merge-pr")
+        print(f"CTO thu hồi quyền merge chung '{a[1]}'.")
+    elif name == "merge-pr" and a and a[0].lstrip("#").isdigit():
         r = AP.record("merge", a[0].lstrip("#"), via="/merge-pr", label=a[1] if len(a) > 1 else None,
                       scores=a[2] if len(a) > 2 else None, reason=" ".join(a[3:]) or None)
         print(f"CTO đã chốt merge PR #{r['ref']} (ghi sổ duyệt {r['at'][11:16]}). Chạy ops/merge_pr.sh {r['ref']} — không hỏi lại.")
