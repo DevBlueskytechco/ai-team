@@ -11,6 +11,7 @@
       "Bash(python3 ops/ticket.py children*)",
       "Bash(python3 ops/ticket.py comment*)",
       "Bash(python3 ops/ticket.py label*)",
+      "Bash(python3 ops/ticket.py close*)",
       "Bash(python3 ops/ticket.py reopen*)",
       "Bash(python3 ops/ticket.py backup*)",
       "Bash(python3 ops/ticket.py export*)",
@@ -48,7 +49,6 @@
       "Bash(gh pr merge*)",
       "Bash(gh pr review*)",
       "Bash(python3 orchestrator/review.py*)",
-      "Bash(python3 ops/ticket.py close*)",
       "Bash(python3 ops/ticket.py init*)",
       "Bash(shopify theme publish*)",
       "Bash(shopify theme delete*)",
@@ -73,7 +73,11 @@
       {
         "matcher": "Bash|Monitor",
         "hooks": [
-          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/guard_bash.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/guard_bash.py\"",
+            "timeout": 10
+          }
         ]
       }
     ],
@@ -81,7 +85,11 @@
       {
         "matcher": "",
         "hooks": [
-          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/cto_command.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/ops/hooks/cto_command.py\"",
+            "timeout": 10
+          }
         ]
       }
     ]

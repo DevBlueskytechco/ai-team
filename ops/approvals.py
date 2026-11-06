@@ -10,13 +10,20 @@ Claude không ghi sổ: CLI này không có lệnh ghi; hook PreToolUse (ops/hoo
   python3 ops/approvals.py list                         việc đã chốt chưa chạy
   python3 ops/approvals.py require merge <PR> [--after <iso>]   in JSON lần chốt còn hiệu lực, không có → mã 1
   python3 ops/approvals.py done merge <PR> [kết quả]    đánh dấu đã chạy (merge_pr.sh / apply_patch.sh gọi)
+  python3 ops/approvals.py policy <base> <head> <story>  (danh sách file từ stdin)  in JSON quyền merge chung nếu PR thuộc phạm vi, không → mã 1
 Sổ: data/approvals.jsonl (data/ không commit). Hiệu lực: merge 72 giờ, patch 24 giờ."""
 import os, sys, json, datetime
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LEDGER = os.path.join(ROOT, "data", "approvals.jsonl")
-TTL_H = {"merge": 72, "patch": 24}
-KIND = {"merge": "merge PR", "patch": "áp patch"}
+TTL_H = {"merge": 72, "patch": 24, "merge-policy": 14 * 24}
+KIND = {"merge": "merge PR", "patch": "áp patch", "merge-policy": "quyền merge chung"}
+# Quyền merge chung (CTO gõ /merge-pr auto <tên> "<lý do>", hết hạn 14 ngày; /merge-pr auto-off <tên> để thu hồi).
+# Không áp cho: nhánh đích khác develop, nhánh không phải ticket agent, story ngoài mục tiêu, file đổi cổng kiểm tra.
+POLICY_BASE = "develop"
+POLICY_HEAD = "feature/ai-ES1-T"
+POLICY_DENY_STORY = {"TE-6", "TE-8", "TE-9"}
+POLICY_DENY_PATH = (".github/", ".claude/", "scripts/", "playwright.config", "lighthouserc", "package.json", "package-lock.json")
 
 
 def now(): return datetime.datetime.now().astimezone()
@@ -67,8 +74,26 @@ def find(kind, ref):
     return next((r for r in reversed(pending()) if r["kind"] == kind and r["ref"] == str(ref)), None)
 
 
+def policy_check(base, head, story, files):
+    """Lý do PR nằm ngoài quyền merge chung; None nếu trong phạm vi."""
+    if base != POLICY_BASE: return f"nhánh đích {base}, chỉ {POLICY_BASE}"
+    if not head.startswith(POLICY_HEAD): return f"nhánh {head} không phải ticket agent"
+    if story in POLICY_DENY_STORY or not story: return f"story {story or '(trống)'} ngoài phạm vi"
+    bad = [f for f in files if f.startswith(POLICY_DENY_PATH)]
+    if bad: return "đổi file cổng kiểm tra: " + ", ".join(bad[:5])
+    return None
+
+
 def main(a):
     if not a or a[0] in ("-h", "--help"): print(__doc__); return 0
+    if a[0] == "policy" and len(a) >= 4:
+        act = [r for r in pending() if r["kind"] == "merge-policy"]
+        if not act:
+            print("Không có quyền merge chung còn hiệu lực.", file=sys.stderr); return 1
+        why = policy_check(a[1], a[2], a[3], [l.strip() for l in sys.stdin if l.strip()])
+        if why:
+            print(f"PR ngoài quyền merge chung: {why}. CTO chốt riêng ở Việc chờ tôi hoặc /merge-pr.", file=sys.stderr); return 1
+        print(json.dumps(act[-1], ensure_ascii=False)); return 0
     if a[0] == "list":
         P = pending()
         if "--json" in a: print(json.dumps(P, ensure_ascii=False)); return 0
